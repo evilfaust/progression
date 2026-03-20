@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивные модели — Арифметическая прогрессия</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 50px 20px 30px;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        }
+        .hero h1 {
+            font-size: 2.4em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .hero p {
+            font-size: 1.15em;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px 50px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            border-color: #475569;
+        }
+
+        .card-icon {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+        .card-icon.stone { background: linear-gradient(135deg, #1e3a5f, #0f172a); }
+        .card-icon.tables { background: linear-gradient(135deg, #422006, #1c1917); }
+        .card-icon.amphi { background: linear-gradient(135deg, #3b0764, #1e1b4b); }
+        .card-icon.train { background: linear-gradient(135deg, #7c2d12, #1c1917); }
+
+        .card-body {
+            padding: 18px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-body h2 {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .card-body h2.stone-title { color: #60a5fa; }
+        .card-body h2.tables-title { color: #f59e0b; }
+        .card-body h2.amphi-title { color: #e879f9; }
+        .card-body h2.train-title { color: #f97316; }
+
+        .card-body .task-text {
+            font-size: 0.92em;
+            color: #cbd5e1;
+            line-height: 1.55;
+            flex: 1;
+        }
+
+        .card-body .params {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .param-tag {
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+            background: rgba(100,116,139,0.15);
+            color: #94a3b8;
+            border: 1px solid rgba(100,116,139,0.2);
+        }
+
+        .card-footer {
+            padding: 12px 20px;
+            border-top: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .open-btn {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card:hover .open-btn { color: #93c5fd; }
+        .card-footer .answer {
+            font-size: 0.8em;
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #475569;
+            font-size: 0.8em;
+            border-top: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Арифметическая прогрессия</h1>
+    <p>Интерактивные модели для изучения арифметических прогрессий. Нажмите на задачу, чтобы открыть модель.</p>
+</div>
+
+<div class="cards">
+
+    <a class="card" href="stone.html">
+        <div class="card-icon stone">🪨</div>
+        <div class="card-body">
+            <h2 class="stone-title">Камень в ущелье</h2>
+            <div class="task-text">
+                Камень падает в ущелье. За первую секунду он пролетает 9&nbsp;метров, а за каждую следующую секунду — на 10&nbsp;метров больше, чем за предыдущую. Какое расстояние камень пролетит за N&nbsp;секунд?
+            </div>
+            <div class="params">
+                <span class="param-tag">a₁ = 9</span>
+                <span class="param-tag">d = 10</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">S₅ = 145 м</span>
+        </div>
+    </a>
+
+    <a class="card" href="tables.html">
+        <div class="card-icon tables">🍽️</div>
+        <div class="card-body">
+            <h2 class="tables-title">Столики в кафе</h2>
+            <div class="task-text">
+                В кафе квадратные столики ставят в ряд. За одним столиком сидят 4&nbsp;человека. Когда столики сдвигают, за каждый следующий столик добавляется 2&nbsp;места. Сколько человек сядет за N&nbsp;сдвинутых столиков?
+            </div>
+            <div class="params">
+                <span class="param-tag">a₁ = 4</span>
+                <span class="param-tag">d = 2</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">N=16 → 34 мест</span>
+        </div>
+    </a>
+
+    <a class="card" href="amphitheater.html">
+        <div class="card-icon amphi">🎭</div>
+        <div class="card-body">
+            <h2 class="amphi-title">Амфитеатр</h2>
+            <div class="task-text">
+                В амфитеатре 14&nbsp;рядов, причём в каждом следующем ряду на одно и то же число мест больше, чем в предыдущем. В пятом ряду 27&nbsp;мест, а в восьмом ряду 36&nbsp;мест. Сколько мест в последнем ряду амфитеатра?
+            </div>
+            <div class="params">
+                <span class="param-tag">a₅ = 27</span>
+                <span class="param-tag">a₈ = 36</span>
+                <span class="param-tag">n = 14</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">a₁₄ = 54 мест</span>
+        </div>
+    </a>
+
+    <a class="card" href="train.html">
+        <div class="card-icon train">🚂</div>
+        <div class="card-body">
+            <h2 class="train-title">Поезд от станции</h2>
+            <div class="task-text">
+                Поезд начал движение от станции. За первую секунду состав сдвинулся на 0,2&nbsp;м, а за каждую следующую секунду он проходил на 0,4&nbsp;м больше, чем за предыдущую. Сколько метров состав прошёл за первые 10&nbsp;секунд движения?
+            </div>
+            <div class="params">
+                <span class="param-tag">a₁ = 0.2</span>
+                <span class="param-tag">d = 0.4</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">S₁₀ = 20 м</span>
+        </div>
+    </a>
+
+</div>
+
+<div class="footer">Интерактивные модели для уроков математики</div>
+
+</body>
+</html>

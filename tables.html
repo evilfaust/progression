@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача о столиках — Арифметическая прогрессия</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid #1e293b;
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .slider-group label {
+            font-size: 0.85em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .slider-group .val {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #f59e0b;
+            min-width: 30px;
+            text-align: center;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 160px;
+            height: 6px;
+            border-radius: 3px;
+            background: #334155;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #f59e0b;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(245,158,11,0.4);
+        }
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-play { background: linear-gradient(135deg, #f59e0b, #d97706); color: #1e293b; }
+        .btn-reset { background: #334155; color: #94a3b8; }
+        .btn-speed { background: #334155; color: #94a3b8; padding: 8px 12px; font-size: 0.85em; }
+        .btn-speed.active { background: #f59e0b; color: #1e293b; }
+
+        /* ═══ MAIN GRID: 2 columns ═══ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══ LEFT: Scene + Pattern ═══ */
+        .left-cell {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1e293b;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .cell-title {
+            font-size: 0.8em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 8px 16px 4px;
+        }
+        .scene-wrap {
+            flex: 0 0 auto;
+            height: 40%;
+            min-height: 120px;
+            position: relative;
+        }
+        canvas#sceneCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .pattern-scroll {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            border-top: 1px solid #1e293b;
+        }
+        .pattern-scroll::-webkit-scrollbar { width: 4px; }
+        .pattern-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        .pattern-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .pattern-table th {
+            background: #1e293b;
+            padding: 6px 8px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 2px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .pattern-table td {
+            padding: 5px 8px;
+            text-align: center;
+            border-bottom: 1px solid #1e293b;
+            font-size: 0.95em;
+            font-family: 'Courier New', monospace;
+        }
+        .pattern-table tr.highlight td {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            font-weight: 700;
+        }
+        .pattern-table tr.active td {
+            background: rgba(74, 222, 128, 0.06);
+            color: #4ade80;
+            font-weight: 700;
+        }
+        .pattern-table tr.dimmed td { color: #475569; }
+
+        /* ═══ RIGHT: Formulas ═══ */
+        .formulas-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 14px 20px;
+            overflow-y: auto;
+            min-height: 0;
+            justify-content: center;
+        }
+        .formula-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 14px 20px;
+            border: 1px solid #334155;
+        }
+        .formula-card .card-title {
+            font-size: 0.85em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .formula-card .formula {
+            font-size: 1.3em;
+            color: #a78bfa;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 4px;
+        }
+        .formula-card .calculation {
+            font-size: 1.2em;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+        .formula-card .result {
+            font-size: 1.4em;
+            color: #4ade80;
+            font-weight: 700;
+        }
+
+        /* ═══ BOTTOM BAR ═══ */
+        .bottom-bar {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            border-top: 1px solid #1e293b;
+            background: #1e293b;
+        }
+        .status-items {
+            display: flex;
+            gap: 20px;
+            padding: 8px 20px;
+            align-items: center;
+        }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label {
+            font-size: 0.7em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .status-item .value.amber { color: #f59e0b; }
+        .status-item .value.green { color: #4ade80; }
+        .status-item .value.blue { color: #60a5fa; }
+        .status-item .value.purple { color: #a78bfa; }
+
+        .comparison-items {
+            display: flex;
+            gap: 12px;
+            padding: 8px 20px;
+            flex: 1;
+            justify-content: center;
+        }
+        .comp-card {
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comp-card.manual {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .comp-card.formula-method {
+            background: rgba(74, 222, 128, 0.08);
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+        .comp-card .comp-title {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .comp-card.manual .comp-title { color: #f87171; }
+        .comp-card.formula-method .comp-title { color: #4ade80; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.manual .comp-value { color: #ef4444; }
+        .comp-card.formula-method .comp-value { color: #22c55e; }
+
+        .insight-item {
+            padding: 8px 20px;
+            font-size: 0.9em;
+            color: #fcd34d;
+            display: none;
+            align-items: center;
+            border-left: 1px solid #334155;
+            max-width: 380px;
+        }
+        .insight-item.visible { display: flex; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <h1>Задача о столиках в кафе</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>N =</label>
+                <span class="val" id="displayN">3</span>
+                <input type="range" id="sliderN" min="1" max="40" value="3" step="1">
+            </div>
+            <button class="btn btn-play" id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <!-- LEFT: Scene + Pattern Table -->
+        <div class="left-cell">
+            <div class="cell-title">Вид сверху</div>
+            <div class="scene-wrap">
+                <canvas id="sceneCanvas"></canvas>
+            </div>
+            <div class="cell-title">Закономерность</div>
+            <div class="pattern-scroll">
+                <table class="pattern-table">
+                    <thead>
+                        <tr><th>N</th><th>Мест</th><th>+</th><th>Формула</th></tr>
+                    </thead>
+                    <tbody id="patternBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RIGHT: Formulas -->
+        <div class="formulas-cell">
+            <div class="formula-card">
+                <div class="card-title">Закономерность</div>
+                <div class="formula">a&#8321; = 4, &nbsp;d = 2</div>
+                <div class="calculation" id="formulaPattern">Каждый новый столик &rarr; +2 места</div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Формула n-го члена</div>
+                <div class="formula">a&#8345; = a&#8321; + (n&minus;1)&middot;d = 2n + 2</div>
+                <div class="calculation" id="formulaAn">a&#8323; = 4 + (3&minus;1)&middot;2 = <span class="result">8 мест</span></div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Почему именно +2?</div>
+                <div class="calculation" id="formulaWhy">
+                    4 стороны нового столика &minus; 2 склеенных = +2
+                </div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Ответ для N столиков</div>
+                <div class="formula">Мест = 2&middot;N + 2</div>
+                <div class="calculation" id="formulaAnswer">2&middot;3 + 2 = <span class="result">8 человек</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Столиков</span>
+                <span class="value amber" id="statTables">3</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Мест</span>
+                <span class="value green" id="statSeats">8</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Прибавка</span>
+                <span class="value blue" id="statAdded">+2</span>
+            </div>
+            <div class="status-item">
+                <span class="label">a&#8321;</span>
+                <span class="value purple" id="statA1">4</span>
+            </div>
+            <div class="status-item">
+                <span class="label">d</span>
+                <span class="value purple" id="statD">2</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card manual">
+                <div class="comp-title">Перебор</div>
+                <div class="comp-value" id="compManual">Рисовать 3 столика</div>
+            </div>
+            <div class="comp-card formula-method">
+                <div class="comp-title">Формула</div>
+                <div class="comp-value" id="compFormula">2&middot;3+2 = 8</div>
+            </div>
+        </div>
+        <div class="insight-item" id="insightBanner">
+            <span id="insightText"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+let N = 3;
+let isPlaying = false;
+let speed = 1;
+let lastFrame = 0;
+let animProgress = 0;
+
+function seats(n) { return n === 0 ? 0 : 2 * n + 2; }
+
+const sliderN = document.getElementById('sliderN');
+const btnPlay = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const sceneCanvas = document.getElementById('sceneCanvas');
+const sceneCtx = sceneCanvas.getContext('2d');
+
+function resizeCanvas(canvas) {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.getContext('2d').scale(dpr, dpr);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+}
+function resizeAll() { resizeCanvas(sceneCanvas); render(); }
+
+function drawScene() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = sceneCanvas.width / dpr;
+    const h = sceneCanvas.height / dpr;
+    const ctx = sceneCtx;
+    ctx.clearRect(0, 0, w, h);
+
+    const showN = Math.min(Math.floor(animProgress) + 1, N);
+    const partial = animProgress - Math.floor(animProgress);
+    const isPartial = Math.floor(animProgress) < N && animProgress < N;
+
+    const maxTableW = 60;
+    const tableSize = Math.min(maxTableW, (w - 60) / Math.max(N, 1));
+    const totalW = showN * tableSize;
+    const startX = (w - totalW) / 2;
+    const centerY = h / 2;
+    const chairSize = tableSize * 0.22;
+    const chairOffset = tableSize * 0.12;
+
+    for (let i = 0; i < showN; i++) {
+        const isLast = (i === showN - 1) && isPartial;
+        const alpha = isLast ? 0.3 + partial * 0.7 : 1;
+        const tx = startX + i * tableSize;
+        const ty = centerY - tableSize / 2;
+        ctx.globalAlpha = alpha;
+
+        ctx.fillStyle = '#92603a'; ctx.strokeStyle = '#6b4423'; ctx.lineWidth = 2;
+        const r = tableSize * 0.08;
+        roundRect(ctx, tx + 2, ty + 2, tableSize - 4, tableSize - 4, r);
+        ctx.fill(); ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1;
+        const cx = tx + tableSize / 2, cy = ty + tableSize / 2, dd = tableSize * 0.22;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - dd); ctx.lineTo(cx + dd, cy);
+        ctx.lineTo(cx, cy + dd); ctx.lineTo(cx - dd, cy);
+        ctx.closePath(); ctx.stroke();
+
+        drawChair(ctx, cx, ty - chairOffset - chairSize, chairSize, 'top');
+        drawChair(ctx, cx, ty + tableSize + chairOffset, chairSize, 'bottom');
+        if (i === 0) drawChair(ctx, tx - chairOffset - chairSize, cy, chairSize, 'left');
+        if (i === showN - 1) drawChair(ctx, tx + tableSize + chairOffset, cy, chairSize, 'right');
+
+        const plateR = tableSize * 0.06;
+        ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+        drawPlate(ctx, cx, ty + tableSize * 0.2, plateR);
+        drawPlate(ctx, cx, ty + tableSize * 0.8, plateR);
+        if (i === 0) drawPlate(ctx, tx + tableSize * 0.2, cy, plateR);
+        if (i === showN - 1) drawPlate(ctx, tx + tableSize * 0.8, cy, plateR);
+        ctx.globalAlpha = 1;
+
+        if (i > 0 && !isLast) {
+            ctx.fillStyle = '#60a5fa'; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
+            ctx.textAlign = 'center'; ctx.fillText('+2', tx + tableSize / 2, ty - chairOffset - chairSize - 6);
+        }
+        if (i === 0) {
+            ctx.fillStyle = '#4ade80'; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
+            ctx.textAlign = 'center'; ctx.fillText('4', tx + tableSize / 2, ty - chairOffset - chairSize - 6);
+        }
+    }
+
+    const totalSeats = seats(showN - (isPartial ? 1 : 0));
+    ctx.globalAlpha = 1; ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 16px system-ui';
+    ctx.textAlign = 'center'; ctx.fillText(totalSeats + ' мест', w / 2, h - 8);
+}
+
+function drawChair(ctx, cx, cy, size, dir) {
+    ctx.fillStyle = '#b47a3e'; ctx.strokeStyle = '#7a5225'; ctx.lineWidth = 1.5;
+    const r = size; ctx.beginPath();
+    if (dir === 'top') ctx.arc(cx, cy + r * 0.3, r, Math.PI * 1.15, Math.PI * 1.85);
+    else if (dir === 'bottom') ctx.arc(cx, cy - r * 0.3, r, Math.PI * 0.15, Math.PI * 0.85);
+    else if (dir === 'left') ctx.arc(cx + r * 0.3, cy, r, Math.PI * 0.65, Math.PI * 1.35);
+    else ctx.arc(cx - r * 0.3, cy, r, -Math.PI * 0.35, Math.PI * 0.35);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f5deb3'; ctx.strokeStyle = '#d4a96a'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, size * 0.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+}
+function drawPlate(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+
+function updatePatternTable() {
+    const body = document.getElementById('patternBody');
+    const nDone = Math.min(Math.floor(animProgress), N);
+    const maxShow = Math.min(N, 20);
+    let html = '';
+    for (let k = 1; k <= maxShow; k++) {
+        let cls = k <= nDone ? 'active' : (k === nDone + 1 ? 'highlight' : 'dimmed');
+        const s = seats(k), added = k === 1 ? '—' : '+2';
+        html += `<tr class="${cls}"><td>${k}</td><td>${s}</td><td>${added}</td><td>2·${k}+2=${s}</td></tr>`;
+    }
+    if (N > maxShow) {
+        html += `<tr class="dimmed"><td colspan="4" style="color:#475569;font-size:0.8em">... ещё ${N - maxShow}</td></tr>`;
+        const s = seats(N);
+        html += `<tr class="${nDone >= N ? 'active' : 'highlight'}"><td>${N}</td><td>${s}</td><td>+2</td><td>2·${N}+2=${s}</td></tr>`;
+    }
+    body.innerHTML = html;
+}
+
+function updateUI() {
+    const nDone = Math.min(Math.floor(animProgress), N);
+    const s = seats(nDone), total = seats(N);
+    document.getElementById('displayN').textContent = N;
+    document.getElementById('statTables').textContent = nDone;
+    document.getElementById('statSeats').textContent = s;
+    document.getElementById('statAdded').textContent = nDone <= 1 ? (nDone === 0 ? '—' : '+4') : '+2';
+    document.getElementById('statA1').textContent = '4';
+    document.getElementById('statD').textContent = '2';
+    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[c] || c).join('');
+    document.getElementById('formulaAn').innerHTML = `a${sub(N)} = 4 + (${N}−1)·2 = <span class="result">${total} мест</span>`;
+    document.getElementById('formulaAnswer').innerHTML = `2·${N} + 2 = <span class="result">${total} человек</span>`;
+    document.getElementById('compManual').textContent = N <= 5 ? `Рисовать ${N} ст.` : `Рисовать ${N} столиков!`;
+    document.getElementById('compFormula').textContent = `2·${N}+2 = ${total}`;
+    const banner = document.getElementById('insightBanner'), txt = document.getElementById('insightText');
+    if (N >= 20) { banner.classList.add('visible'); txt.textContent = `${N} столиков? Формула: ${total} мест мгновенно!`; }
+    else if (N >= 10) { banner.classList.add('visible'); txt.textContent = `${N} столиков — считать долго. Формула проще!`; }
+    else { banner.classList.remove('visible'); }
+    updatePatternTable();
+}
+
+function render() { drawScene(); updateUI(); }
+
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrame === 0) lastFrame = ts;
+    animProgress += ((ts - lastFrame) / 1000) * speed * 0.9;
+    lastFrame = ts;
+    if (animProgress >= N) { animProgress = N; isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+sliderN.addEventListener('input', () => {
+    N = parseInt(sliderN.value);
+    if (!isPlaying) animProgress = N; else animProgress = Math.min(animProgress, N);
+    render();
+});
+btnPlay.addEventListener('click', () => {
+    if (isPlaying) { isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
+    else { if (animProgress >= N) animProgress = 0; isPlaying = true; lastFrame = 0; btnPlay.textContent = '⏸ Пауза'; requestAnimationFrame(animate); }
+});
+btnReset.addEventListener('click', () => { isPlaying = false; animProgress = 0; lastFrame = 0; btnPlay.textContent = '▶ Пуск'; render(); });
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => { document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active')); btn.classList.add('active'); speed = parseFloat(btn.dataset.speed); });
+});
+
+window.addEventListener('resize', resizeAll);
+setTimeout(resizeAll, 50);
+animProgress = N;
+render();
+</script>
+</body>
+</html>

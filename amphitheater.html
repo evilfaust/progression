@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача об амфитеатре — Арифметическая прогрессия</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid #1e293b;
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e879f9, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .slider-group label {
+            font-size: 0.8em;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+        .slider-group .val {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #e879f9;
+            min-width: 26px;
+            text-align: center;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: #334155;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e879f9;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(232,121,249,0.4);
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-play { background: linear-gradient(135deg, #d946ef, #a855f7); color: white; }
+        .btn-reset { background: #334155; color: #94a3b8; }
+        .btn-speed { background: #334155; color: #94a3b8; padding: 8px 12px; font-size: 0.8em; }
+        .btn-speed.active { background: #d946ef; color: white; }
+
+        /* ═══ MAIN GRID: 2 columns ═══ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══ LEFT: Amphitheater ═══ */
+        .amphi-cell {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #1e293b;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .cell-title {
+            font-size: 0.8em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 8px 14px 4px;
+        }
+        .amphi-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        canvas#amphiCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ═══ RIGHT: Solution ═══ */
+        .solution-cell {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 14px 20px;
+            gap: 10px;
+            justify-content: center;
+        }
+        .solution-cell::-webkit-scrollbar { width: 4px; }
+        .solution-cell::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+
+        .sol-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 12px 18px;
+            border: 1px solid #334155;
+        }
+        .sol-card.given { border-color: rgba(232,121,249,0.3); }
+        .sol-card.step-d { border-color: rgba(96,165,250,0.3); }
+        .sol-card.step-a1 { border-color: rgba(251,191,36,0.3); }
+        .sol-card.formula { border-color: rgba(167,139,250,0.3); }
+        .sol-card.answer { border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
+
+        .sol-card .card-title {
+            font-size: 0.8em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .sol-card .card-formula {
+            font-size: 1.2em;
+            color: #a78bfa;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 2px;
+        }
+        .sol-card .card-calc {
+            font-size: 1.15em;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+        .sol-card .card-calc .hl-pink { color: #e879f9; }
+        .sol-card .card-calc .hl-blue { color: #60a5fa; }
+        .sol-card .card-calc .hl-amber { color: #fbbf24; }
+        .sol-card .card-calc .hl-green { color: #4ade80; font-size: 1.15em; }
+        .sol-card .card-calc .hl-purple { color: #a78bfa; }
+
+        /* ═══ BOTTOM BAR ═══ */
+        .bottom-bar {
+            display: flex;
+            align-items: stretch;
+            border-top: 1px solid #1e293b;
+            background: #1e293b;
+        }
+        .status-items {
+            display: flex;
+            gap: 18px;
+            padding: 8px 20px;
+            align-items: center;
+        }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label {
+            font-size: 0.7em;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .status-item .value.pink { color: #e879f9; }
+        .status-item .value.green { color: #4ade80; }
+        .status-item .value.blue { color: #60a5fa; }
+        .status-item .value.amber { color: #fbbf24; }
+        .status-item .value.purple { color: #a78bfa; }
+
+        .comparison-items {
+            display: flex;
+            gap: 12px;
+            padding: 8px 20px;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+        }
+        .comp-card {
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comp-card.manual {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .comp-card.formula-method {
+            background: rgba(74, 222, 128, 0.08);
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+        .comp-card .comp-title {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .comp-card.manual .comp-title { color: #f87171; }
+        .comp-card.formula-method .comp-title { color: #4ade80; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.manual .comp-value { color: #ef4444; }
+        .comp-card.formula-method .comp-value { color: #22c55e; }
+
+        .insight-item {
+            padding: 8px 20px;
+            font-size: 0.9em;
+            color: #e9d5ff;
+            display: none;
+            align-items: center;
+            border-left: 1px solid #334155;
+            max-width: 380px;
+        }
+        .insight-item.visible { display: flex; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <h1>Амфитеатр</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>Рядов =</label>
+                <span class="val" id="displayN">14</span>
+                <input type="range" id="sliderN" min="1" max="50" value="14" step="1">
+            </div>
+            <div class="slider-group">
+                <label>a&#8325; =</label>
+                <span class="val" id="displayA5">27</span>
+                <input type="range" id="sliderA5" min="5" max="60" value="27" step="1">
+            </div>
+            <div class="slider-group">
+                <label>a&#8328; =</label>
+                <span class="val" id="displayA8">36</span>
+                <input type="range" id="sliderA8" min="5" max="80" value="36" step="1">
+            </div>
+            <button class="btn btn-play" id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="amphi-cell">
+            <div class="cell-title">Амфитеатр (вид сверху)</div>
+            <div class="amphi-wrap">
+                <canvas id="amphiCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="solution-cell" id="solutionPanel"></div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Ряд</span>
+                <span class="value pink" id="statRow">14</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Мест</span>
+                <span class="value green" id="statSeats">54</span>
+            </div>
+            <div class="status-item">
+                <span class="label">d</span>
+                <span class="value blue" id="statD">3</span>
+            </div>
+            <div class="status-item">
+                <span class="label">a&#8321;</span>
+                <span class="value amber" id="statA1">15</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Последний</span>
+                <span class="value purple" id="statLast">54</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card manual">
+                <div class="comp-title">Перебор</div>
+                <div class="comp-value" id="compManual">Считать 14 рядов</div>
+            </div>
+            <div class="comp-card formula-method">
+                <div class="comp-title">Формула</div>
+                <div class="comp-value" id="compFormula">a&#8321;&#8324; = 54</div>
+            </div>
+        </div>
+        <div class="insight-item" id="insightBanner">
+            <span id="insightText"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+let N = 14, a5val = 27, a8val = 36;
+let isPlaying = false, speed = 1, lastFrame = 0, animProgress = 0;
+
+function calcParams() {
+    const dd = (a8val - a5val) / 3;
+    const aa1 = a5val - 4 * dd;
+    return { d: dd, a1: aa1 };
+}
+
+const sliderN = document.getElementById('sliderN');
+const sliderA5 = document.getElementById('sliderA5');
+const sliderA8 = document.getElementById('sliderA8');
+const btnPlay = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const amphiCanvas = document.getElementById('amphiCanvas');
+const amphiCtx = amphiCanvas.getContext('2d');
+
+function resizeCanvas(canvas) {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+    canvas.getContext('2d').scale(dpr, dpr);
+    canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+}
+function resizeAll() { resizeCanvas(amphiCanvas); render(); }
+
+function drawAmphitheater() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = amphiCanvas.width / dpr, h = amphiCanvas.height / dpr;
+    const ctx = amphiCtx;
+    ctx.clearRect(0, 0, w, h);
+
+    const { d: dd, a1 } = calcParams();
+    const nDone = Math.min(Math.floor(animProgress), N);
+    const partial = animProgress - Math.floor(animProgress);
+    const isPartial = Math.floor(animProgress) < N && animProgress < N;
+
+    const cx = w / 2, cy = h * 0.12;
+    const minR = Math.min(w, h) * 0.1;
+    const maxR = Math.min(w * 0.48, h * 0.85);
+    const rowStep = N > 1 ? (maxR - minR) / (N - 1) : 0;
+    const rowThick = Math.max(3, rowStep * 0.7);
+
+    // Stage
+    ctx.fillStyle = '#4a2c6a';
+    ctx.beginPath(); ctx.ellipse(cx, cy, minR * 0.7, minR * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e9d5ff'; ctx.font = 'bold 11px system-ui';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('СЦЕНА', cx, cy);
+
+    for (let i = 0; i < N; i++) {
+        const row = i + 1;
+        const r = minR + i * rowStep;
+        const seatsInRow = a1 + i * dd;
+        const isCurrentAnim = (i === nDone) && isPartial;
+        const isDone = row <= nDone;
+        const isRow5 = (row === 5), isRow8 = (row === 8), isLast = (row === N);
+
+        let alpha = 1;
+        if (isCurrentAnim) alpha = 0.3 + partial * 0.7;
+        else if (!isDone && !isCurrentAnim) alpha = 0.15;
+        ctx.globalAlpha = alpha;
+
+        let color = '#475569';
+        if (isDone || isCurrentAnim) {
+            if (isRow5) color = '#e879f9';
+            else if (isRow8) color = '#60a5fa';
+            else if (isLast && isDone) color = '#4ade80';
+            else color = '#8b5cf6';
+        }
+
+        const startAngle = Math.PI * 0.15, endAngle = Math.PI * 0.85;
+        ctx.strokeStyle = color; ctx.lineWidth = Math.min(rowThick, 12); ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(cx, cy, r, startAngle, endAngle); ctx.stroke();
+
+        const seatCount = Math.max(3, Math.min(Math.round(seatsInRow), 60));
+        const dotR = Math.min(3, rowThick * 0.28);
+        if (dotR > 0.8) {
+            for (let s = 0; s < seatCount; s++) {
+                const angle = startAngle + (s / (seatCount - 1)) * (endAngle - startAngle);
+                ctx.fillStyle = color; ctx.beginPath();
+                ctx.arc(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r, dotR, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        if (isDone || isCurrentAnim) {
+            const labelAngle = endAngle + 0.08;
+            ctx.fillStyle = color;
+            ctx.font = `bold ${Math.min(13, Math.max(9, rowStep * 0.55))}px system-ui`;
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(`${Math.round(seatsInRow)}`, cx + Math.cos(labelAngle) * r + 8, cy + Math.sin(labelAngle) * r);
+
+            const lAngle = startAngle - 0.08;
+            ctx.fillStyle = 'rgba(148,163,184,0.5)';
+            ctx.font = `${Math.min(10, Math.max(7, rowStep * 0.45))}px system-ui`;
+            ctx.textAlign = 'right';
+            ctx.fillText(row, cx + Math.cos(lAngle) * r - 8, cy + Math.sin(lAngle) * r);
+        }
+        ctx.globalAlpha = 1;
+    }
+}
+
+function updateSolution() {
+    const { d: dd, a1 } = calcParams();
+    const lastTerm = a1 + (N - 1) * dd;
+    const panel = document.getElementById('solutionPanel');
+    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[c] || c).join('');
+    const fmt = v => v % 1 === 0 ? v : v.toFixed(2);
+
+    panel.innerHTML = `
+        <div class="sol-card given">
+            <div class="card-title">Дано</div>
+            <div class="card-calc">
+                <span class="hl-pink">a₅ = ${a5val}</span>, &nbsp;
+                <span class="hl-blue">a₈ = ${a8val}</span>, &nbsp;
+                n = <span class="hl-purple">${N}</span>
+            </div>
+        </div>
+        <div class="sol-card step-d">
+            <div class="card-title">Шаг 1: Находим d</div>
+            <div class="card-formula">d = (a₈ − a₅) / (8 − 5)</div>
+            <div class="card-calc">d = (${a8val} − ${a5val}) / 3 = <span class="hl-blue">${fmt(dd)}</span></div>
+        </div>
+        <div class="sol-card step-a1">
+            <div class="card-title">Шаг 2: Находим a₁</div>
+            <div class="card-formula">a₁ = a₅ − 4d</div>
+            <div class="card-calc">a₁ = ${a5val} − 4·${fmt(dd)} = <span class="hl-amber">${fmt(a1)}</span></div>
+        </div>
+        <div class="sol-card formula">
+            <div class="card-title">Формула n-го члена</div>
+            <div class="card-formula">aₙ = a₁ + (n−1)·d</div>
+            <div class="card-calc">aₙ = <span class="hl-amber">${fmt(a1)}</span> + (n−1)·<span class="hl-blue">${fmt(dd)}</span></div>
+        </div>
+        <div class="sol-card answer">
+            <div class="card-title">Ответ: мест в ${N}-м ряду</div>
+            <div class="card-formula">a${sub(N)} = ${fmt(a1)} + (${N}−1)·${fmt(dd)}</div>
+            <div class="card-calc">a${sub(N)} = <span class="hl-green">${fmt(lastTerm)} мест</span></div>
+        </div>
+    `;
+}
+
+function updateUI() {
+    const { d: dd, a1 } = calcParams();
+    const nDone = Math.min(Math.floor(animProgress), N);
+    const lastTerm = a1 + (N - 1) * dd;
+    const currentTerm = nDone > 0 ? a1 + (nDone - 1) * dd : 0;
+    const fmt = v => v % 1 === 0 ? v : v.toFixed(2);
+
+    document.getElementById('displayN').textContent = N;
+    document.getElementById('displayA5').textContent = a5val;
+    document.getElementById('displayA8').textContent = a8val;
+    document.getElementById('statRow').textContent = nDone > 0 ? nDone : '—';
+    document.getElementById('statSeats').textContent = nDone > 0 ? Math.round(currentTerm) : '—';
+    document.getElementById('statD').textContent = fmt(dd);
+    document.getElementById('statA1').textContent = fmt(a1);
+    document.getElementById('statLast').textContent = fmt(lastTerm);
+
+    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[c] || c).join('');
+    document.getElementById('compManual').textContent = `Считать ${N} рядов`;
+    document.getElementById('compFormula').innerHTML = `a${sub(N)} = ${fmt(lastTerm)}`;
+
+    const banner = document.getElementById('insightBanner'), txt = document.getElementById('insightText');
+    if (N > 20) { banner.classList.add('visible'); txt.textContent = `${N} рядов — формула даёт ${Math.round(lastTerm)} мест мгновенно!`; }
+    else if (N > 10) { banner.classList.add('visible'); txt.textContent = `Зная d и a₁, находим любой ряд по формуле за секунду.`; }
+    else { banner.classList.remove('visible'); }
+
+    updateSolution();
+}
+
+function render() { drawAmphitheater(); updateUI(); }
+
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrame === 0) lastFrame = ts;
+    animProgress += ((ts - lastFrame) / 1000) * speed * 0.9;
+    lastFrame = ts;
+    if (animProgress >= N) { animProgress = N; isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+sliderN.addEventListener('input', () => { N = parseInt(sliderN.value); if (!isPlaying) animProgress = N; else animProgress = Math.min(animProgress, N); render(); });
+sliderA5.addEventListener('input', () => { a5val = parseInt(sliderA5.value); render(); });
+sliderA8.addEventListener('input', () => { a8val = parseInt(sliderA8.value); render(); });
+btnPlay.addEventListener('click', () => {
+    if (isPlaying) { isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
+    else { if (animProgress >= N) animProgress = 0; isPlaying = true; lastFrame = 0; btnPlay.textContent = '⏸ Пауза'; requestAnimationFrame(animate); }
+});
+btnReset.addEventListener('click', () => { isPlaying = false; animProgress = 0; lastFrame = 0; btnPlay.textContent = '▶ Пуск'; render(); });
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => { document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active')); btn.classList.add('active'); speed = parseFloat(btn.dataset.speed); });
+});
+
+window.addEventListener('resize', resizeAll);
+setTimeout(resizeAll, 50);
+animProgress = N;
+render();
+</script>
+</body>
+</html>
