@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Арифметическая прогрессия — Интерактивная модель</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #16213e;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+            --canyon-sky1: #1a1a2e;
+            --canyon-sky2: #0a0a15;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --bg3: #e8f4f8;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+            --canyon-sky1: #bae6fd;
+            --canyon-sky2: #7dd3fc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .app {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slider-group label {
+            font-size: 0.8em;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+        .slider-group .val {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #60a5fa;
+            min-width: 26px;
+            text-align: center;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 110px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--track);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #60a5fa;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(96,165,250,0.4);
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-play { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
+        .btn-speed.active { background: #3b82f6; color: white; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
+        .btn-theme:hover { opacity: 0.85; }
+
+        /* ═══ MAIN GRID: 2 columns ═══ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══ LEFT: Canyon ═══ */
+        .canyon-cell {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border2);
+            background: linear-gradient(180deg, var(--bg3) 0%, var(--bg) 100%);
+            min-height: 0;
+            overflow: hidden;
+        }
+        .cell-title {
+            font-size: 0.8em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 8px 14px 4px;
+        }
+        .canyon-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        canvas#canyonCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ═══ RIGHT: Formulas + Terms ═══ */
+        .right-cell {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            padding: 14px 24px;
+            gap: 10px;
+        }
+        .formulas-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .formula-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 14px 20px;
+            border: 1px solid var(--border);
+        }
+        .formula-card .card-title {
+            font-size: 0.85em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .formula-card .formula {
+            font-size: 1.4em;
+            color: #a78bfa;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 4px;
+        }
+        .formula-card .calculation {
+            font-size: 1.2em;
+            color: var(--text);
+            font-weight: 600;
+        }
+        .formula-card .result {
+            font-size: 1.5em;
+            color: #4ade80;
+            font-weight: 700;
+        }
+
+        .terms-section {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        .terms-section::-webkit-scrollbar { width: 4px; }
+        .terms-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .terms-title {
+            font-size: 0.85em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .terms-list {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .term-badge {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        .term-badge.done {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        html.light .term-badge.done {
+            background: rgba(22, 163, 74, 0.12);
+            color: #15803d;
+            border: 1px solid rgba(22, 163, 74, 0.35);
+        }
+        .term-badge.active {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
+        }
+        html.light .term-badge.active {
+            background: rgba(180, 83, 9, 0.12);
+            color: #b45309;
+            border: 1px solid rgba(180, 83, 9, 0.4);
+        }
+        .term-badge.future {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--muted);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        .term-badge.ellipsis {
+            background: none; border: none; color: var(--subtle); padding: 5px;
+        }
+
+        .progress-bar-bg {
+            height: 5px;
+            background: var(--card);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        /* ═══ BOTTOM BAR ═══ */
+        .bottom-bar {
+            display: flex;
+            align-items: stretch;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
+        }
+        .status-items {
+            display: flex;
+            gap: 18px;
+            padding: 8px 20px;
+            align-items: center;
+        }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label {
+            font-size: 0.7em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .status-item .value.blue { color: #60a5fa; }
+        .status-item .value.green { color: #4ade80; }
+        .status-item .value.amber { color: #fbbf24; }
+        .status-item .value.purple { color: #a78bfa; }
+        html.light .status-item .value.green { color: #15803d; }
+        html.light .status-item .value.amber { color: #b45309; }
+
+        .comparison-items {
+            display: flex;
+            gap: 12px;
+            padding: 8px 20px;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+        }
+        .comp-card {
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comp-card.manual {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .comp-card.formula-method {
+            background: rgba(74, 222, 128, 0.08);
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+        html.light .comp-card.manual { background: rgba(239, 68, 68, 0.06); }
+        html.light .comp-card.formula-method { background: rgba(22, 163, 74, 0.06); }
+        .comp-card .comp-title {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .comp-card.manual .comp-title { color: #f87171; }
+        .comp-card.formula-method .comp-title { color: #4ade80; }
+        html.light .comp-card.formula-method .comp-title { color: #15803d; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.manual .comp-value { color: #ef4444; }
+        .comp-card.formula-method .comp-value { color: #22c55e; }
+        html.light .comp-card.formula-method .comp-value { color: #15803d; }
+
+        .insight-item {
+            padding: 8px 20px;
+            font-size: 0.9em;
+            color: #c4b5fd;
+            display: none;
+            align-items: center;
+            border-left: 1px solid var(--border);
+            max-width: 380px;
+        }
+        html.light .insight-item { color: #6d28d9; }
+        .insight-item.visible { display: flex; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <h1>Камень в ущелье</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>N =</label>
+                <span class="val" id="displayN">5</span>
+                <input type="range" id="sliderN" min="1" max="40" value="5" step="1">
+            </div>
+            <div class="slider-group">
+                <label>a&#8321; =</label>
+                <span class="val" id="displayA1">9</span>
+                <input type="range" id="sliderA1" min="1" max="50" value="9" step="1">
+            </div>
+            <div class="slider-group">
+                <label>d =</label>
+                <span class="val" id="displayD">10</span>
+                <input type="range" id="sliderD" min="1" max="30" value="10" step="1">
+            </div>
+            <button class="btn btn-play" id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">☀ Светлая</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="canyon-cell">
+            <div class="cell-title">Ущелье</div>
+            <div class="canyon-wrap">
+                <canvas id="canyonCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="right-cell">
+            <div class="formulas-row">
+                <div class="formula-card">
+                    <div class="card-title">n-й член прогрессии</div>
+                    <div class="formula">a&#8345; = a&#8321; + (n&minus;1)&middot;d</div>
+                    <div class="calculation" id="formulaAn">a&#8325; = 9 + 4&middot;10 = <span class="result">49 м</span></div>
+                </div>
+                <div class="formula-card">
+                    <div class="card-title">Сумма n членов</div>
+                    <div class="formula">S&#8345; = n&middot;(a&#8321;+a&#8345;)/2</div>
+                    <div class="calculation" id="formulaSn">S&#8325; = 5&middot;(9+49)/2 = <span class="result">145 м</span></div>
+                </div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="terms-section">
+                <div class="terms-title">Члены прогрессии</div>
+                <div class="terms-list" id="termsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Секунда</span>
+                <span class="value blue" id="statSecond">0 / 5</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Пройдено</span>
+                <span class="value green" id="statDistance">0 м</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Сейчас</span>
+                <span class="value amber" id="statSpeed">0 м/с</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Всего</span>
+                <span class="value purple" id="statTotal">145 м</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card manual">
+                <div class="comp-title">Перебор</div>
+                <div class="comp-value" id="compManual">5 сложений</div>
+            </div>
+            <div class="comp-card formula-method">
+                <div class="comp-title">Формула</div>
+                <div class="comp-value" id="compFormula">S = 145 м</div>
+            </div>
+        </div>
+        <div class="insight-item" id="insightBanner">
+            <span id="insightText"></span>
+        </div>
+    </div>
+</div>
+
+<script>
+let N = 5, a1 = 9, d = 10;
+let animTime = 0, isPlaying = false, speed = 1, lastFrameTime = 0;
+
+const sliderN = document.getElementById('sliderN');
+const sliderA1 = document.getElementById('sliderA1');
+const sliderD = document.getElementById('sliderD');
+const btnPlay = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
+const canyonCanvas = document.getElementById('canyonCanvas');
+const canyonCtx = canyonCanvas.getContext('2d');
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') {
+    document.documentElement.classList.add('light');
+    btnTheme.textContent = '🌙 Тёмная';
+}
+btnTheme.addEventListener('click', () => {
+    const isLight = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', isLight ? 'light' : 'dark');
+    btnTheme.textContent = isLight ? '🌙 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+function term(k) { return a1 + (k - 1) * d; }
+function sumN(n) { return n * (2 * a1 + (n - 1) * d) / 2; }
+
+function resizeCanvas(canvas) {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+    canvas.getContext('2d').scale(dpr, dpr);
+    canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
+}
+function resizeAll() { resizeCanvas(canyonCanvas); render(); }
+
+function drawCanyon() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canyonCanvas.width / dpr, h = canyonCanvas.height / dpr;
+    const ctx = canyonCtx;
+    const light = isLight();
+    ctx.clearRect(0, 0, w, h);
+
+    const canyonLeft = w * 0.22, canyonRight = w * 0.78;
+    const canyonWidth = canyonRight - canyonLeft;
+    const topY = 20, bottomY = h - 12;
+    const canyonHeight = bottomY - topY;
+    const totalDist = sumN(N);
+
+    const nDone = Math.min(Math.floor(animTime), N);
+    const frac = animTime - nDone;
+    const distDone = sumN(nDone);
+    const vCurr = nDone < N ? term(nDone + 1) : 0;
+    const currentDist = distDone + vCurr * frac;
+    const progress = totalDist > 0 ? currentDist / totalDist : 0;
+
+    // Canyon background
+    const bgGrad = ctx.createLinearGradient(0, topY, 0, bottomY);
+    if (light) {
+        bgGrad.addColorStop(0, '#bae6fd'); bgGrad.addColorStop(1, '#7dd3fc');
+    } else {
+        bgGrad.addColorStop(0, '#1a1a2e'); bgGrad.addColorStop(1, '#0a0a15');
+    }
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(canyonLeft, topY, canyonWidth, canyonHeight);
+
+    // Canyon walls
+    const wallGrad = ctx.createLinearGradient(0, topY, 0, bottomY);
+    wallGrad.addColorStop(0, '#8B6914'); wallGrad.addColorStop(0.5, '#6B4F12'); wallGrad.addColorStop(1, '#4a3510');
+    ctx.fillStyle = wallGrad;
+    ctx.fillRect(canyonLeft - 10, topY, 10, canyonHeight);
+    ctx.fillRect(canyonRight, topY, 10, canyonHeight);
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 1;
+    for (let y = topY; y < bottomY; y += 12) {
+        ctx.beginPath(); ctx.moveTo(canyonLeft - 10, y); ctx.lineTo(canyonLeft, y);
+        ctx.moveTo(canyonRight, y); ctx.lineTo(canyonRight + 10, y); ctx.stroke();
+    }
+
+    // Top grass / ground
+    ctx.fillStyle = light ? '#4ade80' : '#2d5a27'; ctx.fillRect(0, topY - 6, canyonLeft - 10, 6);
+    ctx.fillRect(canyonRight + 10, topY - 6, w - canyonRight - 10, 6);
+    ctx.fillStyle = light ? '#86efac' : '#3a7a32'; ctx.fillRect(0, topY - 8, canyonLeft - 10, 3);
+    ctx.fillRect(canyonRight + 10, topY - 8, w - canyonRight - 10, 3);
+    ctx.fillStyle = '#3a2510'; ctx.fillRect(canyonLeft, bottomY - 3, canyonWidth, 3);
+
+    // Segment markers
+    const markColor = light ? 'rgba(146,64,14,0.6)' : 'rgba(251, 191, 36, 0.4)';
+    const labelColor = light ? 'rgba(146,64,14,0.9)' : 'rgba(251, 191, 36, 0.8)';
+    const sideColor = light ? 'rgba(51,65,85,0.7)' : 'rgba(148, 163, 184, 0.6)';
+
+    for (let j = 1; j <= nDone; j++) {
+        const markDist = sumN(j);
+        const markY = topY + (markDist / totalDist) * canyonHeight;
+        ctx.strokeStyle = markColor; ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]); ctx.beginPath();
+        ctx.moveTo(canyonLeft, markY); ctx.lineTo(canyonRight, markY); ctx.stroke(); ctx.setLineDash([]);
+
+        const prevDist = sumN(j - 1);
+        const prevY = j === 1 ? topY : topY + (prevDist / totalDist) * canyonHeight;
+        const midY = (prevY + markY) / 2;
+
+        ctx.fillStyle = labelColor;
+        ctx.font = `600 ${Math.min(12, canyonWidth * 0.08)}px system-ui`;
+        ctx.textAlign = 'center';
+        ctx.fillText('+' + term(j), (canyonLeft + canyonRight) / 2, midY + 4);
+
+        ctx.fillStyle = sideColor;
+        ctx.font = `${Math.min(9, canyonWidth * 0.06)}px system-ui`;
+        ctx.textAlign = 'left';
+        ctx.fillText(markDist + 'м', canyonRight + 13, markY + 3);
+    }
+
+    // Stone glow + stone
+    const stoneY = topY + progress * canyonHeight;
+    const stoneR = Math.min(10, canyonWidth * 0.07);
+    const glowGrad = ctx.createRadialGradient((canyonLeft+canyonRight)/2, stoneY, 0, (canyonLeft+canyonRight)/2, stoneY, stoneR*3);
+    glowGrad.addColorStop(0, 'rgba(251,191,36,0.3)'); glowGrad.addColorStop(1, 'rgba(251,191,36,0)');
+    ctx.fillStyle = glowGrad; ctx.beginPath();
+    ctx.arc((canyonLeft+canyonRight)/2, stoneY, stoneR*3, 0, Math.PI*2); ctx.fill();
+
+    const stoneGrad = ctx.createRadialGradient((canyonLeft+canyonRight)/2-stoneR*0.3, stoneY-stoneR*0.3, stoneR*0.1, (canyonLeft+canyonRight)/2, stoneY, stoneR);
+    stoneGrad.addColorStop(0, '#d4a053'); stoneGrad.addColorStop(0.7, '#8B6914'); stoneGrad.addColorStop(1, '#5a4510');
+    ctx.fillStyle = stoneGrad; ctx.beginPath();
+    ctx.arc((canyonLeft+canyonRight)/2, stoneY, stoneR, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    if (currentDist > 0) {
+        ctx.fillStyle = light ? '#1d4ed8' : '#60a5fa';
+        ctx.font = 'bold 12px system-ui';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(currentDist) + ' м', canyonLeft - 14, stoneY + 4);
+    }
+}
+
+function updateUI() {
+    const nDone = Math.min(Math.floor(animTime), N);
+    const frac = animTime - nDone;
+    const distDone = sumN(nDone);
+    const vCurr = nDone < N ? term(nDone + 1) : 0;
+    const currentDist = distDone + vCurr * frac;
+    const totalDist = sumN(N);
+    const lastTerm = term(N);
+
+    document.getElementById('statSecond').textContent = nDone + ' / ' + N;
+    document.getElementById('statDistance').textContent = Math.round(currentDist) + ' м';
+    document.getElementById('statSpeed').textContent = vCurr + ' м/с';
+    document.getElementById('statTotal').textContent = totalDist + ' м';
+
+    const pct = totalDist > 0 ? (currentDist / totalDist) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    document.getElementById('displayN').textContent = N;
+    document.getElementById('displayA1').textContent = a1;
+    document.getElementById('displayD').textContent = d;
+
+    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[c] || c).join('');
+    document.getElementById('formulaAn').innerHTML = `a${sub(N)} = ${a1} + (${N}−1)·${d} = <span class="result">${lastTerm} м</span>`;
+    document.getElementById('formulaSn').innerHTML = `S${sub(N)} = ${N}·(${a1}+${lastTerm})/2 = <span class="result">${totalDist} м</span>`;
+
+    const termsList = document.getElementById('termsList');
+    const maxShow = 30;
+    let html = '';
+    for (let k = 1; k <= Math.min(N, maxShow); k++) {
+        let cls = k <= nDone ? 'done' : (k === nDone + 1 ? 'active' : 'future');
+        html += `<span class="term-badge ${cls}">${term(k)}</span>`;
+    }
+    if (N > maxShow) html += `<span class="term-badge ellipsis">… ещё ${N - maxShow}</span>`;
+    termsList.innerHTML = html;
+
+    document.getElementById('compManual').textContent = N + ' сложений';
+    document.getElementById('compFormula').textContent = 'S = ' + totalDist + ' м';
+
+    const banner = document.getElementById('insightBanner'), insightText = document.getElementById('insightText');
+    if (N > 15) { banner.classList.add('visible'); insightText.textContent = `${N} чисел вручную? Формула Sₙ даёт ${totalDist} м мгновенно!`; }
+    else if (N > 8) { banner.classList.add('visible'); insightText.textContent = `${N} слагаемых — перебор утомителен. Формула проще!`; }
+    else { banner.classList.remove('visible'); }
+}
+
+function render() { drawCanyon(); updateUI(); }
+
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrameTime === 0) lastFrameTime = ts;
+    animTime += ((ts - lastFrameTime) / 1000) * speed * 0.8;
+    lastFrameTime = ts;
+    if (animTime >= N) { animTime = N; isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+sliderN.addEventListener('input', () => { N = parseInt(sliderN.value); if (!isPlaying) animTime = N; else animTime = Math.min(animTime, N); render(); });
+sliderA1.addEventListener('input', () => { a1 = parseInt(sliderA1.value); render(); });
+sliderD.addEventListener('input', () => { d = parseInt(sliderD.value); render(); });
+btnPlay.addEventListener('click', () => {
+    if (isPlaying) { isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
+    else { if (animTime >= N) animTime = 0; isPlaying = true; lastFrameTime = 0; btnPlay.textContent = '⏸ Пауза'; requestAnimationFrame(animate); }
+});
+btnReset.addEventListener('click', () => { isPlaying = false; animTime = 0; lastFrameTime = 0; btnPlay.textContent = '▶ Пуск'; render(); });
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => { document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active')); btn.classList.add('active'); speed = parseFloat(btn.dataset.speed); });
+});
+
+window.addEventListener('resize', resizeAll);
+setTimeout(resizeAll, 50);
+animTime = N;
+render();
+</script>
+</body>
+</html>
