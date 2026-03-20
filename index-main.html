@@ -5,19 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Интерактивные модели — Арифметическая прогрессия</title>
     <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --task-text: #cbd5e1;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --task-text: #1e293b;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            transition: background 0.2s, color 0.2s;
         }
+
+        .top-nav {
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px 0;
+        }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-theme:hover { opacity: 0.85; }
 
         .hero {
             text-align: center;
-            padding: 50px 20px 30px;
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            padding: 36px 20px 30px;
+            background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
         }
         .hero h1 {
             font-size: 2.4em;
@@ -28,9 +74,14 @@
             background-clip: text;
             margin-bottom: 10px;
         }
+        html.light .hero h1 {
+            background: linear-gradient(135deg, #1d4ed8, #7c3aed, #a21caf);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
         .hero p {
             font-size: 1.15em;
-            color: #94a3b8;
+            color: var(--muted);
             max-width: 600px;
             margin: 0 auto;
         }
@@ -45,9 +96,9 @@
         }
 
         .card {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 16px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
             overflow: hidden;
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
@@ -58,9 +109,10 @@
         }
         .card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-            border-color: #475569;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            border-color: var(--muted);
         }
+        html.light .card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
 
         .card-icon {
             height: 80px;
@@ -73,6 +125,10 @@
         .card-icon.tables { background: linear-gradient(135deg, #422006, #1c1917); }
         .card-icon.amphi { background: linear-gradient(135deg, #3b0764, #1e1b4b); }
         .card-icon.train { background: linear-gradient(135deg, #7c2d12, #1c1917); }
+        html.light .card-icon.stone { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+        html.light .card-icon.tables { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        html.light .card-icon.amphi { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
+        html.light .card-icon.train { background: linear-gradient(135deg, #fee2e2, #fecaca); }
 
         .card-body {
             padding: 18px 20px;
@@ -89,10 +145,14 @@
         .card-body h2.tables-title { color: #f59e0b; }
         .card-body h2.amphi-title { color: #e879f9; }
         .card-body h2.train-title { color: #f97316; }
+        html.light .card-body h2.stone-title { color: #1d4ed8; }
+        html.light .card-body h2.tables-title { color: #b45309; }
+        html.light .card-body h2.amphi-title { color: #7e22ce; }
+        html.light .card-body h2.train-title { color: #c2410c; }
 
         .card-body .task-text {
             font-size: 0.92em;
-            color: #cbd5e1;
+            color: var(--task-text);
             line-height: 1.55;
             flex: 1;
         }
@@ -110,13 +170,18 @@
             font-weight: 600;
             font-family: 'Courier New', monospace;
             background: rgba(100,116,139,0.15);
-            color: #94a3b8;
+            color: var(--muted);
             border: 1px solid rgba(100,116,139,0.2);
+        }
+        html.light .param-tag {
+            background: rgba(100,116,139,0.1);
+            color: var(--subtle);
+            border-color: rgba(100,116,139,0.3);
         }
 
         .card-footer {
             padding: 12px 20px;
-            border-top: 1px solid #334155;
+            border-top: 1px solid var(--border2);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -129,23 +194,29 @@
             align-items: center;
             gap: 6px;
         }
-        .card:hover .open-btn { color: #93c5fd; }
+        html.light .open-btn { color: #1d4ed8; }
+        .card:hover .open-btn { opacity: 0.8; }
         .card-footer .answer {
             font-size: 0.8em;
             color: #4ade80;
             font-weight: 600;
         }
+        html.light .card-footer .answer { color: #15803d; }
 
         .footer {
             text-align: center;
             padding: 20px;
-            color: #475569;
+            color: var(--subtle);
             font-size: 0.8em;
-            border-top: 1px solid #1e293b;
+            border-top: 1px solid var(--border2);
         }
     </style>
 </head>
 <body>
+
+<div class="top-nav">
+    <button class="btn-theme" id="btnTheme">☀ Светлая</button>
+</div>
 
 <div class="hero">
     <h1>Арифметическая прогрессия</h1>
@@ -231,5 +302,15 @@
 
 <div class="footer">Интерактивные модели для уроков математики</div>
 
+<script>
+const btnTheme = document.getElementById('btnTheme');
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') { document.documentElement.classList.add('light'); btnTheme.textContent = '🌙 Тёмная'; }
+btnTheme.addEventListener('click', () => {
+    const isL = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
+    btnTheme.textContent = isL ? '🌙 Тёмная' : '☀ Светлая';
+});
+</script>
 </body>
 </html>

@@ -5,14 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Арифметическая прогрессия — Интерактивная модель</title>
     <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #16213e;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+            --canyon-sky1: #1a1a2e;
+            --canyon-sky2: #0a0a15;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --bg3: #e8f4f8;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+            --canyon-sky1: #bae6fd;
+            --canyon-sky2: #7dd3fc;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            background: var(--bg);
+            color: var(--text);
             height: 100vh;
             overflow: hidden;
+            transition: background 0.2s, color 0.2s;
         }
 
         .app {
@@ -27,8 +61,8 @@
             align-items: center;
             gap: 16px;
             padding: 10px 20px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-bottom: 1px solid #1e293b;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
             flex-wrap: wrap;
         }
         .top-bar h1 {
@@ -54,7 +88,7 @@
         }
         .slider-group label {
             font-size: 0.8em;
-            color: #94a3b8;
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.4px;
             font-weight: 600;
@@ -71,7 +105,7 @@
             width: 110px;
             height: 6px;
             border-radius: 3px;
-            background: #334155;
+            background: var(--track);
             outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
@@ -93,9 +127,18 @@
             transition: all 0.2s;
         }
         .btn-play { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
-        .btn-reset { background: #334155; color: #94a3b8; }
-        .btn-speed { background: #334155; color: #94a3b8; padding: 8px 12px; font-size: 0.8em; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
         .btn-speed.active { background: #3b82f6; color: white; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
+        .btn-theme:hover { opacity: 0.85; }
 
         /* ═══ MAIN GRID: 2 columns ═══ */
         .main-grid {
@@ -110,14 +153,14 @@
         .canyon-cell {
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #1e293b;
-            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-right: 1px solid var(--border2);
+            background: linear-gradient(180deg, var(--bg3) 0%, var(--bg) 100%);
             min-height: 0;
             overflow: hidden;
         }
         .cell-title {
             font-size: 0.8em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
@@ -149,14 +192,14 @@
             gap: 12px;
         }
         .formula-card {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 12px;
             padding: 14px 20px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
         }
         .formula-card .card-title {
             font-size: 0.85em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 6px;
@@ -170,7 +213,7 @@
         }
         .formula-card .calculation {
             font-size: 1.2em;
-            color: #e2e8f0;
+            color: var(--text);
             font-weight: 600;
         }
         .formula-card .result {
@@ -185,10 +228,10 @@
             overflow-y: auto;
         }
         .terms-section::-webkit-scrollbar { width: 4px; }
-        .terms-section::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        .terms-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
         .terms-title {
             font-size: 0.85em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
@@ -211,6 +254,11 @@
             color: #4ade80;
             border: 1px solid rgba(74, 222, 128, 0.3);
         }
+        html.light .term-badge.done {
+            background: rgba(22, 163, 74, 0.12);
+            color: #15803d;
+            border: 1px solid rgba(22, 163, 74, 0.35);
+        }
         .term-badge.active {
             background: rgba(251, 191, 36, 0.2);
             color: #fbbf24;
@@ -218,18 +266,23 @@
             transform: scale(1.05);
             box-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
         }
+        html.light .term-badge.active {
+            background: rgba(180, 83, 9, 0.12);
+            color: #b45309;
+            border: 1px solid rgba(180, 83, 9, 0.4);
+        }
         .term-badge.future {
             background: rgba(100, 116, 139, 0.15);
-            color: #64748b;
+            color: var(--muted);
             border: 1px solid rgba(100, 116, 139, 0.2);
         }
         .term-badge.ellipsis {
-            background: none; border: none; color: #475569; padding: 5px;
+            background: none; border: none; color: var(--subtle); padding: 5px;
         }
 
         .progress-bar-bg {
             height: 5px;
-            background: #1e293b;
+            background: var(--card);
             border-radius: 3px;
             overflow: hidden;
         }
@@ -244,8 +297,8 @@
         .bottom-bar {
             display: flex;
             align-items: stretch;
-            border-top: 1px solid #1e293b;
-            background: #1e293b;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
         }
         .status-items {
             display: flex;
@@ -256,7 +309,7 @@
         .status-item { display: flex; flex-direction: column; align-items: center; }
         .status-item .label {
             font-size: 0.7em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
@@ -265,6 +318,8 @@
         .status-item .value.green { color: #4ade80; }
         .status-item .value.amber { color: #fbbf24; }
         .status-item .value.purple { color: #a78bfa; }
+        html.light .status-item .value.green { color: #15803d; }
+        html.light .status-item .value.amber { color: #b45309; }
 
         .comparison-items {
             display: flex;
@@ -290,6 +345,8 @@
             background: rgba(74, 222, 128, 0.08);
             border-color: rgba(74, 222, 128, 0.2);
         }
+        html.light .comp-card.manual { background: rgba(239, 68, 68, 0.06); }
+        html.light .comp-card.formula-method { background: rgba(22, 163, 74, 0.06); }
         .comp-card .comp-title {
             font-size: 0.75em;
             font-weight: 600;
@@ -297,9 +354,11 @@
         }
         .comp-card.manual .comp-title { color: #f87171; }
         .comp-card.formula-method .comp-title { color: #4ade80; }
+        html.light .comp-card.formula-method .comp-title { color: #15803d; }
         .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
         .comp-card.manual .comp-value { color: #ef4444; }
         .comp-card.formula-method .comp-value { color: #22c55e; }
+        html.light .comp-card.formula-method .comp-value { color: #15803d; }
 
         .insight-item {
             padding: 8px 20px;
@@ -307,9 +366,10 @@
             color: #c4b5fd;
             display: none;
             align-items: center;
-            border-left: 1px solid #334155;
+            border-left: 1px solid var(--border);
             max-width: 380px;
         }
+        html.light .insight-item { color: #6d28d9; }
         .insight-item.visible { display: flex; }
     </style>
 </head>
@@ -339,6 +399,7 @@
             <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
             <button class="btn btn-speed active" data-speed="1">1&times;</button>
             <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">☀ Светлая</button>
         </div>
     </div>
 
@@ -417,8 +478,23 @@ const sliderA1 = document.getElementById('sliderA1');
 const sliderD = document.getElementById('sliderD');
 const btnPlay = document.getElementById('btnPlay');
 const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
 const canyonCanvas = document.getElementById('canyonCanvas');
 const canyonCtx = canyonCanvas.getContext('2d');
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') {
+    document.documentElement.classList.add('light');
+    btnTheme.textContent = '🌙 Тёмная';
+}
+btnTheme.addEventListener('click', () => {
+    const isLight = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', isLight ? 'light' : 'dark');
+    btnTheme.textContent = isLight ? '🌙 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
 
 function term(k) { return a1 + (k - 1) * d; }
 function sumN(n) { return n * (2 * a1 + (n - 1) * d) / 2; }
@@ -436,6 +512,7 @@ function drawCanyon() {
     const dpr = window.devicePixelRatio || 1;
     const w = canyonCanvas.width / dpr, h = canyonCanvas.height / dpr;
     const ctx = canyonCtx;
+    const light = isLight();
     ctx.clearRect(0, 0, w, h);
 
     const canyonLeft = w * 0.22, canyonRight = w * 0.78;
@@ -451,11 +528,17 @@ function drawCanyon() {
     const currentDist = distDone + vCurr * frac;
     const progress = totalDist > 0 ? currentDist / totalDist : 0;
 
+    // Canyon background
     const bgGrad = ctx.createLinearGradient(0, topY, 0, bottomY);
-    bgGrad.addColorStop(0, '#1a1a2e'); bgGrad.addColorStop(1, '#0a0a15');
+    if (light) {
+        bgGrad.addColorStop(0, '#bae6fd'); bgGrad.addColorStop(1, '#7dd3fc');
+    } else {
+        bgGrad.addColorStop(0, '#1a1a2e'); bgGrad.addColorStop(1, '#0a0a15');
+    }
     ctx.fillStyle = bgGrad;
     ctx.fillRect(canyonLeft, topY, canyonWidth, canyonHeight);
 
+    // Canyon walls
     const wallGrad = ctx.createLinearGradient(0, topY, 0, bottomY);
     wallGrad.addColorStop(0, '#8B6914'); wallGrad.addColorStop(0.5, '#6B4F12'); wallGrad.addColorStop(1, '#4a3510');
     ctx.fillStyle = wallGrad;
@@ -468,16 +551,22 @@ function drawCanyon() {
         ctx.moveTo(canyonRight, y); ctx.lineTo(canyonRight + 10, y); ctx.stroke();
     }
 
-    ctx.fillStyle = '#2d5a27'; ctx.fillRect(0, topY - 6, canyonLeft - 10, 6);
+    // Top grass / ground
+    ctx.fillStyle = light ? '#4ade80' : '#2d5a27'; ctx.fillRect(0, topY - 6, canyonLeft - 10, 6);
     ctx.fillRect(canyonRight + 10, topY - 6, w - canyonRight - 10, 6);
-    ctx.fillStyle = '#3a7a32'; ctx.fillRect(0, topY - 8, canyonLeft - 10, 3);
+    ctx.fillStyle = light ? '#86efac' : '#3a7a32'; ctx.fillRect(0, topY - 8, canyonLeft - 10, 3);
     ctx.fillRect(canyonRight + 10, topY - 8, w - canyonRight - 10, 3);
     ctx.fillStyle = '#3a2510'; ctx.fillRect(canyonLeft, bottomY - 3, canyonWidth, 3);
+
+    // Segment markers
+    const markColor = light ? 'rgba(146,64,14,0.6)' : 'rgba(251, 191, 36, 0.4)';
+    const labelColor = light ? 'rgba(146,64,14,0.9)' : 'rgba(251, 191, 36, 0.8)';
+    const sideColor = light ? 'rgba(51,65,85,0.7)' : 'rgba(148, 163, 184, 0.6)';
 
     for (let j = 1; j <= nDone; j++) {
         const markDist = sumN(j);
         const markY = topY + (markDist / totalDist) * canyonHeight;
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)'; ctx.lineWidth = 1;
+        ctx.strokeStyle = markColor; ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]); ctx.beginPath();
         ctx.moveTo(canyonLeft, markY); ctx.lineTo(canyonRight, markY); ctx.stroke(); ctx.setLineDash([]);
 
@@ -485,17 +574,18 @@ function drawCanyon() {
         const prevY = j === 1 ? topY : topY + (prevDist / totalDist) * canyonHeight;
         const midY = (prevY + markY) / 2;
 
-        ctx.fillStyle = 'rgba(251, 191, 36, 0.8)';
+        ctx.fillStyle = labelColor;
         ctx.font = `600 ${Math.min(12, canyonWidth * 0.08)}px system-ui`;
         ctx.textAlign = 'center';
         ctx.fillText('+' + term(j), (canyonLeft + canyonRight) / 2, midY + 4);
 
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.6)';
+        ctx.fillStyle = sideColor;
         ctx.font = `${Math.min(9, canyonWidth * 0.06)}px system-ui`;
         ctx.textAlign = 'left';
         ctx.fillText(markDist + 'м', canyonRight + 13, markY + 3);
     }
 
+    // Stone glow + stone
     const stoneY = topY + progress * canyonHeight;
     const stoneR = Math.min(10, canyonWidth * 0.07);
     const glowGrad = ctx.createRadialGradient((canyonLeft+canyonRight)/2, stoneY, 0, (canyonLeft+canyonRight)/2, stoneY, stoneR*3);
@@ -510,8 +600,10 @@ function drawCanyon() {
     ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1.5; ctx.stroke();
 
     if (currentDist > 0) {
-        ctx.fillStyle = '#60a5fa'; ctx.font = 'bold 12px system-ui';
-        ctx.textAlign = 'right'; ctx.fillText(Math.round(currentDist) + ' м', canyonLeft - 14, stoneY + 4);
+        ctx.fillStyle = light ? '#1d4ed8' : '#60a5fa';
+        ctx.font = 'bold 12px system-ui';
+        ctx.textAlign = 'right';
+        ctx.fillText(Math.round(currentDist) + ' м', canyonLeft - 14, stoneY + 4);
     }
 }
 

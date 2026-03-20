@@ -5,14 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Задача о столиках — Арифметическая прогрессия</title>
     <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+            --table-td-border: #1e293b;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+            --table-td-border: #e2e8f0;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            background: var(--bg);
+            color: var(--text);
             height: 100vh;
             overflow: hidden;
+            transition: background 0.2s, color 0.2s;
         }
 
         .app {
@@ -21,14 +51,13 @@
             height: 100vh;
         }
 
-        /* ═══ TOP BAR ═══ */
         .top-bar {
             display: flex;
             align-items: center;
             gap: 20px;
             padding: 10px 24px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-bottom: 1px solid #1e293b;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
             flex-wrap: wrap;
         }
         .top-bar h1 {
@@ -39,6 +68,11 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             white-space: nowrap;
+        }
+        html.light .top-bar h1 {
+            background: linear-gradient(135deg, #b45309, #c2410c);
+            -webkit-background-clip: text;
+            background-clip: text;
         }
         .top-controls {
             display: flex;
@@ -53,7 +87,7 @@
         }
         .slider-group label {
             font-size: 0.85em;
-            color: #94a3b8;
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
@@ -65,12 +99,13 @@
             min-width: 30px;
             text-align: center;
         }
+        html.light .slider-group .val { color: #b45309; }
         input[type="range"] {
             -webkit-appearance: none;
             width: 160px;
             height: 6px;
             border-radius: 3px;
-            background: #334155;
+            background: var(--track);
             outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
@@ -82,6 +117,7 @@
             cursor: pointer;
             box-shadow: 0 0 8px rgba(245,158,11,0.4);
         }
+        html.light input[type="range"]::-webkit-slider-thumb { background: #b45309; }
         .btn {
             padding: 8px 18px;
             border: none;
@@ -92,11 +128,20 @@
             transition: all 0.2s;
         }
         .btn-play { background: linear-gradient(135deg, #f59e0b, #d97706); color: #1e293b; }
-        .btn-reset { background: #334155; color: #94a3b8; }
-        .btn-speed { background: #334155; color: #94a3b8; padding: 8px 12px; font-size: 0.85em; }
+        html.light .btn-play { background: linear-gradient(135deg, #b45309, #92400e); color: white; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.85em; }
         .btn-speed.active { background: #f59e0b; color: #1e293b; }
+        html.light .btn-speed.active { background: #b45309; color: white; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
 
-        /* ═══ MAIN GRID: 2 columns ═══ */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -105,17 +150,16 @@
             overflow: hidden;
         }
 
-        /* ═══ LEFT: Scene + Pattern ═══ */
         .left-cell {
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #1e293b;
+            border-right: 1px solid var(--border2);
             min-height: 0;
             overflow: hidden;
         }
         .cell-title {
             font-size: 0.8em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
@@ -136,23 +180,23 @@
             flex: 1;
             overflow-y: auto;
             min-height: 0;
-            border-top: 1px solid #1e293b;
+            border-top: 1px solid var(--border2);
         }
         .pattern-scroll::-webkit-scrollbar { width: 4px; }
-        .pattern-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        .pattern-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
         .pattern-table {
             width: 100%;
             border-collapse: collapse;
         }
         .pattern-table th {
-            background: #1e293b;
+            background: var(--bg2);
             padding: 6px 8px;
             text-align: center;
             font-size: 0.85em;
-            color: #94a3b8;
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            border-bottom: 2px solid #334155;
+            border-bottom: 2px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 1;
@@ -160,23 +204,25 @@
         .pattern-table td {
             padding: 5px 8px;
             text-align: center;
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid var(--table-td-border);
             font-size: 0.95em;
             font-family: 'Courier New', monospace;
+            color: var(--text);
         }
         .pattern-table tr.highlight td {
             background: rgba(245, 158, 11, 0.1);
             color: #f59e0b;
             font-weight: 700;
         }
+        html.light .pattern-table tr.highlight td { color: #b45309; background: rgba(180,83,9,0.08); }
         .pattern-table tr.active td {
             background: rgba(74, 222, 128, 0.06);
             color: #4ade80;
             font-weight: 700;
         }
-        .pattern-table tr.dimmed td { color: #475569; }
+        html.light .pattern-table tr.active td { color: #15803d; background: rgba(22,163,74,0.06); }
+        .pattern-table tr.dimmed td { color: var(--subtle); }
 
-        /* ═══ RIGHT: Formulas ═══ */
         .formulas-cell {
             display: flex;
             flex-direction: column;
@@ -187,14 +233,14 @@
             justify-content: center;
         }
         .formula-card {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 12px;
             padding: 14px 20px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
         }
         .formula-card .card-title {
             font-size: 0.85em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 6px;
@@ -206,9 +252,10 @@
             font-family: 'Courier New', monospace;
             margin-bottom: 4px;
         }
+        html.light .formula-card .formula { color: #6d28d9; }
         .formula-card .calculation {
             font-size: 1.2em;
-            color: #e2e8f0;
+            color: var(--text);
             font-weight: 600;
         }
         .formula-card .result {
@@ -216,14 +263,14 @@
             color: #4ade80;
             font-weight: 700;
         }
+        html.light .formula-card .result { color: #15803d; }
 
-        /* ═══ BOTTOM BAR ═══ */
         .bottom-bar {
             display: flex;
             align-items: stretch;
             gap: 0;
-            border-top: 1px solid #1e293b;
-            background: #1e293b;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
         }
         .status-items {
             display: flex;
@@ -234,7 +281,7 @@
         .status-item { display: flex; flex-direction: column; align-items: center; }
         .status-item .label {
             font-size: 0.7em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
@@ -243,6 +290,8 @@
         .status-item .value.green { color: #4ade80; }
         .status-item .value.blue { color: #60a5fa; }
         .status-item .value.purple { color: #a78bfa; }
+        html.light .status-item .value.amber { color: #b45309; }
+        html.light .status-item .value.green { color: #15803d; }
 
         .comparison-items {
             display: flex;
@@ -259,25 +308,17 @@
             align-items: center;
             gap: 10px;
         }
-        .comp-card.manual {
-            background: rgba(239, 68, 68, 0.08);
-            border-color: rgba(239, 68, 68, 0.2);
-        }
-        .comp-card.formula-method {
-            background: rgba(74, 222, 128, 0.08);
-            border-color: rgba(74, 222, 128, 0.2);
-        }
-        .comp-card .comp-title {
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
+        .comp-card.manual { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+        .comp-card.formula-method { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
+        html.light .comp-card.formula-method { background: rgba(22,163,74,0.06); }
+        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
         .comp-card.manual .comp-title { color: #f87171; }
         .comp-card.formula-method .comp-title { color: #4ade80; }
+        html.light .comp-card.formula-method .comp-title { color: #15803d; }
         .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
         .comp-card.manual .comp-value { color: #ef4444; }
         .comp-card.formula-method .comp-value { color: #22c55e; }
+        html.light .comp-card.formula-method .comp-value { color: #15803d; }
 
         .insight-item {
             padding: 8px 20px;
@@ -285,9 +326,10 @@
             color: #fcd34d;
             display: none;
             align-items: center;
-            border-left: 1px solid #334155;
+            border-left: 1px solid var(--border);
             max-width: 380px;
         }
+        html.light .insight-item { color: #b45309; }
         .insight-item.visible { display: flex; }
     </style>
 </head>
@@ -307,11 +349,11 @@
             <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
             <button class="btn btn-speed active" data-speed="1">1&times;</button>
             <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">☀ Светлая</button>
         </div>
     </div>
 
     <div class="main-grid">
-        <!-- LEFT: Scene + Pattern Table -->
         <div class="left-cell">
             <div class="cell-title">Вид сверху</div>
             <div class="scene-wrap">
@@ -328,7 +370,6 @@
             </div>
         </div>
 
-        <!-- RIGHT: Formulas -->
         <div class="formulas-cell">
             <div class="formula-card">
                 <div class="card-title">Закономерность</div>
@@ -405,8 +446,20 @@ function seats(n) { return n === 0 ? 0 : 2 * n + 2; }
 const sliderN = document.getElementById('sliderN');
 const btnPlay = document.getElementById('btnPlay');
 const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
 const sceneCanvas = document.getElementById('sceneCanvas');
 const sceneCtx = sceneCanvas.getContext('2d');
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') { document.documentElement.classList.add('light'); btnTheme.textContent = '🌙 Тёмная'; }
+btnTheme.addEventListener('click', () => {
+    const isL = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
+    btnTheme.textContent = isL ? '🌙 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
 
 function resizeCanvas(canvas) {
     const rect = canvas.parentElement.getBoundingClientRect();
@@ -424,7 +477,12 @@ function drawScene() {
     const w = sceneCanvas.width / dpr;
     const h = sceneCanvas.height / dpr;
     const ctx = sceneCtx;
+    const light = isLight();
     ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = light ? '#f1f5f9' : '#0f172a';
+    ctx.fillRect(0, 0, w, h);
 
     const showN = Math.min(Math.floor(animProgress) + 1, N);
     const partial = animProgress - Math.floor(animProgress);
@@ -470,18 +528,22 @@ function drawScene() {
         if (i === showN - 1) drawPlate(ctx, tx + tableSize * 0.8, cy, plateR);
         ctx.globalAlpha = 1;
 
+        const labelColor = light ? '#1d4ed8' : '#60a5fa';
+        const firstColor = light ? '#15803d' : '#4ade80';
         if (i > 0 && !isLast) {
-            ctx.fillStyle = '#60a5fa'; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
+            ctx.fillStyle = labelColor; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
             ctx.textAlign = 'center'; ctx.fillText('+2', tx + tableSize / 2, ty - chairOffset - chairSize - 6);
         }
         if (i === 0) {
-            ctx.fillStyle = '#4ade80'; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
+            ctx.fillStyle = firstColor; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
             ctx.textAlign = 'center'; ctx.fillText('4', tx + tableSize / 2, ty - chairOffset - chairSize - 6);
         }
     }
 
     const totalSeats = seats(showN - (isPartial ? 1 : 0));
-    ctx.globalAlpha = 1; ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 16px system-ui';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = light ? '#b45309' : '#f59e0b';
+    ctx.font = 'bold 16px system-ui';
     ctx.textAlign = 'center'; ctx.fillText(totalSeats + ' мест', w / 2, h - 8);
 }
 
@@ -516,7 +578,7 @@ function updatePatternTable() {
         html += `<tr class="${cls}"><td>${k}</td><td>${s}</td><td>${added}</td><td>2·${k}+2=${s}</td></tr>`;
     }
     if (N > maxShow) {
-        html += `<tr class="dimmed"><td colspan="4" style="color:#475569;font-size:0.8em">... ещё ${N - maxShow}</td></tr>`;
+        html += `<tr class="dimmed"><td colspan="4" style="font-size:0.8em">... ещё ${N - maxShow}</td></tr>`;
         const s = seats(N);
         html += `<tr class="${nDone >= N ? 'active' : 'highlight'}"><td>${N}</td><td>${s}</td><td>+2</td><td>2·${N}+2=${s}</td></tr>`;
     }

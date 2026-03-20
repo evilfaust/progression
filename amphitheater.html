@@ -5,14 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Задача об амфитеатре — Арифметическая прогрессия</title>
     <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            background: var(--bg);
+            color: var(--text);
             height: 100vh;
             overflow: hidden;
+            transition: background 0.2s, color 0.2s;
         }
 
         .app {
@@ -21,14 +49,13 @@
             height: 100vh;
         }
 
-        /* ═══ TOP BAR ═══ */
         .top-bar {
             display: flex;
             align-items: center;
             gap: 16px;
             padding: 10px 20px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-bottom: 1px solid #1e293b;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
             flex-wrap: wrap;
         }
         .top-bar h1 {
@@ -39,6 +66,11 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             white-space: nowrap;
+        }
+        html.light .top-bar h1 {
+            background: linear-gradient(135deg, #7e22ce, #4c1d95);
+            -webkit-background-clip: text;
+            background-clip: text;
         }
         .top-controls {
             display: flex;
@@ -54,7 +86,7 @@
         }
         .slider-group label {
             font-size: 0.8em;
-            color: #94a3b8;
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.4px;
             font-weight: 600;
@@ -66,12 +98,13 @@
             min-width: 26px;
             text-align: center;
         }
+        html.light .slider-group .val { color: #7e22ce; }
         input[type="range"] {
             -webkit-appearance: none;
             width: 100px;
             height: 6px;
             border-radius: 3px;
-            background: #334155;
+            background: var(--track);
             outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
@@ -83,6 +116,7 @@
             cursor: pointer;
             box-shadow: 0 0 8px rgba(232,121,249,0.4);
         }
+        html.light input[type="range"]::-webkit-slider-thumb { background: #7e22ce; }
         .btn {
             padding: 8px 16px;
             border: none;
@@ -93,11 +127,20 @@
             transition: all 0.2s;
         }
         .btn-play { background: linear-gradient(135deg, #d946ef, #a855f7); color: white; }
-        .btn-reset { background: #334155; color: #94a3b8; }
-        .btn-speed { background: #334155; color: #94a3b8; padding: 8px 12px; font-size: 0.8em; }
+        html.light .btn-play { background: linear-gradient(135deg, #7e22ce, #4c1d95); }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
         .btn-speed.active { background: #d946ef; color: white; }
+        html.light .btn-speed.active { background: #7e22ce; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
 
-        /* ═══ MAIN GRID: 2 columns ═══ */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -106,17 +149,16 @@
             overflow: hidden;
         }
 
-        /* ═══ LEFT: Amphitheater ═══ */
         .amphi-cell {
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #1e293b;
+            border-right: 1px solid var(--border2);
             min-height: 0;
             overflow: hidden;
         }
         .cell-title {
             font-size: 0.8em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
@@ -133,7 +175,6 @@
             height: 100%;
         }
 
-        /* ═══ RIGHT: Solution ═══ */
         .solution-cell {
             display: flex;
             flex-direction: column;
@@ -144,23 +185,24 @@
             justify-content: center;
         }
         .solution-cell::-webkit-scrollbar { width: 4px; }
-        .solution-cell::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        .solution-cell::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
         .sol-card {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 12px;
             padding: 12px 18px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
         }
         .sol-card.given { border-color: rgba(232,121,249,0.3); }
         .sol-card.step-d { border-color: rgba(96,165,250,0.3); }
         .sol-card.step-a1 { border-color: rgba(251,191,36,0.3); }
         .sol-card.formula { border-color: rgba(167,139,250,0.3); }
         .sol-card.answer { border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.05); }
+        html.light .sol-card.answer { background: rgba(22,163,74,0.05); border-color: rgba(22,163,74,0.3); }
 
         .sol-card .card-title {
             font-size: 0.8em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.4px;
             margin-bottom: 4px;
@@ -172,9 +214,10 @@
             font-family: 'Courier New', monospace;
             margin-bottom: 2px;
         }
+        html.light .sol-card .card-formula { color: #6d28d9; }
         .sol-card .card-calc {
             font-size: 1.15em;
-            color: #e2e8f0;
+            color: var(--text);
             font-weight: 600;
         }
         .sol-card .card-calc .hl-pink { color: #e879f9; }
@@ -182,13 +225,17 @@
         .sol-card .card-calc .hl-amber { color: #fbbf24; }
         .sol-card .card-calc .hl-green { color: #4ade80; font-size: 1.15em; }
         .sol-card .card-calc .hl-purple { color: #a78bfa; }
+        html.light .sol-card .card-calc .hl-pink { color: #7e22ce; }
+        html.light .sol-card .card-calc .hl-blue { color: #1d4ed8; }
+        html.light .sol-card .card-calc .hl-amber { color: #b45309; }
+        html.light .sol-card .card-calc .hl-green { color: #15803d; }
+        html.light .sol-card .card-calc .hl-purple { color: #6d28d9; }
 
-        /* ═══ BOTTOM BAR ═══ */
         .bottom-bar {
             display: flex;
             align-items: stretch;
-            border-top: 1px solid #1e293b;
-            background: #1e293b;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
         }
         .status-items {
             display: flex;
@@ -199,7 +246,7 @@
         .status-item { display: flex; flex-direction: column; align-items: center; }
         .status-item .label {
             font-size: 0.7em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
@@ -209,6 +256,11 @@
         .status-item .value.blue { color: #60a5fa; }
         .status-item .value.amber { color: #fbbf24; }
         .status-item .value.purple { color: #a78bfa; }
+        html.light .status-item .value.pink { color: #7e22ce; }
+        html.light .status-item .value.green { color: #15803d; }
+        html.light .status-item .value.blue { color: #1d4ed8; }
+        html.light .status-item .value.amber { color: #b45309; }
+        html.light .status-item .value.purple { color: #6d28d9; }
 
         .comparison-items {
             display: flex;
@@ -226,24 +278,17 @@
             align-items: center;
             gap: 10px;
         }
-        .comp-card.manual {
-            background: rgba(239, 68, 68, 0.08);
-            border-color: rgba(239, 68, 68, 0.2);
-        }
-        .comp-card.formula-method {
-            background: rgba(74, 222, 128, 0.08);
-            border-color: rgba(74, 222, 128, 0.2);
-        }
-        .comp-card .comp-title {
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+        .comp-card.manual { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+        .comp-card.formula-method { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
+        html.light .comp-card.formula-method { background: rgba(22,163,74,0.06); }
+        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; }
         .comp-card.manual .comp-title { color: #f87171; }
         .comp-card.formula-method .comp-title { color: #4ade80; }
+        html.light .comp-card.formula-method .comp-title { color: #15803d; }
         .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
         .comp-card.manual .comp-value { color: #ef4444; }
         .comp-card.formula-method .comp-value { color: #22c55e; }
+        html.light .comp-card.formula-method .comp-value { color: #15803d; }
 
         .insight-item {
             padding: 8px 20px;
@@ -251,9 +296,10 @@
             color: #e9d5ff;
             display: none;
             align-items: center;
-            border-left: 1px solid #334155;
+            border-left: 1px solid var(--border);
             max-width: 380px;
         }
+        html.light .insight-item { color: #6d28d9; }
         .insight-item.visible { display: flex; }
     </style>
 </head>
@@ -283,6 +329,7 @@
             <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
             <button class="btn btn-speed active" data-speed="1">1&times;</button>
             <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">☀ Светлая</button>
         </div>
     </div>
 
@@ -293,7 +340,6 @@
                 <canvas id="amphiCanvas"></canvas>
             </div>
         </div>
-
         <div class="solution-cell" id="solutionPanel"></div>
     </div>
 
@@ -351,8 +397,20 @@ const sliderA5 = document.getElementById('sliderA5');
 const sliderA8 = document.getElementById('sliderA8');
 const btnPlay = document.getElementById('btnPlay');
 const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
 const amphiCanvas = document.getElementById('amphiCanvas');
 const amphiCtx = amphiCanvas.getContext('2d');
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') { document.documentElement.classList.add('light'); btnTheme.textContent = '🌙 Тёмная'; }
+btnTheme.addEventListener('click', () => {
+    const isL = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
+    btnTheme.textContent = isL ? '🌙 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
 
 function resizeCanvas(canvas) {
     const rect = canvas.parentElement.getBoundingClientRect();
@@ -367,7 +425,12 @@ function drawAmphitheater() {
     const dpr = window.devicePixelRatio || 1;
     const w = amphiCanvas.width / dpr, h = amphiCanvas.height / dpr;
     const ctx = amphiCtx;
+    const light = isLight();
     ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = light ? '#f1f5f9' : '#0f172a';
+    ctx.fillRect(0, 0, w, h);
 
     const { d: dd, a1 } = calcParams();
     const nDone = Math.min(Math.floor(animProgress), N);
@@ -381,9 +444,10 @@ function drawAmphitheater() {
     const rowThick = Math.max(3, rowStep * 0.7);
 
     // Stage
-    ctx.fillStyle = '#4a2c6a';
+    ctx.fillStyle = light ? '#ddd6fe' : '#4a2c6a';
     ctx.beginPath(); ctx.ellipse(cx, cy, minR * 0.7, minR * 0.35, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#e9d5ff'; ctx.font = 'bold 11px system-ui';
+    ctx.fillStyle = light ? '#4c1d95' : '#e9d5ff';
+    ctx.font = 'bold 11px system-ui';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText('СЦЕНА', cx, cy);
 
@@ -397,15 +461,15 @@ function drawAmphitheater() {
 
         let alpha = 1;
         if (isCurrentAnim) alpha = 0.3 + partial * 0.7;
-        else if (!isDone && !isCurrentAnim) alpha = 0.15;
+        else if (!isDone && !isCurrentAnim) alpha = light ? 0.25 : 0.15;
         ctx.globalAlpha = alpha;
 
-        let color = '#475569';
+        let color = light ? '#94a3b8' : '#475569';
         if (isDone || isCurrentAnim) {
-            if (isRow5) color = '#e879f9';
-            else if (isRow8) color = '#60a5fa';
-            else if (isLast && isDone) color = '#4ade80';
-            else color = '#8b5cf6';
+            if (isRow5) color = light ? '#7e22ce' : '#e879f9';
+            else if (isRow8) color = light ? '#1d4ed8' : '#60a5fa';
+            else if (isLast && isDone) color = light ? '#15803d' : '#4ade80';
+            else color = light ? '#6d28d9' : '#8b5cf6';
         }
 
         const startAngle = Math.PI * 0.15, endAngle = Math.PI * 0.85;
@@ -430,7 +494,7 @@ function drawAmphitheater() {
             ctx.fillText(`${Math.round(seatsInRow)}`, cx + Math.cos(labelAngle) * r + 8, cy + Math.sin(labelAngle) * r);
 
             const lAngle = startAngle - 0.08;
-            ctx.fillStyle = 'rgba(148,163,184,0.5)';
+            ctx.fillStyle = light ? 'rgba(51,65,85,0.6)' : 'rgba(148,163,184,0.5)';
             ctx.font = `${Math.min(10, Math.max(7, rowStep * 0.45))}px system-ui`;
             ctx.textAlign = 'right';
             ctx.fillText(row, cx + Math.cos(lAngle) * r - 8, cy + Math.sin(lAngle) * r);

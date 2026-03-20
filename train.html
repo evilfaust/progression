@@ -5,14 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Задача о поезде — Арифметическая прогрессия</title>
     <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
+            background: var(--bg);
+            color: var(--text);
             height: 100vh;
             overflow: hidden;
+            transition: background 0.2s, color 0.2s;
         }
 
         .app {
@@ -21,14 +49,13 @@
             height: 100vh;
         }
 
-        /* ═══ TOP BAR ═══ */
         .top-bar {
             display: flex;
             align-items: center;
             gap: 16px;
             padding: 10px 20px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-bottom: 1px solid #1e293b;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
             flex-wrap: wrap;
         }
         .top-bar h1 {
@@ -39,6 +66,11 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             white-space: nowrap;
+        }
+        html.light .top-bar h1 {
+            background: linear-gradient(135deg, #c2410c, #b91c1c);
+            -webkit-background-clip: text;
+            background-clip: text;
         }
         .top-controls {
             display: flex;
@@ -54,7 +86,7 @@
         }
         .slider-group label {
             font-size: 0.8em;
-            color: #94a3b8;
+            color: var(--muted);
             text-transform: uppercase;
             letter-spacing: 0.4px;
             font-weight: 600;
@@ -66,12 +98,13 @@
             min-width: 36px;
             text-align: center;
         }
+        html.light .slider-group .val { color: #c2410c; }
         input[type="range"] {
             -webkit-appearance: none;
             width: 110px;
             height: 6px;
             border-radius: 3px;
-            background: #334155;
+            background: var(--track);
             outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
@@ -83,6 +116,7 @@
             cursor: pointer;
             box-shadow: 0 0 8px rgba(249,115,22,0.4);
         }
+        html.light input[type="range"]::-webkit-slider-thumb { background: #c2410c; }
         .btn {
             padding: 8px 16px;
             border: none;
@@ -93,11 +127,20 @@
             transition: all 0.2s;
         }
         .btn-play { background: linear-gradient(135deg, #f97316, #ea580c); color: white; }
-        .btn-reset { background: #334155; color: #94a3b8; }
-        .btn-speed { background: #334155; color: #94a3b8; padding: 8px 12px; font-size: 0.8em; }
+        html.light .btn-play { background: linear-gradient(135deg, #c2410c, #991b1b); }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
         .btn-speed.active { background: #f97316; color: white; }
+        html.light .btn-speed.active { background: #c2410c; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
 
-        /* ═══ MAIN GRID ═══ */
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -106,17 +149,16 @@
             overflow: hidden;
         }
 
-        /* ═══ LEFT: Scene ═══ */
         .scene-cell {
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #1e293b;
+            border-right: 1px solid var(--border2);
             min-height: 0;
             overflow: hidden;
         }
         .cell-title {
             font-size: 0.8em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
@@ -133,7 +175,6 @@
             height: 100%;
         }
 
-        /* ═══ RIGHT: Formulas ═══ */
         .formulas-cell {
             display: flex;
             flex-direction: column;
@@ -144,16 +185,16 @@
             justify-content: center;
         }
         .formulas-cell::-webkit-scrollbar { width: 4px; }
-        .formulas-cell::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+        .formulas-cell::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
         .formula-card {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 12px;
             padding: 14px 20px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
         }
         .formula-card .card-title {
             font-size: 0.85em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 6px;
@@ -165,9 +206,10 @@
             font-family: 'Courier New', monospace;
             margin-bottom: 4px;
         }
+        html.light .formula-card .formula { color: #6d28d9; }
         .formula-card .calculation {
             font-size: 1.2em;
-            color: #e2e8f0;
+            color: var(--text);
             font-weight: 600;
         }
         .formula-card .result {
@@ -175,28 +217,27 @@
             color: #4ade80;
             font-weight: 700;
         }
+        html.light .formula-card .result { color: #15803d; }
         .formula-card .hl-orange { color: #f97316; }
         .formula-card .hl-blue { color: #60a5fa; }
+        html.light .formula-card .hl-orange { color: #c2410c; }
+        html.light .formula-card .hl-blue { color: #1d4ed8; }
 
         .terms-section {
-            background: #1e293b;
+            background: var(--card);
             border-radius: 12px;
             padding: 12px 18px;
-            border: 1px solid #334155;
+            border: 1px solid var(--border);
         }
         .terms-title {
             font-size: 0.8em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.4px;
             font-weight: 600;
             margin-bottom: 6px;
         }
-        .terms-list {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
+        .terms-list { display: flex; gap: 5px; flex-wrap: wrap; }
         .term-badge {
             padding: 4px 10px;
             border-radius: 6px;
@@ -209,24 +250,25 @@
             color: #4ade80;
             border: 1px solid rgba(74, 222, 128, 0.3);
         }
+        html.light .term-badge.done { background: rgba(22,163,74,0.12); color: #15803d; border-color: rgba(22,163,74,0.35); }
         .term-badge.active {
             background: rgba(249, 115, 22, 0.2);
             color: #fb923c;
             border: 1px solid rgba(249, 115, 22, 0.4);
             box-shadow: 0 0 6px rgba(249,115,22,0.2);
         }
+        html.light .term-badge.active { background: rgba(194,65,12,0.12); color: #c2410c; border-color: rgba(194,65,12,0.4); }
         .term-badge.future {
             background: rgba(100, 116, 139, 0.15);
-            color: #64748b;
+            color: var(--muted);
             border: 1px solid rgba(100, 116, 139, 0.2);
         }
 
-        /* ═══ BOTTOM BAR ═══ */
         .bottom-bar {
             display: flex;
             align-items: stretch;
-            border-top: 1px solid #1e293b;
-            background: #1e293b;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
         }
         .status-items {
             display: flex;
@@ -237,7 +279,7 @@
         .status-item { display: flex; flex-direction: column; align-items: center; }
         .status-item .label {
             font-size: 0.7em;
-            color: #64748b;
+            color: var(--subtle);
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
@@ -246,6 +288,10 @@
         .status-item .value.green { color: #4ade80; }
         .status-item .value.blue { color: #60a5fa; }
         .status-item .value.purple { color: #a78bfa; }
+        html.light .status-item .value.orange { color: #c2410c; }
+        html.light .status-item .value.green { color: #15803d; }
+        html.light .status-item .value.blue { color: #1d4ed8; }
+        html.light .status-item .value.purple { color: #6d28d9; }
 
         .comparison-items {
             display: flex;
@@ -263,24 +309,17 @@
             align-items: center;
             gap: 10px;
         }
-        .comp-card.manual {
-            background: rgba(239, 68, 68, 0.08);
-            border-color: rgba(239, 68, 68, 0.2);
-        }
-        .comp-card.formula-method {
-            background: rgba(74, 222, 128, 0.08);
-            border-color: rgba(74, 222, 128, 0.2);
-        }
-        .comp-card .comp-title {
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
+        .comp-card.manual { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
+        .comp-card.formula-method { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
+        html.light .comp-card.formula-method { background: rgba(22,163,74,0.06); }
+        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; }
         .comp-card.manual .comp-title { color: #f87171; }
         .comp-card.formula-method .comp-title { color: #4ade80; }
+        html.light .comp-card.formula-method .comp-title { color: #15803d; }
         .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
         .comp-card.manual .comp-value { color: #ef4444; }
         .comp-card.formula-method .comp-value { color: #22c55e; }
+        html.light .comp-card.formula-method .comp-value { color: #15803d; }
 
         .insight-item {
             padding: 8px 20px;
@@ -288,9 +327,10 @@
             color: #fdba74;
             display: none;
             align-items: center;
-            border-left: 1px solid #334155;
+            border-left: 1px solid var(--border);
             max-width: 380px;
         }
+        html.light .insight-item { color: #c2410c; }
         .insight-item.visible { display: flex; }
     </style>
 </head>
@@ -320,6 +360,7 @@
             <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
             <button class="btn btn-speed active" data-speed="1">1&times;</button>
             <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">☀ Светлая</button>
         </div>
     </div>
 
@@ -390,7 +431,7 @@
 </div>
 
 <script>
-let N = 10, a1raw = 2, draw = 4; // stored as x10 for integer slider
+let N = 10, a1raw = 2, draw = 4;
 let isPlaying = false, speed = 1, lastFrame = 0, animTime = 0;
 
 function a1() { return a1raw / 10; }
@@ -404,8 +445,20 @@ const sliderA1 = document.getElementById('sliderA1');
 const sliderD = document.getElementById('sliderD');
 const btnPlay = document.getElementById('btnPlay');
 const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
 const sceneCanvas = document.getElementById('sceneCanvas');
 const ctx = sceneCanvas.getContext('2d');
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') { document.documentElement.classList.add('light'); btnTheme.textContent = '🌙 Тёмная'; }
+btnTheme.addEventListener('click', () => {
+    const isL = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
+    btnTheme.textContent = isL ? '🌙 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
 
 function resizeCanvas(canvas) {
     const rect = canvas.parentElement.getBoundingClientRect();
@@ -419,6 +472,7 @@ function resizeAll() { resizeCanvas(sceneCanvas); render(); }
 function drawScene() {
     const dpr = window.devicePixelRatio || 1;
     const w = sceneCanvas.width / dpr, h = sceneCanvas.height / dpr;
+    const light = isLight();
     ctx.clearRect(0, 0, w, h);
 
     const nDone = Math.min(Math.floor(animTime), N);
@@ -434,32 +488,38 @@ function drawScene() {
     const trackLen = trackEnd - stationX;
     const progress = totalDist > 0 ? currentDist / totalDist : 0;
 
-    // Sky gradient
+    // Sky
     const sky = ctx.createLinearGradient(0, 0, 0, trackY - 30);
-    sky.addColorStop(0, '#1e3a5f'); sky.addColorStop(1, '#0f172a');
+    if (light) {
+        sky.addColorStop(0, '#bfdbfe'); sky.addColorStop(1, '#e0f2fe');
+    } else {
+        sky.addColorStop(0, '#1e3a5f'); sky.addColorStop(1, '#0f172a');
+    }
     ctx.fillStyle = sky; ctx.fillRect(0, 0, w, trackY - 30);
 
     // Ground
-    ctx.fillStyle = '#1a3320'; ctx.fillRect(0, trackY - 30, w, h - trackY + 30);
+    ctx.fillStyle = light ? '#bbf7d0' : '#1a3320';
+    ctx.fillRect(0, trackY - 30, w, h - trackY + 30);
 
     // Track bed
-    ctx.fillStyle = '#3d2b1a'; ctx.fillRect(stationX - 10, trackY - 4, trackLen + 40, 8);
+    ctx.fillStyle = light ? '#d4a96a' : '#3d2b1a';
+    ctx.fillRect(stationX - 10, trackY - 4, trackLen + 40, 8);
 
     // Rails
-    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+    ctx.strokeStyle = light ? '#64748b' : '#94a3b8'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(stationX - 10, trackY - 3); ctx.lineTo(trackEnd + 30, trackY - 3); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(stationX - 10, trackY + 3); ctx.lineTo(trackEnd + 30, trackY + 3); ctx.stroke();
 
     // Sleepers
-    ctx.fillStyle = '#5a4030';
+    ctx.fillStyle = light ? '#92400e' : '#5a4030';
     for (let x = stationX; x < trackEnd + 20; x += 16) {
         ctx.fillRect(x, trackY - 6, 4, 12);
     }
 
     // Station
-    ctx.fillStyle = '#334155';
+    ctx.fillStyle = light ? '#94a3b8' : '#334155';
     ctx.fillRect(stationX - 20, trackY - 50, 40, 46);
-    ctx.fillStyle = '#475569';
+    ctx.fillStyle = light ? '#64748b' : '#475569';
     ctx.beginPath();
     ctx.moveTo(stationX - 25, trackY - 50);
     ctx.lineTo(stationX, trackY - 64);
@@ -468,67 +528,59 @@ function drawScene() {
     ctx.fillStyle = '#fbbf24';
     ctx.fillRect(stationX - 8, trackY - 36, 6, 8);
     ctx.fillRect(stationX + 2, trackY - 36, 6, 8);
-    ctx.fillStyle = '#94a3b8'; ctx.font = '9px system-ui';
+    ctx.fillStyle = light ? '#1e293b' : '#94a3b8';
+    ctx.font = '9px system-ui';
     ctx.textAlign = 'center'; ctx.fillText('СТАНЦИЯ', stationX, trackY - 54);
 
-    // Distance markers for each done second
+    // Segment markers
     for (let k = 1; k <= nDone; k++) {
         const markDist = sumN(k);
         const markX = stationX + (markDist / totalDist) * trackLen;
-        ctx.strokeStyle = 'rgba(251,191,36,0.3)'; ctx.lineWidth = 1;
+        ctx.strokeStyle = light ? 'rgba(146,64,14,0.35)' : 'rgba(251,191,36,0.3)'; ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]);
         ctx.beginPath(); ctx.moveTo(markX, trackY - 20); ctx.lineTo(markX, trackY + 20); ctx.stroke();
         ctx.setLineDash([]);
 
-        // Segment label
         const prevDist = sumN(k - 1);
         const prevX = stationX + (prevDist / totalDist) * trackLen;
         const midX = (prevX + markX) / 2;
         const segW = markX - prevX;
-
-        // Colored segment
         const hue = 25 + k * 8;
-        ctx.fillStyle = `hsla(${hue}, 80%, 55%, 0.15)`;
+        ctx.fillStyle = `hsla(${hue}, 80%, ${light ? 35 : 55}%, 0.15)`;
         ctx.fillRect(prevX, trackY + 14, segW, 16);
-        ctx.strokeStyle = `hsla(${hue}, 80%, 55%, 0.4)`;
+        ctx.strokeStyle = `hsla(${hue}, 80%, ${light ? 35 : 55}%, 0.4)`;
         ctx.lineWidth = 1;
         ctx.strokeRect(prevX, trackY + 14, segW, 16);
 
         if (segW > 20) {
-            ctx.fillStyle = '#fbbf24';
+            ctx.fillStyle = light ? '#92400e' : '#fbbf24';
             ctx.font = `bold ${Math.min(11, segW * 0.4)}px system-ui`;
             ctx.textAlign = 'center';
             ctx.fillText('+' + fmt(term(k)), midX, trackY + 26);
         }
 
-        // Distance total at marker
-        ctx.fillStyle = 'rgba(148,163,184,0.6)';
+        ctx.fillStyle = light ? 'rgba(51,65,85,0.65)' : 'rgba(148,163,184,0.6)';
         ctx.font = '8px system-ui'; ctx.textAlign = 'center';
         ctx.fillText(fmt(markDist), markX, trackY - 24);
     }
 
-    // Train position
+    // Train
     const trainX = stationX + progress * trackLen;
-
-    // Train body
     const trainW = Math.min(70, w * 0.08);
     const trainH = 28;
     const tx = trainX - trainW / 2;
     const ty = trackY - trainH - 4;
 
-    // Locomotive
     const trainGrad = ctx.createLinearGradient(tx, ty, tx, ty + trainH);
     trainGrad.addColorStop(0, '#dc2626'); trainGrad.addColorStop(1, '#991b1b');
     ctx.fillStyle = trainGrad;
     roundRect(ctx, tx, ty, trainW, trainH, 4); ctx.fill();
     ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 1.5; ctx.stroke();
 
-    // Cabin
-    ctx.fillStyle = '#1e3a5f';
+    ctx.fillStyle = light ? '#bfdbfe' : '#1e3a5f';
     ctx.fillRect(tx + trainW * 0.55, ty + 3, trainW * 0.35, trainH * 0.5);
-    ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 0.5; ctx.stroke();
+    ctx.strokeStyle = light ? '#1d4ed8' : '#60a5fa'; ctx.lineWidth = 0.5; ctx.stroke();
 
-    // Front light
     ctx.fillStyle = '#fbbf24';
     ctx.beginPath(); ctx.arc(tx + trainW - 2, ty + trainH * 0.5, 3, 0, Math.PI * 2); ctx.fill();
     if (isPlaying) {
@@ -541,16 +593,15 @@ function drawScene() {
         ctx.closePath(); ctx.fill();
     }
 
-    // Wheels
-    ctx.fillStyle = '#374151'; ctx.strokeStyle = '#6b7280'; ctx.lineWidth = 1.5;
+    ctx.fillStyle = light ? '#6b7280' : '#374151';
+    ctx.strokeStyle = light ? '#4b5563' : '#6b7280'; ctx.lineWidth = 1.5;
     for (let wx of [tx + trainW * 0.2, tx + trainW * 0.5, tx + trainW * 0.8]) {
         ctx.beginPath(); ctx.arc(wx, trackY - 3, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     }
 
-    // Smoke when moving
     if (isPlaying || animTime > 0) {
-        ctx.globalAlpha = 0.2;
-        ctx.fillStyle = '#94a3b8';
+        ctx.globalAlpha = light ? 0.15 : 0.2;
+        ctx.fillStyle = light ? '#64748b' : '#94a3b8';
         const t = Date.now() / 600;
         for (let i = 0; i < 4; i++) {
             const sx = tx + 8 - i * 10 + Math.sin(t + i) * 3;
@@ -561,14 +612,14 @@ function drawScene() {
         ctx.globalAlpha = 1;
     }
 
-    // Distance label
-    ctx.fillStyle = '#f97316'; ctx.font = 'bold 14px system-ui';
+    ctx.fillStyle = light ? '#c2410c' : '#f97316';
+    ctx.font = 'bold 14px system-ui';
     ctx.textAlign = 'center';
     ctx.fillText(fmt(currentDist) + ' м', trainX, ty - 14);
 
-    // Second counter above scene
     if (nDone > 0 && nDone <= N) {
-        ctx.fillStyle = '#60a5fa'; ctx.font = '12px system-ui';
+        ctx.fillStyle = light ? '#1d4ed8' : '#60a5fa';
+        ctx.font = '12px system-ui';
         ctx.textAlign = 'center';
         ctx.fillText('t = ' + nDone + ' с', trainX, ty - 28);
     }
@@ -609,7 +660,6 @@ function updateUI() {
     document.getElementById('formulaSn').innerHTML =
         `S${sub(N)} = ${N}·(${fmt(a1())} + ${fmt(lastTerm)}) / 2 = <span class="result">${fmt(totalDist)} м</span>`;
 
-    // Terms badges
     const list = document.getElementById('termsList');
     let html = '';
     const maxShow = 25;
@@ -617,7 +667,7 @@ function updateUI() {
         const cls = k <= nDone ? 'done' : (k === nDone + 1 ? 'active' : 'future');
         html += `<span class="term-badge ${cls}">${fmt(term(k))}</span>`;
     }
-    if (N > maxShow) html += `<span class="term-badge future" style="border:none;background:none;color:#475569">…ещё ${N - maxShow}</span>`;
+    if (N > maxShow) html += `<span class="term-badge future" style="border:none;background:none">…ещё ${N - maxShow}</span>`;
     list.innerHTML = html;
 
     document.getElementById('compManual').textContent = N + ' сложений';
