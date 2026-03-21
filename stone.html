@@ -371,6 +371,42 @@
         }
         html.light .insight-item { color: #6d28d9; }
         .insight-item.visible { display: flex; }
+        /* ═══ МОБИЛЬНАЯ ВЕРСИЯ ═══ */
+        @media (max-width: 700px) {
+            html, body { height: auto; overflow-y: auto; }
+            .app { height: auto; min-height: 100svh; grid-template-rows: auto auto auto; }
+
+            .top-bar { padding: 8px 12px; gap: 8px; }
+            .top-bar h1 { font-size: 1em; white-space: normal; }
+            .top-controls { gap: 8px; }
+            .slider-group .val { font-size: 1.1em; min-width: 24px; }
+            input[type="range"] { width: 76px; }
+            .btn-theme { margin-left: 0; }
+
+            .main-grid { grid-template-columns: 1fr; overflow: visible; }
+
+            .canyon-cell, .canvas-cell, .left-cell, .amphi-cell, .scene-cell {
+                height: 56vw;
+                min-height: 220px;
+                max-height: 340px;
+                border-right: none;
+                border-bottom: 1px solid var(--border2);
+            }
+
+            .right-cell, .solution-cell, .formulas-cell {
+                overflow: visible;
+                height: auto;
+                padding: 12px 14px;
+                gap: 8px;
+            }
+            .terms-section { max-height: 200px; }
+
+            .bottom-bar { flex-wrap: wrap; }
+            .status-items { flex-wrap: wrap; gap: 10px; padding: 8px 12px; }
+            .comparison-items { flex-wrap: wrap; padding: 8px 12px; gap: 8px; }
+            .comp-card { padding: 5px 12px; }
+            .comp-card .comp-value { font-size: 0.95em; }
+        }
     </style>
 </head>
 <body>

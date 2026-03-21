@@ -219,12 +219,44 @@
         }
         html.light .card-footer .answer { color: #15803d; }
 
+        .section-heading {
+            max-width: 1100px;
+            margin: 32px auto 0;
+            padding: 0 20px 14px;
+            font-size: 1.3em;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .section-heading::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        .section-heading.ap { color: #60a5fa; }
+        .section-heading.gp { color: #4ade80; }
+        html.light .section-heading.ap { color: #1d4ed8; }
+        html.light .section-heading.gp { color: #15803d; }
+
+        .cards { padding: 12px 20px 16px; }
+
         .footer {
             text-align: center;
             padding: 20px;
             color: var(--subtle);
             font-size: 0.8em;
             border-top: 1px solid var(--border2);
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.6em; }
+            .hero p  { font-size: 1em; }
+            .hero    { padding: 24px 16px 20px; }
+            .cards   { padding: 8px 12px 12px; gap: 14px; }
+            .section-heading { font-size: 1.1em; margin-top: 20px; }
         }
     </style>
 </head>
@@ -235,10 +267,11 @@
 </div>
 
 <div class="hero">
-    <h1>Арифметическая прогрессия</h1>
-    <p>Интерактивные модели для изучения арифметических прогрессий. Нажмите на задачу, чтобы открыть модель.</p>
+    <h1>Прогрессии</h1>
+    <p>Интерактивные модели для изучения арифметических и геометрических прогрессий. Нажмите на задачу, чтобы открыть модель.</p>
 </div>
 
+<h2 class="section-heading ap">Арифметическая прогрессия</h2>
 <div class="cards">
 
     <a class="card" href="stone.html">
@@ -313,6 +346,11 @@
             <span class="answer">S₁₀ = 20 м</span>
         </div>
     </a>
+
+</div>
+
+<h2 class="section-heading gp">Геометрическая прогрессия</h2>
+<div class="cards">
 
     <a class="card" href="snake.html">
         <div class="card-icon snake">〰️</div>
