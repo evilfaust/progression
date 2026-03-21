@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Решето Эратосфена — Простые числа</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#f43f5e;--acc2:#e11d48;--acc-glow:rgba(244,63,94,.4);}
+html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#e11d48;--acc2:#be123c;--acc-glow:rgba(225,29,72,.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
+.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
+.back-link:hover{color:var(--text);border-color:var(--muted);}
+.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
+.slider-group{display:flex;align-items:center;gap:6px;}
+.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:42px;text-align:center;}
+input[type=range]{-webkit-appearance:none;width:120px;height:6px;border-radius:3px;background:var(--track);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+.btn-reset{background:var(--btn2);color:var(--btn2-text);}
+.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
+.btn-speed.active{background:var(--acc);color:#fff;}
+.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
+.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
+.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
+.scene-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;}
+.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;}
+.formulas-cell::-webkit-scrollbar{width:4px;}
+.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
+.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
+.formula-card .formula{font-size:1.15em;color:#fca5a5;font-family:'Courier New',monospace;margin-bottom:4px;}
+html.light .formula-card .formula{color:#be123c;}
+.formula-card .calculation{font-size:1em;color:var(--text);font-weight:600;line-height:1.6;}
+.hl-y{color:#fbbf24;}html.light .hl-y{color:#d97706;}
+.hl-g{color:#4ade80;}html.light .hl-g{color:#15803d;}
+.hl-r{color:#f87171;}html.light .hl-r{color:#be123c;}
+.prime-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.prime-badge{padding:3px 8px;border-radius:6px;font-size:.82em;font-weight:700;font-family:'Courier New',monospace;background:rgba(244,63,94,.15);color:#fca5a5;border:1px solid rgba(244,63,94,.35);}
+html.light .prime-badge{background:rgba(225,29,72,.1);color:#be123c;border-color:rgba(225,29,72,.3);}
+.prime-badge.current{background:rgba(244,63,94,.35);color:#fecdd3;border:1px solid rgba(244,63,94,.7);box-shadow:0 0 8px rgba(244,63,94,.35);}
+html.light .prime-badge.current{color:#be123c;}
+.note-card{background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.2);border-radius:12px;padding:12px 18px;font-size:.88em;color:var(--muted);line-height:1.55;}
+.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
+.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
+.status-item{display:flex;flex-direction:column;align-items:center;}
+.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
+.status-item .value{font-size:1.3em;font-weight:700;}
+.sv-a{color:var(--acc);}
+.sv-y{color:#fbbf24;}html.light .sv-y{color:#d97706;}
+.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
+@media(max-width:700px){
+html,body{height:auto;overflow-y:auto;}
+.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
+.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
+.top-controls{gap:8px;}.slider-group .val{font-size:1.1em;}
+input[type=range]{width:76px;}.btn-theme{margin-left:0;}
+.main-grid{grid-template-columns:1fr;overflow:visible;}
+.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
+.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
+.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a href="index.html" class="back-link">← Назад</a>
+    <h1>🔴 Решето Эратосфена</h1>
+    <div class="top-controls">
+      <div class="slider-group">
+        <label>До N</label>
+        <input type="range" id="slN" min="20" max="150" step="5" value="100">
+        <span class="val" id="valN">100</span>
+      </div>
+      <button class="btn btn-play" id="btnPlay">▶ Старт</button>
+      <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
+      <button class="btn btn-speed" id="btn1x">1×</button>
+      <button class="btn btn-speed active" id="btn2x">2×</button>
+      <button class="btn btn-theme" id="btnTheme">☀</button>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="scene-cell">
+      <div class="cell-title">Решето чисел</div>
+      <div class="scene-wrap">
+        <canvas id="cv"></canvas>
+      </div>
+    </div>
+    <div class="formulas-cell" id="panel"></div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="status-items">
+      <div class="status-item">
+        <span class="label">Текущее простое</span>
+        <span class="value sv-a" id="stPrime">—</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Найдено простых</span>
+        <span class="value sv-g" id="stCount">0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Вычеркнуто</span>
+        <span class="value sv-y" id="stCrossed">0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Run full sieve and record "steps" for animation
+// Each step = one prime being processed (highlighting it + crossing multiples)
+function runSieve(n) {
+  const composite = new Array(n+1).fill(false);
+  composite[0] = composite[1] = true;
+  const steps = []; // [{prime, crossed:[...]}]
+
+  for (let p = 2; p <= n; p++) {
+    if (composite[p]) continue;
+    const crossed = [];
+    for (let m = p*p; m <= n; m += p) {
+      if (!composite[m]) {
+        composite[m] = true;
+        crossed.push(m);
+      }
+    }
+    steps.push({prime: p, crossed});
+  }
+  return {steps, composite};
+}
+
+// ─── Canvas ───
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+function resizeCanvas() {
+  const rect = cv.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = rect.width * dpr;
+  cv.height = rect.height * dpr;
+  cv.style.width = rect.width + 'px';
+  cv.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+}
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+
+// ─── State ───
+let N = 100;
+let animStep = 0;   // which "step" (prime) we're currently processing
+let isPlaying = false;
+let speed = 2;
+let rafId = null;
+let lastTs = null;
+let sieveData = runSieve(N);
+
+// For smooth animation: within a step, we progressively mark multiples
+let stepProgress = 0; // 0..1 fraction within current step
+
+// ─── Controls ───
+const slN     = document.getElementById('slN');
+const valN    = document.getElementById('valN');
+const btnPlay  = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btn1x    = document.getElementById('btn1x');
+const btn2x    = document.getElementById('btn2x');
+const btnTheme = document.getElementById('btnTheme');
+
+slN.addEventListener('input', () => {
+  N = +slN.value;
+  valN.textContent = N;
+  sieveData = runSieve(N);
+  animStep = Math.min(animStep, sieveData.steps.length);
+  stepProgress = 0;
+  updatePanel();
+  render();
+});
+btnPlay.addEventListener('click', () => {
+  if (isPlaying) { pause(); }
+  else {
+    if (animStep >= sieveData.steps.length) { animStep = 0; stepProgress = 0; }
+    play();
+  }
+});
+btnReset.addEventListener('click', () => { pause(); animStep = 0; stepProgress = 0; updatePanel(); render(); });
+btn1x.addEventListener('click', () => { speed=1; btn1x.classList.add('active'); btn2x.classList.remove('active'); });
+btn2x.addEventListener('click', () => { speed=2; btn2x.classList.add('active'); btn1x.classList.remove('active'); });
+btnTheme.addEventListener('click', () => { document.documentElement.classList.toggle('light'); render(); });
+
+function play() {
+  isPlaying = true;
+  btnPlay.textContent = '⏸ Пауза';
+  lastTs = null;
+  rafId = requestAnimationFrame(animate);
+}
+function pause() {
+  isPlaying = false;
+  btnPlay.textContent = '▶ Старт';
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}
+
+// Animation: move through steps
+function animate(ts) {
+  if (!isPlaying) return;
+  if (lastTs === null) lastTs = ts;
+  const dt = (ts - lastTs) / 1000;
+  lastTs = ts;
+
+  // Progress: each step takes ~0.5s at 1x speed
+  const stepsPerSec = speed * 2.5;
+  stepProgress += dt * stepsPerSec;
+
+  while (stepProgress >= 1 && animStep < sieveData.steps.length) {
+    stepProgress -= 1;
+    animStep++;
+  }
+  if (stepProgress > 1) stepProgress = 1;
+
+  updatePanel();
+  render();
+
+  if (animStep >= sieveData.steps.length && stepProgress >= 1) {
+    pause();
+    return;
+  }
+  rafId = requestAnimationFrame(animate);
+}
+
+// Build the "current state" of the sieve for rendering
+function getSieveState() {
+  const state = new Array(N+1).fill('unknown'); // 'prime','composite','current','pending'
+  state[0] = state[1] = 'composite';
+
+  const {steps} = sieveData;
+
+  // All steps before animStep are complete
+  for (let s = 0; s < animStep; s++) {
+    state[steps[s].prime] = 'prime';
+    for (const c of steps[s].crossed) state[c] = 'composite';
+  }
+
+  // Current step (partially animated)
+  if (animStep < steps.length) {
+    const cur = steps[animStep];
+    state[cur.prime] = 'current';
+    const count = Math.floor(cur.crossed.length * Math.min(stepProgress, 1));
+    for (let i = 0; i < count; i++) state[cur.crossed[i]] = 'composite';
+  }
+
+  return state;
+}
+
+// ─── Render ───
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+function render() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.width / dpr, H = cv.height / dpr;
+  const light = isLight();
+  ctx.clearRect(0, 0, W, H);
+
+  if (animStep === 0 && stepProgress < 0.01) {
+    ctx.fillStyle = light ? 'rgba(225,29,72,0.08)' : 'rgba(244,63,94,0.12)';
+    ctx.beginPath(); ctx.arc(W/2, H/2, 55, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = light ? '#be123c' : '#fca5a5';
+    ctx.font = 'bold 28px Segoe UI'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('▶', W/2, H/2);
+    updateStatus();
+    return;
+  }
+
+  const state = getSieveState();
+
+  // Grid layout
+  const cols = Math.ceil(Math.sqrt(N * (W/H)));
+  const rows = Math.ceil(N / cols);
+  const pad = 10;
+  const cw = (W - 2*pad) / cols;
+  const ch = (H - 2*pad) / rows;
+  const cellSize = Math.min(cw, ch);
+  const gap = Math.max(1, cellSize * 0.06);
+  const totalW = cols * cellSize;
+  const totalH = Math.ceil(N / cols) * cellSize;
+  const ox = (W - totalW) / 2;
+  const oy = (H - totalH) / 2;
+
+  for (let n = 2; n <= N; n++) {
+    const idx = n - 2;
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    const x = ox + col * cellSize + gap/2;
+    const y = oy + row * cellSize + gap/2;
+    const w = cellSize - gap;
+    const h = cellSize - gap;
+    const r = Math.max(2, w * 0.12);
+
+    let bg, textCol, lineThrough = false;
+    const s = state[n];
+
+    if (s === 'prime') {
+      bg = light ? 'rgba(244,63,94,0.85)' : 'rgba(244,63,94,0.9)';
+      textCol = '#fff';
+    } else if (s === 'current') {
+      bg = light ? '#fde68a' : '#fbbf24';
+      textCol = '#0f172a';
+    } else if (s === 'composite') {
+      bg = light ? 'rgba(148,163,184,0.15)' : 'rgba(30,41,59,0.6)';
+      textCol = light ? 'rgba(100,116,139,0.5)' : 'rgba(100,116,139,0.4)';
+      lineThrough = true;
+    } else {
+      bg = light ? 'rgba(99,102,241,0.1)' : 'rgba(99,102,241,0.12)';
+      textCol = light ? '#4f46e5' : '#a78bfa';
+    }
+
+    ctx.fillStyle = bg;
+    roundRect(ctx, x, y, w, h, r);
+    ctx.fill();
+
+    if (s === 'current') {
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, x, y, w, h, r);
+      ctx.stroke();
+    }
+
+    if (cellSize > 14) {
+      ctx.fillStyle = textCol;
+      const fs = Math.max(7, Math.min(cellSize * 0.28, 15));
+      ctx.font = `${s==='prime'||s==='current'?'bold ':''} ${fs}px 'Courier New',monospace`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      const cx2 = x + w/2, cy2 = y + h/2;
+      ctx.fillText(String(n), cx2, cy2);
+      if (lineThrough && cellSize > 20) {
+        ctx.strokeStyle = textCol;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx2 - w*0.3, cy2);
+        ctx.lineTo(cx2 + w*0.3, cy2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  updateStatus();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+// ─── Panel ───
+function updatePanel() {
+  const panel = document.getElementById('panel');
+  const {steps} = sieveData;
+
+  // Collect found primes so far
+  const foundPrimes = [];
+  for (let s = 0; s < animStep; s++) foundPrimes.push(steps[s].prime);
+
+  const currentPrime = animStep < steps.length ? steps[animStep].prime : null;
+  if (currentPrime && animStep === foundPrimes.length) foundPrimes.push(currentPrime);
+
+  const badgesHtml = foundPrimes.map((p, i) => {
+    const isCur = p === currentPrime;
+    return `<span class="prime-badge${isCur?' current':''}">${p}</span>`;
+  }).join('');
+
+  const totalPrimes = steps.length;
+  const foundCount = animStep + (animStep < steps.length ? 1 : 0);
+
+  panel.innerHTML = `
+    <div class="formula-card" style="border-left:4px solid #f43f5e">
+      <div class="card-title">📝 Описание</div>
+      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">
+        Берём наименьшее невычеркнутое число — оно простое. Вычёркиваем все его кратные. Повторяем.
+        Оставшиеся числа — все <strong>простые числа</strong> до N.
+      </p>
+    </div>
+
+    <div class="formula-card">
+      <div class="card-title">📐 Алгоритм</div>
+      <div class="formula">p — простое → вычеркнуть p², 2p², 3p²…</div>
+      <div class="calculation">
+        Достаточно проверить до <span class="hl-y">√${N} ≈ ${Math.ceil(Math.sqrt(N))}</span>
+      </div>
+    </div>
+
+    ${currentPrime ? `<div class="formula-card">
+      <div class="card-title">🔴 Сейчас обрабатывается</div>
+      <div class="calculation" style="font-size:2em;text-align:center;padding:6px 0">
+        <span class="hl-r">${currentPrime}</span>
+      </div>
+      <div class="calculation" style="font-size:.9em">
+        Вычёркиваем: ${currentPrime}² = ${currentPrime*currentPrime}${currentPrime*currentPrime<=N?`, ${currentPrime*2*currentPrime<=N ? currentPrime*2+'²='+(currentPrime*currentPrime*2) : '…'}`:' — нет кратных в диапазоне'}
+      </div>
+    </div>` : `<div class="formula-card">
+      <div class="card-title">✅ Готово</div>
+      <div class="calculation" style="font-size:.95em">
+        Всего простых до ${N}: <span class="hl-g">${totalPrimes}</span>
+      </div>
+    </div>`}
+
+    <div class="formula-card">
+      <div class="card-title">⭐ Найденные простые (${foundPrimes.length})</div>
+      <div class="prime-badges">${badgesHtml}</div>
+    </div>
+
+    <div class="note-card">
+      💡 Теорема о простых числах: примерно N/ln(N) простых до N.<br>
+      До 100: ≈ 100/ln(100) ≈ <strong>21.7</strong>, реально — <strong>25</strong>.
+    </div>`;
+}
+
+function updateStatus() {
+  const {steps} = sieveData;
+  const state = getSieveState();
+  const currentPrime = animStep < steps.length ? steps[animStep].prime : null;
+  let primeCount = 0, compositeCount = 0;
+  for (let n = 2; n <= N; n++) {
+    if (state[n]==='prime' || state[n]==='current') primeCount++;
+    if (state[n]==='composite') compositeCount++;
+  }
+  document.getElementById('stPrime').textContent = currentPrime ?? '—';
+  document.getElementById('stCount').textContent = primeCount;
+  document.getElementById('stCrossed').textContent = compositeCount;
+}
+
+// Init
+updatePanel();
+resizeCanvas();
+render();
+</script>
+</body>
+</html>

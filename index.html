@@ -286,6 +286,22 @@
         html.light .card-body h2.vasya-title   { color: #6d28d9; }
         html.light .card-body h2.bubbly-title  { color: #d97706; }
 
+        /* Beautiful math section */
+        .section-heading.special { color: #a78bfa; }
+        html.light .section-heading.special { color: #6d28d9; }
+        .card-icon.fibonacci { background: linear-gradient(135deg, #1e1b4b, #0f0f2a); }
+        .card-icon.pascal    { background: linear-gradient(135deg, #042f2e, #0a1a2e); }
+        .card-icon.sieve     { background: linear-gradient(135deg, #450a0a, #1c0505); }
+        html.light .card-icon.fibonacci { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
+        html.light .card-icon.pascal    { background: linear-gradient(135deg, #cffafe, #a5f3fc); }
+        html.light .card-icon.sieve     { background: linear-gradient(135deg, #ffe4e6, #fecdd3); }
+        .card-body h2.fibonacci-title { color: #818cf8; }
+        .card-body h2.pascal-title    { color: #67e8f9; }
+        .card-body h2.sieve-title     { color: #fca5a5; }
+        html.light .card-body h2.fibonacci-title { color: #4f46e5; }
+        html.light .card-body h2.pascal-title    { color: #0891b2; }
+        html.light .card-body h2.sieve-title     { color: #be123c; }
+
         .cards { padding: 12px 20px 16px; }
 
         .footer {
@@ -598,6 +614,56 @@
                     <span class="param-tag">q = 4</span>
                 </div>
                 <span class="answer">a₄ = 320 000</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+</div>
+
+<h2 class="section-heading special" style="margin-top:40px">✨ Красивая математика</h2>
+<div class="cards">
+
+    <a class="card" href="fibonacci.html">
+        <div class="card-icon fibonacci">🌀</div>
+        <div class="card-body">
+            <h2 class="fibonacci-title">Спираль Фибоначчи</h2>
+            <p class="task-text">Строим квадраты со сторонами 1, 1, 2, 3, 5, 8… и вписываем в каждый четверть окружности. Отношение соседних чисел стремится к золотому сечению φ = 1.618…</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">F(n) = F(n-1)+F(n-2)</span>
+                </div>
+                <span class="answer">φ ≈ 1.6180…</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="card" href="pascal.html">
+        <div class="card-icon pascal">🔺</div>
+        <div class="card-body">
+            <h2 class="pascal-title">Треугольник Паскаля</h2>
+            <p class="task-text">Каждое число — сумма двух чисел над ним. Включите режим цвета — нечётные числа образуют треугольник Серпинского: фрактал из простого правила!</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">C(n,k) = C(n-1,k-1)+C(n-1,k)</span>
+                </div>
+                <span class="answer">Σ строки = 2ⁿ</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="card" href="sieve.html">
+        <div class="card-icon sieve">🔴</div>
+        <div class="card-body">
+            <h2 class="sieve-title">Решето Эратосфена</h2>
+            <p class="task-text">Берём наименьшее невычеркнутое число — оно простое. Вычёркиваем все его кратные. Повторяем до √N. Всё что осталось — простые числа.</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">вычеркнуть кратные p²</span>
+                </div>
+                <span class="answer">простых до 100: 25</span>
                 <span class="open-btn">Открыть →</span>
             </div>
         </div>

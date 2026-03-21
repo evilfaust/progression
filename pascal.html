@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Треугольник Паскаля — Фрактал Серпинского</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#06b6d4;--acc2:#0891b2;--acc-glow:rgba(6,182,212,.4);}
+html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#0891b2;--acc2:#0e7490;--acc-glow:rgba(8,145,178,.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
+.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
+.back-link:hover{color:var(--text);border-color:var(--muted);}
+.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
+.slider-group{display:flex;align-items:center;gap:6px;}
+.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:36px;text-align:center;}
+input[type=range]{-webkit-appearance:none;width:110px;height:6px;border-radius:3px;background:var(--track);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+.btn-reset{background:var(--btn2);color:var(--btn2-text);}
+.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
+.btn-speed.active{background:var(--acc);color:#fff;}
+.btn-mode{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.82em;border:1px solid var(--border);}
+.btn-mode.active{background:rgba(6,182,212,.2);color:var(--acc);border-color:var(--acc);}
+html.light .btn-mode.active{background:rgba(8,145,178,.15);}
+.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
+.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
+.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
+.scene-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;}
+.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;}
+.formulas-cell::-webkit-scrollbar{width:4px;}
+.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
+.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
+.formula-card .formula{font-size:1.15em;color:#67e8f9;font-family:'Courier New',monospace;margin-bottom:4px;}
+html.light .formula-card .formula{color:#0e7490;}
+.formula-card .calculation{font-size:1em;color:var(--text);font-weight:600;line-height:1.6;}
+.hl-y{color:#fbbf24;}html.light .hl-y{color:#d97706;}
+.hl-b{color:#60a5fa;}html.light .hl-b{color:#1d4ed8;}
+.hl-c{color:#67e8f9;}html.light .hl-c{color:#0e7490;}
+.note-card{background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.25);border-radius:12px;padding:12px 18px;font-size:.88em;color:var(--muted);line-height:1.55;}
+html.light .note-card{background:rgba(8,145,178,.06);}
+.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
+.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
+.status-item{display:flex;flex-direction:column;align-items:center;}
+.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
+.status-item .value{font-size:1.3em;font-weight:700;}
+.sv-a{color:var(--acc);}
+.sv-y{color:#fbbf24;}html.light .sv-y{color:#d97706;}
+.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
+.insight-item{padding:8px 20px;font-size:.88em;color:#67e8f9;display:none;align-items:center;border-left:1px solid var(--border);max-width:400px;line-height:1.4;}
+html.light .insight-item{color:#0891b2;}
+.insight-item.visible{display:flex;}
+@media(max-width:700px){
+html,body{height:auto;overflow-y:auto;}
+.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
+.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
+.top-controls{gap:8px;}.slider-group .val{font-size:1.1em;}
+input[type=range]{width:76px;}.btn-theme{margin-left:0;}
+.main-grid{grid-template-columns:1fr;overflow:visible;}
+.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
+.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
+.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <a href="index.html" class="back-link">← Назад</a>
+    <h1>🔺 Треугольник Паскаля</h1>
+    <div class="top-controls">
+      <div class="slider-group">
+        <label>Строки N</label>
+        <input type="range" id="slN" min="2" max="12" value="6">
+        <span class="val" id="valN">6</span>
+      </div>
+      <button class="btn btn-play" id="btnPlay">▶ Старт</button>
+      <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
+      <button class="btn btn-speed" id="btn1x">1×</button>
+      <button class="btn btn-speed active" id="btn2x">2×</button>
+      <button class="btn btn-mode active" id="btnNums">🔢 Числа</button>
+      <button class="btn btn-mode" id="btnColor">🎨 Цвет</button>
+      <button class="btn btn-theme" id="btnTheme">☀</button>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="scene-cell">
+      <div class="cell-title">Визуализация</div>
+      <div class="scene-wrap">
+        <canvas id="cv"></canvas>
+      </div>
+    </div>
+    <div class="formulas-cell" id="panel"></div>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="status-items">
+      <div class="status-item">
+        <span class="label">Строк</span>
+        <span class="value sv-a" id="stRows">0</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Сумма строки</span>
+        <span class="value sv-y" id="stSum">—</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Всего чисел</span>
+        <span class="value sv-g" id="stTotal">0</span>
+      </div>
+    </div>
+    <div class="insight-item" id="insight">✨ Нечётные числа образуют треугольник Серпинского!</div>
+  </div>
+</div>
+
+<script>
+// Compute Pascal's triangle up to n rows
+function buildPascal(n) {
+  const tri = [];
+  for (let r = 0; r < n; r++) {
+    const row = [];
+    for (let k = 0; k <= r; k++) {
+      if (k === 0 || k === r) row.push(1);
+      else row.push(tri[r-1][k-1] + tri[r-1][k]);
+    }
+    tri.push(row);
+  }
+  return tri;
+}
+
+// ─── Canvas ───
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+function resizeCanvas() {
+  const rect = cv.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = rect.width * dpr;
+  cv.height = rect.height * dpr;
+  cv.style.width = rect.width + 'px';
+  cv.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+}
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+
+// ─── State ───
+let N = 6;
+let animTime = 0;
+let isPlaying = false;
+let speed = 2;
+let colorMode = false; // false=numbers, true=odd/even coloring
+let rafId = null;
+let lastTs = null;
+
+// ─── Controls ───
+const slN     = document.getElementById('slN');
+const valN    = document.getElementById('valN');
+const btnPlay  = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btn1x    = document.getElementById('btn1x');
+const btn2x    = document.getElementById('btn2x');
+const btnNums  = document.getElementById('btnNums');
+const btnColor = document.getElementById('btnColor');
+const btnTheme = document.getElementById('btnTheme');
+
+slN.addEventListener('input', () => {
+  N = +slN.value;
+  valN.textContent = N;
+  animTime = Math.min(animTime, N);
+  updatePanel();
+  render();
+});
+btnPlay.addEventListener('click', () => {
+  if (isPlaying) { pause(); }
+  else { if (animTime >= N) animTime = 0; play(); }
+});
+btnReset.addEventListener('click', () => { pause(); animTime = 0; updatePanel(); render(); });
+btn1x.addEventListener('click', () => { speed=1; btn1x.classList.add('active'); btn2x.classList.remove('active'); });
+btn2x.addEventListener('click', () => { speed=2; btn2x.classList.add('active'); btn1x.classList.remove('active'); });
+btnNums.addEventListener('click', () => {
+  colorMode = false;
+  btnNums.classList.add('active'); btnColor.classList.remove('active');
+  render();
+});
+btnColor.addEventListener('click', () => {
+  colorMode = true;
+  btnColor.classList.add('active'); btnNums.classList.remove('active');
+  render();
+});
+btnTheme.addEventListener('click', () => { document.documentElement.classList.toggle('light'); render(); });
+
+function play() {
+  isPlaying = true;
+  btnPlay.textContent = '⏸ Пауза';
+  lastTs = null;
+  rafId = requestAnimationFrame(animate);
+}
+function pause() {
+  isPlaying = false;
+  btnPlay.textContent = '▶ Старт';
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}
+function animate(ts) {
+  if (!isPlaying) return;
+  if (lastTs === null) lastTs = ts;
+  const dt = (ts - lastTs) / 1000;
+  lastTs = ts;
+  animTime = Math.min(animTime + dt * speed * 0.9, N);
+  updatePanel();
+  render();
+  if (animTime >= N) { pause(); return; }
+  rafId = requestAnimationFrame(animate);
+}
+
+// ─── Render ───
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+// Color for a value in color mode
+function cellColor(val, light) {
+  if (val === 0) return 'transparent';
+  const odd = val % 2 === 1;
+  if (odd)  return light ? 'rgba(6,182,212,0.85)'  : 'rgba(6,182,212,0.9)';
+  return light ? 'rgba(100,116,139,0.15)' : 'rgba(30,41,59,0.5)';
+}
+
+function render() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.width / dpr, H = cv.height / dpr;
+  const light = isLight();
+  ctx.clearRect(0, 0, W, H);
+
+  const rows = Math.floor(animTime);   // fully shown rows
+  const frac = animTime - rows;        // partial row progress
+
+  if (animTime < 0.01) {
+    ctx.fillStyle = light ? 'rgba(8,145,178,0.08)' : 'rgba(6,182,212,0.12)';
+    ctx.beginPath(); ctx.arc(W/2, H/2, 55, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = light ? '#0891b2' : '#67e8f9';
+    ctx.font = 'bold 28px Segoe UI'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('▶', W/2, H/2);
+    updateStatus(0);
+    return;
+  }
+
+  const tri = buildPascal(Math.min(rows + 1, N));
+  const displayRows = Math.min(rows + 1, N);
+
+  // Cell sizing
+  const pad = 0.05;
+  const cellW = Math.min((W * (1-2*pad)) / displayRows, (H * (1-2*pad)) / displayRows * 1.15);
+  const cellH = cellW * 0.88;
+  const totalW = displayRows * cellW;
+  const totalH = displayRows * cellH;
+  const startX = (W - totalW) / 2;
+  const startY = (H - totalH) / 2;
+
+  for (let r = 0; r < displayRows; r++) {
+    if (!tri[r]) continue;
+    const rowAlpha = (r < rows) ? 1 : frac; // partial last row
+    const rowY = startY + r * cellH;
+    const rowStartX = startX + (displayRows - 1 - r) * cellW / 2;
+
+    for (let k = 0; k <= r; k++) {
+      const val = tri[r][k];
+      const cx = rowStartX + k * cellW + cellW / 2;
+      const cy = rowY + cellH / 2;
+
+      if (colorMode) {
+        // Color mode: odd=teal, even=dark
+        const odd = val % 2 === 1;
+        if (odd) {
+          ctx.fillStyle = light
+            ? `rgba(6,182,212,${0.8 * rowAlpha})`
+            : `rgba(6,182,212,${0.85 * rowAlpha})`;
+          const sz = cellW * 0.44;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - sz);
+          ctx.lineTo(cx + sz * 0.866, cy + sz * 0.5);
+          ctx.lineTo(cx - sz * 0.866, cy + sz * 0.5);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillStyle = light
+            ? `rgba(148,163,184,${0.15 * rowAlpha})`
+            : `rgba(30,41,59,${0.7 * rowAlpha})`;
+          const sz = cellW * 0.38;
+          ctx.fillRect(cx - sz/2, cy - sz/2, sz, sz);
+        }
+      } else {
+        // Number mode
+        const isBorder = (k === 0 || k === r);
+        const bg   = isBorder
+          ? (light ? 'rgba(6,182,212,0.2)' : 'rgba(6,182,212,0.18)')
+          : (light ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.14)');
+        const border = isBorder
+          ? (light ? 'rgba(6,182,212,0.6)' : 'rgba(6,182,212,0.5)')
+          : (light ? 'rgba(99,102,241,0.4)' : 'rgba(99,102,241,0.35)');
+        const textCol = isBorder
+          ? (light ? '#0891b2' : '#67e8f9')
+          : (light ? '#4f46e5' : '#a78bfa');
+
+        const hw = cellW * 0.43, hh = cellH * 0.43;
+        const rx = 4;
+        ctx.globalAlpha = rowAlpha;
+        ctx.fillStyle = bg;
+        roundRect(ctx, cx-hw, cy-hh, hw*2, hh*2, rx);
+        ctx.fill();
+        ctx.strokeStyle = border;
+        ctx.lineWidth = 1;
+        roundRect(ctx, cx-hw, cy-hh, hw*2, hh*2, rx);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        if (cellW > 24) {
+          ctx.globalAlpha = rowAlpha;
+          ctx.fillStyle = textCol;
+          const fs = Math.max(9, Math.min(cellW * 0.3, 18));
+          ctx.font = `bold ${fs}px 'Courier New',monospace`;
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(val > 999 ? '…' : String(val), cx, cy);
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+  }
+
+  updateStatus(rows);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+// ─── Panel ───
+function updatePanel() {
+  const rows = Math.min(Math.floor(animTime) + 1, N);
+  const panel = document.getElementById('panel');
+  const tri = buildPascal(rows);
+
+  const lastRow = tri[rows-1] || [];
+  const sumRow = lastRow.reduce((a,b)=>a+b, 0);
+  const lastRowStr = lastRow.length <= 10
+    ? lastRow.join(' + ')
+    : lastRow.slice(0,5).join(' + ') + ' + … + ' + lastRow.slice(-2).join(' + ');
+
+  panel.innerHTML = `
+    <div class="formula-card" style="border-left:4px solid #06b6d4">
+      <div class="card-title">📝 Описание</div>
+      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">
+        Каждое число равно сумме двух чисел над ним. Нажмите <strong>🎨 Цвет</strong> —
+        нечётные числа выделятся, и проявится <strong>треугольник Серпинского</strong>&nbsp;— фрактал!
+      </p>
+    </div>
+
+    <div class="formula-card">
+      <div class="card-title">📐 Правило построения</div>
+      <div class="formula">C(n,k) = C(n−1,k−1) + C(n−1,k)</div>
+      <div class="calculation"><span class="hl-b">C(n,0) = C(n,n) = 1</span></div>
+    </div>
+
+    <div class="formula-card">
+      <div class="card-title">🔢 Строка ${rows} (0-индексация: строка ${rows-1})</div>
+      <div class="calculation" style="font-size:.9em;word-break:break-all;line-height:1.6">
+        <span class="hl-c">${lastRowStr}</span>
+      </div>
+    </div>
+
+    <div class="formula-card">
+      <div class="card-title">✨ Сумма строки ${rows}</div>
+      <div class="formula">Σ = 2<sup>${rows-1}</sup></div>
+      <div class="calculation">Σ = <span class="hl-y">${sumRow}</span></div>
+    </div>
+
+    <div class="note-card">
+      💡 В строках треугольника Паскаля спрятаны числа Фибоначчи (по диагоналям),
+      степени числа 11 и коэффициенты бинома Ньютона (a+b)ⁿ.
+    </div>`;
+}
+
+function updateStatus(rows) {
+  document.getElementById('stRows').textContent = rows;
+  const insight = document.getElementById('insight');
+  if (rows > 0) {
+    const tri = buildPascal(rows);
+    const last = tri[rows-1] || [];
+    const sum = last.reduce((a,b)=>a+b, 0);
+    document.getElementById('stSum').textContent = sum;
+    document.getElementById('stTotal').textContent = rows*(rows+1)/2;
+    insight.classList.toggle('visible', colorMode && rows >= 4);
+  } else {
+    document.getElementById('stSum').textContent = '—';
+    document.getElementById('stTotal').textContent = 0;
+    insight.classList.remove('visible');
+  }
+}
+
+// Init
+updatePanel();
+resizeCanvas();
+render();
+</script>
+</body>
+</html>
