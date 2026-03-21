@@ -68,6 +68,21 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
 .scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
 .formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
 .bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}}
+/* ── Info Modal ── */
+.btn-info{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;border:1px solid var(--border);}
+.btn-info:hover{color:var(--text);border-color:var(--muted);}
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:999;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+.info-overlay.open{display:flex;}
+.info-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:660px;width:100%;padding:28px 30px 24px;position:relative;margin:auto;}
+.info-modal h2{font-size:1.15em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:18px;padding-right:32px;line-height:1.35;}
+.info-close{position:absolute;top:14px;right:14px;background:var(--btn2);color:var(--btn2-text);border:none;border-radius:6px;cursor:pointer;padding:5px 11px;font-size:1em;transition:all .15s;}
+.info-close:hover{color:var(--text);}
+.info-sec{margin-bottom:16px;}
+.info-sec h3{font-size:.78em;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:6px;font-weight:600;border-bottom:1px solid var(--border2);padding-bottom:4px;}
+.info-sec p,.info-sec ul{font-size:.9em;color:var(--muted);line-height:1.7;}
+.info-sec ul{padding-left:18px;}.info-sec li{margin-bottom:5px;}
+.info-sec strong{color:var(--text);}
+.info-hl{background:var(--bg2);border-left:3px solid var(--acc);padding:9px 14px;border-radius:0 8px 8px 0;font-family:'Courier New',monospace;font-size:.88em;color:var(--text);margin:8px 0;line-height:1.7;white-space:pre-wrap;}
 </style>
 </head>
 <body>
@@ -88,6 +103,7 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
       <button class="btn btn-mode active" id="btnNums">🔢 Числа</button>
       <button class="btn btn-mode" id="btnColor">🎨 Цвет</button>
       <button class="btn btn-mode" id="btnFib">🌀 Фибоначчи</button>
+      <button class="btn btn-info"  id="btnInfo">📖 О модели</button>
       <button class="btn btn-theme" id="btnTheme">☀</button>
     </div>
   </div>
@@ -546,6 +562,75 @@ function updateStatus(rows) {
 updatePanel();
 resizeCanvas();
 render();
+
+// ── Info Modal ──
+const btnInfo     = document.getElementById('btnInfo');
+const infoOverlay = document.getElementById('infoOverlay');
+const infoClose   = document.getElementById('infoClose');
+btnInfo.addEventListener('click', () => infoOverlay.classList.add('open'));
+infoClose.addEventListener('click', () => infoOverlay.classList.remove('open'));
+infoOverlay.addEventListener('click', e => { if (e.target === infoOverlay) infoOverlay.classList.remove('open'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') infoOverlay.classList.remove('open'); });
 </script>
+
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-modal">
+    <button class="info-close" id="infoClose">✕</button>
+    <h2>🔺 Треугольник Паскаля — сокровищница математики</h2>
+
+    <div class="info-sec">
+      <h3>Кратко</h3>
+      <p>Простейшее правило построения — каждое число равно сумме двух над ним — порождает треугольник, в котором зашифрованы биномиальные коэффициенты, числа Фибоначчи, степени числа 11 и даже фракталы. Не зря математики говорят: в этом треугольнике можно прожить всю научную жизнь и не исчерпать его.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>История</h3>
+      <p>Этот треугольник знали задолго до Паскаля. Персидский математик <strong>аль-Карраджи</strong> описал его в XI веке. В Китае он называется «треугольником Янь Хуэй» (XIII в.), в Иране — «треугольником Хайяма», в Италии — «треугольником Тартальи» (XVI в.). <strong>Блез Паскаль</strong> в 1653 году написал систематический трактат о его свойствах — с тех пор имя закрепилось в европейской традиции.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Правило построения</h3>
+      <div class="info-hl">C(n, k) = C(n−1, k−1) + C(n−1, k)
+Граница: C(n, 0) = C(n, n) = 1</div>
+      <p>Элемент C(n, k) — число способов выбрать k объектов из n (биномиальный коэффициент). Именно поэтому строки треугольника — коэффициенты бинома Ньютона <strong>(a+b)ⁿ</strong>.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Скрытые закономерности</h3>
+      <ul>
+        <li>📊 <strong>Бином Ньютона:</strong> строка n — коэффициенты раскрытия (a+b)ⁿ</li>
+        <li>➕ <strong>Суммы строк:</strong> 1, 2, 4, 8, 16… = 2⁰, 2¹, 2², 2³…</li>
+        <li>🔢 <strong>Степени числа 11:</strong> 11⁰=1, 11¹=11, 11²=121, 11³=1331, 11⁴=14641</li>
+        <li>🌀 <strong>Числа Фибоначчи:</strong> суммы по «пологим» диагоналям ↗ (кнопка 🌀 Фибоначчи)</li>
+        <li>🔺 <strong>Треугольник Серпинского:</strong> нечётные числа — фрактал (кнопка 🎨 Цвет)</li>
+        <li>🏒 <strong>«Хоккейная клюшка»:</strong> сумма чисел вдоль диагонали равна числу в следующей строке</li>
+        <li>🔵 <strong>Треугольные числа:</strong> 1, 3, 6, 10, 15… — 2-я диагональ слева</li>
+        <li>🔷 <strong>Тетраэдрические числа:</strong> 1, 4, 10, 20, 35… — 3-я диагональ</li>
+      </ul>
+    </div>
+
+    <div class="info-sec">
+      <h3>Треугольник Серпинского</h3>
+      <p>Включи режим <strong>🎨 Цвет</strong> и поставь N = 20. Нечётные числа образуют самоподобный фрактал — <strong>треугольник Серпинского</strong>. Он строится бесконечным вырезанием средних треугольников. Его размерность Хаусдорфа = log₂3 ≈ 1,585 — это число «между» линией (1) и плоскостью (2)!</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Числа Фибоначчи по диагоналям</h3>
+      <p>«Пологие» диагонали — клетки с одинаковой суммой строка + столбец — дают числа Фибоначчи:</p>
+      <div class="info-hl">F(d+1) = Σ C(d−k, k),   k = 0, 1, …, ⌊d/2⌋
+d=4: C(4,0)+C(3,1)+C(2,2) = 1+3+1 = 5 = F(5)</div>
+    </div>
+
+    <div class="info-sec">
+      <h3>Применение</h3>
+      <ul>
+        <li><strong>Комбинаторика и вероятность:</strong> подсчёт числа исходов, биномиальное распределение</li>
+        <li><strong>Алгебра:</strong> быстрое раскрытие (a+b)ⁿ без длинного умножения</li>
+        <li><strong>Теория чисел:</strong> строка p простая ⟺ все внутренние числа делятся на p</li>
+        <li><strong>Информатика:</strong> динамическое программирование, задачи на подсчёт путей</li>
+      </ul>
+    </div>
+  </div>
+</div>
 </body>
 </html>

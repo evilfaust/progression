@@ -53,6 +53,21 @@ html.light .prime-badge.current{color:#be123c;}
 .ratio-label{color:var(--muted);white-space:nowrap;}
 .ratio-val{font-family:'Courier New',monospace;font-weight:700;color:var(--text);}
 .ratio-val.converged{color:#fbbf24;}html.light .ratio-val.converged{color:#d97706;}
+/* ── Info Modal ── */
+.btn-info{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;border:1px solid var(--border);}
+.btn-info:hover{color:var(--text);border-color:var(--muted);}
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:999;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+.info-overlay.open{display:flex;}
+.info-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:660px;width:100%;padding:28px 30px 24px;position:relative;margin:auto;}
+.info-modal h2{font-size:1.15em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:18px;padding-right:32px;line-height:1.35;}
+.info-close{position:absolute;top:14px;right:14px;background:var(--btn2);color:var(--btn2-text);border:none;border-radius:6px;cursor:pointer;padding:5px 11px;font-size:1em;transition:all .15s;}
+.info-close:hover{color:var(--text);}
+.info-sec{margin-bottom:16px;}
+.info-sec h3{font-size:.78em;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:6px;font-weight:600;border-bottom:1px solid var(--border2);padding-bottom:4px;}
+.info-sec p,.info-sec ul{font-size:.9em;color:var(--muted);line-height:1.7;}
+.info-sec ul{padding-left:18px;}.info-sec li{margin-bottom:5px;}
+.info-sec strong{color:var(--text);}
+.info-hl{background:var(--bg2);border-left:3px solid var(--acc);padding:9px 14px;border-radius:0 8px 8px 0;font-family:'Courier New',monospace;font-size:.88em;color:var(--text);margin:8px 0;line-height:1.7;white-space:pre-wrap;}
 .bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
 .status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
 .status-item{display:flex;flex-direction:column;align-items:center;}
@@ -88,6 +103,7 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
       <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
       <button class="btn btn-speed" id="btn1x">1×</button>
       <button class="btn btn-speed active" id="btn2x">2×</button>
+      <button class="btn btn-info"  id="btnInfo">📖 О модели</button>
       <button class="btn btn-theme" id="btnTheme">☀</button>
     </div>
   </div>
@@ -471,6 +487,78 @@ function updateStatus() {
 updatePanel();
 resizeCanvas();
 render();
+
+// ── Info Modal ──
+const btnInfo     = document.getElementById('btnInfo');
+const infoOverlay = document.getElementById('infoOverlay');
+const infoClose   = document.getElementById('infoClose');
+btnInfo.addEventListener('click', () => infoOverlay.classList.add('open'));
+infoClose.addEventListener('click', () => infoOverlay.classList.remove('open'));
+infoOverlay.addEventListener('click', e => { if (e.target === infoOverlay) infoOverlay.classList.remove('open'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') infoOverlay.classList.remove('open'); });
 </script>
+
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-modal">
+    <button class="info-close" id="infoClose">✕</button>
+    <h2>🔴 Решето Эратосфена — охота за простыми числами</h2>
+
+    <div class="info-sec">
+      <h3>Кратко</h3>
+      <p>Простые числа — «атомы» математики: любое натуральное число единственным образом раскладывается в их произведение (основная теорема арифметики). Решето Эратосфена — древнейший алгоритм поиска простых. Ему более <strong>2200 лет</strong>, а лучшего для нахождения всех простых до N по сей день нет.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>История</h3>
+      <p><strong>Эратосфен Киренский</strong> (~276–194 до н.э.) — греческий математик, поэт, географ и главный библиотекарь Александрийской библиотеки. Он первым измерил длину окружности Земли с ошибкой менее 2%, составил каталог из 675 звёзд и придумал этот алгоритм. Сам он назвал метод «просеиванием» (греч. κόσκινον — решето).</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Алгоритм: шаг за шагом</h3>
+      <div class="info-hl">1. Записать все числа от 2 до N
+2. Взять первое невычеркнутое число p — оно простое
+3. Вычеркнуть все кратные p, начиная с p²
+4. Повторять, пока p ≤ √N
+5. Все оставшиеся числа — простые</div>
+      <p>Почему начинаем с <strong>p²</strong>? Все меньшие кратные уже вычеркнуты предыдущими простыми — дублировать работу не нужно.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Эффективность</h3>
+      <p>Сложность алгоритма — <strong>O(n · log log n)</strong> — практически линейная. Чтобы найти все простые до миллиона, нужно около 3,5 млн операций — в тысячи раз быстрее наивной проверки каждого числа на делители.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Сколько простых чисел?</h3>
+      <p>Простые числа становятся всё реже по мере роста N. <strong>Теорема о простых числах</strong> (1896, Адамар и де ла Валле-Пуссен):</p>
+      <div class="info-hl">π(N) ≈ N / ln(N)</div>
+      <p>Здесь π(N) — количество простых, не превышающих N. До 100 их 25, до 1000 — 168, до миллиона — 78 498.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Простых чисел бесконечно много</h3>
+      <p>Доказал <strong>Евклид</strong> ≈ 300 г. до н.э. Классическое доказательство от противного: допустим, простых конечно — p₁, p₂, …, pₖ. Рассмотрим число P = p₁·p₂·…·pₖ + 1. Оно не делится ни на одно pᵢ (остаток 1). Значит, у P есть простой делитель, которого нет в списке. Противоречие!</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Нерешённые задачи</h3>
+      <ul>
+        <li>🔵 <strong>Гипотеза Гольдбаха (1742):</strong> любое чётное число &gt; 2 — сумма двух простых. Проверено до 4·10¹⁸, но не доказано!</li>
+        <li>🔵 <strong>Гипотеза простых-близнецов:</strong> бесконечно много пар (p, p+2), где оба простые: 3 и 5, 11 и 13, 17 и 19…</li>
+        <li>🔵 <strong>Гипотеза Римана:</strong> о нулях дзета-функции. Одна из «задач тысячелетия» с призом $1 000 000, связана с точным распределением простых чисел.</li>
+      </ul>
+    </div>
+
+    <div class="info-sec">
+      <h3>Применение сегодня</h3>
+      <ul>
+        <li>🔐 <strong>RSA-шифрование:</strong> безопасность интернет-соединений основана на том, что разложить большое число на простые множители крайне сложно</li>
+        <li>💻 <strong>Хеш-таблицы:</strong> размер выбирают простым — это уменьшает коллизии</li>
+        <li>🎲 <strong>Псевдослучайные числа:</strong> арифметика по простому модулю обеспечивает равномерное распределение</li>
+      </ul>
+      <p style="margin-top:8px">🏆 Наибольшее известное простое число (2024): <strong>2¹³⁶ ²⁷⁹ ⁸⁴¹ − 1</strong> — число Мерсенна, в нём более 41 миллиона цифр!</p>
+    </div>
+  </div>
+</div>
 </body>
 </html>

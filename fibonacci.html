@@ -70,6 +70,21 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
 .scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
 .formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
 .bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}}
+/* ── Info Modal ── */
+.btn-info{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;border:1px solid var(--border);}
+.btn-info:hover{color:var(--text);border-color:var(--muted);}
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:999;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+.info-overlay.open{display:flex;}
+.info-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:660px;width:100%;padding:28px 30px 24px;position:relative;margin:auto;}
+.info-modal h2{font-size:1.15em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:18px;padding-right:32px;line-height:1.35;}
+.info-close{position:absolute;top:14px;right:14px;background:var(--btn2);color:var(--btn2-text);border:none;border-radius:6px;cursor:pointer;padding:5px 11px;font-size:1em;transition:all .15s;}
+.info-close:hover{color:var(--text);}
+.info-sec{margin-bottom:16px;}
+.info-sec h3{font-size:.78em;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:6px;font-weight:600;border-bottom:1px solid var(--border2);padding-bottom:4px;}
+.info-sec p,.info-sec ul{font-size:.9em;color:var(--muted);line-height:1.7;}
+.info-sec ul{padding-left:18px;}.info-sec li{margin-bottom:5px;}
+.info-sec strong{color:var(--text);}
+.info-hl{background:var(--bg2);border-left:3px solid var(--acc);padding:9px 14px;border-radius:0 8px 8px 0;font-family:'Courier New',monospace;font-size:.88em;color:var(--text);margin:8px 0;line-height:1.7;white-space:pre-wrap;}
 </style>
 </head>
 <body>
@@ -87,6 +102,7 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
       <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
       <button class="btn btn-speed" id="btn1x">1×</button>
       <button class="btn btn-speed active" id="btn2x">2×</button>
+      <button class="btn btn-info"  id="btnInfo">📖 О модели</button>
       <button class="btn btn-theme" id="btnTheme">☀</button>
     </div>
   </div>
@@ -403,6 +419,70 @@ function updateStatus(shown) {
 updatePanel();
 resizeCanvas();
 render();
+
+// ── Info Modal ──
+const btnInfo     = document.getElementById('btnInfo');
+const infoOverlay = document.getElementById('infoOverlay');
+const infoClose   = document.getElementById('infoClose');
+btnInfo.addEventListener('click', () => infoOverlay.classList.add('open'));
+infoClose.addEventListener('click', () => infoOverlay.classList.remove('open'));
+infoOverlay.addEventListener('click', e => { if (e.target === infoOverlay) infoOverlay.classList.remove('open'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') infoOverlay.classList.remove('open'); });
 </script>
+
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-modal">
+    <button class="info-close" id="infoClose">✕</button>
+    <h2>🌀 Спираль Фибоначчи — Золотое сечение</h2>
+
+    <div class="info-sec">
+      <h3>Кратко</h3>
+      <p>Последовательность Фибоначчи — один из самых удивительных объектов математики. Она возникает в природе повсюду, а отношение соседних чисел стремится к числу <strong>φ (фи)</strong> — «золотому сечению», которое тысячелетиями считалось эталоном красоты и гармонии.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>История</h3>
+      <p>В 1202 году итальянский математик <strong>Леонардо Пизанский</strong> (прозвище — Фибоначчи) опубликовал «Книгу абака» (Liber Abaci). В ней он описал задачу о размножении кроликов — её решение и дало знаменитую последовательность. Однако задолго до него её изучали индийские математики, описывая ритмы санскритской поэзии, — ещё в VI веке н.э.!</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Рекуррентное правило</h3>
+      <div class="info-hl">F(n) = F(n−1) + F(n−2),   F(1) = 1, F(2) = 1
+1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233…</div>
+      <p>Каждое следующее число — сумма двух предыдущих. Из этого простого правила вырастает целый мир математических закономерностей.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Золотое сечение φ</h3>
+      <p>Чем дальше по последовательности, тем ближе отношение соседних чисел к φ:</p>
+      <div class="info-hl">φ = (1 + √5) / 2 ≈ 1,6180339887…</div>
+      <p>Число φ обладает уникальным свойством: <strong>φ² = φ + 1</strong> и <strong>1/φ = φ − 1</strong>. Прямоугольник с отношением сторон 1:φ называется «золотым» — отрезав от него квадрат, получишь снова золотой прямоугольник, и так бесконечно. Именно эту самоподобную конструкцию и строит наша модель!</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>Как строится спираль</h3>
+      <p>Строим квадраты со сторонами F₁, F₂, F₃… прикладывая каждый к уже построенному прямоугольнику. В каждый квадрат вписываем <strong>четверть окружности</strong> — и дуги складываются в непрерывную <strong>логарифмическую спираль</strong>, которая равномерно удаляется от центра при каждом обороте.</p>
+    </div>
+
+    <div class="info-sec">
+      <h3>В природе</h3>
+      <ul>
+        <li>🌻 <strong>Подсолнух:</strong> семена расположены в 34 и 55, или 55 и 89 спиралях — два соседних числа Фибоначчи</li>
+        <li>🌲 <strong>Еловые шишки:</strong> спирали идут в 8 и 13 направлениях</li>
+        <li>🐚 <strong>Раковина наутилуса:</strong> сечение даёт почти точную логарифмическую спираль</li>
+        <li>🌸 <strong>Цветки:</strong> число лепестков почти всегда — число Фибоначчи (3, 5, 8, 13, 21…)</li>
+        <li>🌀 <strong>Галактики:</strong> спиральные рукава закручиваются по той же закономерности</li>
+        <li>🧬 <strong>ДНК:</strong> двойная спираль делает полный оборот через 34 Å, ширина — 21 Å</li>
+      </ul>
+    </div>
+
+    <div class="info-sec">
+      <h3>Формула Бине</h3>
+      <p>Существует явная формула, позволяющая найти любое число Фибоначчи без рекуррентности:</p>
+      <div class="info-hl">F(n) = (φⁿ − ψⁿ) / √5,   где ψ = (1 − √5) / 2 ≈ −0,618</div>
+      <p>Удивительно: формула содержит иррациональные числа, но всегда даёт целый результат!</p>
+    </div>
+  </div>
+</div>
 </body>
 </html>
