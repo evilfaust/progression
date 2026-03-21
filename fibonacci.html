@@ -100,6 +100,7 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
       </div>
       <button class="btn btn-play" id="btnPlay">▶ Старт</button>
       <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
+      <button class="btn btn-speed" id="btnHx">½×</button>
       <button class="btn btn-speed" id="btn1x">1×</button>
       <button class="btn btn-speed active" id="btn2x">2×</button>
       <button class="btn btn-info"  id="btnInfo">📖 О модели</button>
@@ -207,6 +208,7 @@ const slN    = document.getElementById('slN');
 const valN   = document.getElementById('valN');
 const btnPlay  = document.getElementById('btnPlay');
 const btnReset = document.getElementById('btnReset');
+const btnHx    = document.getElementById('btnHx');
 const btn1x    = document.getElementById('btn1x');
 const btn2x    = document.getElementById('btn2x');
 const btnTheme = document.getElementById('btnTheme');
@@ -223,8 +225,11 @@ btnPlay.addEventListener('click', () => {
   else { if (animTime >= N) animTime = 0; play(); }
 });
 btnReset.addEventListener('click', () => { pause(); animTime = 0; updatePanel(); render(); });
-btn1x.addEventListener('click', () => { speed=1; btn1x.classList.add('active'); btn2x.classList.remove('active'); });
-btn2x.addEventListener('click', () => { speed=2; btn2x.classList.add('active'); btn1x.classList.remove('active'); });
+const speedBtns = [btnHx, btn1x, btn2x];
+function setSpeed(s, active) { speed = s; speedBtns.forEach(b => b.classList.remove('active')); active.classList.add('active'); }
+btnHx.addEventListener('click', () => setSpeed(0.5, btnHx));
+btn1x.addEventListener('click', () => setSpeed(1,   btn1x));
+btn2x.addEventListener('click', () => setSpeed(2,   btn2x));
 btnTheme.addEventListener('click', () => { document.documentElement.classList.toggle('light'); render(); });
 
 function play() {
