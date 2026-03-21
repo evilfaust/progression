@@ -423,12 +423,12 @@
             <div class="slider-group">
                 <label>a&#8321; =</label>
                 <span class="val" id="displayA1">9</span>
-                <input type="range" id="sliderA1" min="1" max="50" value="9" step="1">
+                <input type="range" id="sliderA1" min="-50" max="99" value="9" step="1">
             </div>
             <div class="slider-group">
                 <label>d =</label>
                 <span class="val" id="displayD">10</span>
-                <input type="range" id="sliderD" min="1" max="30" value="10" step="1">
+                <input type="range" id="sliderD" min="-20" max="30" value="10" step="1">
             </div>
             <button class="btn btn-play" id="btnPlay">&#9654; Пуск</button>
             <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
@@ -544,7 +544,96 @@ function resizeCanvas(canvas) {
 }
 function resizeAll() { resizeCanvas(canyonCanvas); render(); }
 
+// ─── Chart mode (for d<0 or negative a₁) ────────────────
+function drawChart() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canyonCanvas.width / dpr, h = canyonCanvas.height / dpr;
+    const ctx = canyonCtx;
+    const light = isLight();
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.fillStyle = light ? '#f1f5f9' : '#0f172a';
+    ctx.fillRect(0, 0, w, h);
+
+    const step = Math.min(Math.floor(animTime), N);
+    const frac = animTime - step;
+
+    const terms = Array.from({length: N}, (_, i) => term(i + 1));
+    const maxVal = Math.max(...terms, 0);
+    const minVal = Math.min(...terms, 0);
+    const range = (maxVal - minVal) || 1;
+
+    const mL = 46, mR = 14, mT = 28, mB = 28;
+    const chartW = w - mL - mR;
+    const chartH = h - mT - mB;
+    const zeroY = mT + chartH * (maxVal / range);
+
+    // Zero line
+    ctx.strokeStyle = light ? '#94a3b8' : '#475569';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(mL, zeroY); ctx.lineTo(w - mR, zeroY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = light ? '#64748b' : '#64748b';
+    ctx.font = '10px system-ui'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText('0', mL - 4, zeroY);
+
+    const barSpacing = chartW / N;
+    const barW = Math.max(4, Math.min(barSpacing * 0.65, 44));
+
+    for (let k = 1; k <= N; k++) {
+        const tVal = term(k);
+        let alpha = k <= step ? 1 : (k === step + 1 ? Math.min(1, frac * 1.6) : 0);
+
+        const bh = Math.abs(tVal) / range * chartH;
+        const bx = mL + (k - 0.5) * barSpacing - barW / 2;
+        const by = tVal >= 0 ? zeroY - bh : zeroY;
+        const posColor = light ? '#3b82f6' : '#60a5fa';
+        const negColor = light ? '#dc2626' : '#f87171';
+        const col = tVal >= 0 ? posColor : negColor;
+
+        // future bar (faint)
+        if (alpha <= 0) {
+            ctx.globalAlpha = 0.13;
+            ctx.fillStyle = col;
+            ctx.fillRect(bx, by, barW, Math.max(2, bh));
+            ctx.globalAlpha = 1;
+        } else {
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = col;
+            ctx.fillRect(bx, by, barW, Math.max(2, bh * alpha));
+
+            // value label
+            const fontSize = Math.min(12, barSpacing * 0.38);
+            ctx.fillStyle = light ? '#1e293b' : '#e2e8f0';
+            ctx.font = `bold ${fontSize}px system-ui`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = tVal >= 0 ? 'bottom' : 'top';
+            if (bh > 10 || true) ctx.fillText(tVal, bx + barW / 2, tVal >= 0 ? by - 2 : by + bh + 2);
+            ctx.globalAlpha = 1;
+        }
+
+        // x-axis label (step number)
+        ctx.fillStyle = light ? '#64748b' : '#475569';
+        ctx.font = `${Math.min(10, barSpacing * 0.32)}px system-ui`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(k, bx + barW / 2, h - mB + 4);
+    }
+
+    // Current value highlight
+    if (step > 0 && step <= N) {
+        const currVal = term(step);
+        const col = currVal >= 0 ? (light ? '#1d4ed8' : '#60a5fa') : (light ? '#b91c1c' : '#f87171');
+        ctx.fillStyle = col;
+        ctx.font = 'bold 13px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(`a${step} = ${currVal}`, w / 2, 6);
+    }
+}
+
 function drawCanyon() {
+    // Fall back to bar-chart for negative initial value or all-negative sequence
+    if (a1 <= 0 || (d < 0 && term(1) <= 0)) { drawChart(); return; }
+
     const dpr = window.devicePixelRatio || 1;
     const w = canyonCanvas.width / dpr, h = canyonCanvas.height / dpr;
     const ctx = canyonCtx;
@@ -555,13 +644,20 @@ function drawCanyon() {
     const canyonWidth = canyonRight - canyonLeft;
     const topY = 20, bottomY = h - 12;
     const canyonHeight = bottomY - topY;
-    const totalDist = sumN(N);
 
-    const nDone = Math.min(Math.floor(animTime), N);
-    const frac = animTime - nDone;
+    // When d<0, only count positive terms in totalDist (stone can't go negative distance)
+    const effectiveN = (() => {
+        if (d >= 0) return N;
+        for (let k = 1; k <= N; k++) { if (term(k) <= 0) return k - 1; }
+        return N;
+    })();
+    const totalDist = Math.max(1, sumN(effectiveN));
+
+    const nDone = Math.min(Math.floor(animTime), effectiveN);
+    const frac = animTime - Math.floor(animTime);
     const distDone = sumN(nDone);
-    const vCurr = nDone < N ? term(nDone + 1) : 0;
-    const currentDist = distDone + vCurr * frac;
+    const vCurr = nDone < effectiveN ? Math.max(0, term(nDone + 1)) : 0;
+    const currentDist = Math.min(distDone + vCurr * frac, totalDist);
     const progress = totalDist > 0 ? currentDist / totalDist : 0;
 
     // Canyon background
@@ -599,7 +695,8 @@ function drawCanyon() {
     const labelColor = light ? 'rgba(146,64,14,0.9)' : 'rgba(251, 191, 36, 0.8)';
     const sideColor = light ? 'rgba(51,65,85,0.7)' : 'rgba(148, 163, 184, 0.6)';
 
-    for (let j = 1; j <= nDone; j++) {
+    for (let j = 1; j <= Math.min(nDone, effectiveN); j++) {
+        const segTerm = Math.max(0, term(j));
         const markDist = sumN(j);
         const markY = topY + (markDist / totalDist) * canyonHeight;
         ctx.strokeStyle = markColor; ctx.lineWidth = 1;
@@ -613,7 +710,7 @@ function drawCanyon() {
         ctx.fillStyle = labelColor;
         ctx.font = `600 ${Math.min(12, canyonWidth * 0.08)}px system-ui`;
         ctx.textAlign = 'center';
-        ctx.fillText('+' + term(j), (canyonLeft + canyonRight) / 2, midY + 4);
+        ctx.fillText((d >= 0 ? '+' : '') + segTerm, (canyonLeft + canyonRight) / 2, midY + 4);
 
         ctx.fillStyle = sideColor;
         ctx.font = `${Math.min(9, canyonWidth * 0.06)}px system-ui`;
@@ -644,18 +741,25 @@ function drawCanyon() {
 }
 
 function updateUI() {
-    const nDone = Math.min(Math.floor(animTime), N);
-    const frac = animTime - nDone;
+    // Compute effectiveN (last step where term > 0) for d<0 cases
+    const effectiveN = (() => {
+        if (d >= 0 || a1 <= 0) return N;
+        for (let k = 1; k <= N; k++) { if (term(k) <= 0) return k - 1; }
+        return N;
+    })();
+    const nDone = Math.min(Math.floor(animTime), effectiveN);
+    const frac = animTime - Math.floor(animTime);
     const distDone = sumN(nDone);
-    const vCurr = nDone < N ? term(nDone + 1) : 0;
-    const currentDist = distDone + vCurr * frac;
-    const totalDist = sumN(N);
+    const vCurr = nDone < effectiveN ? Math.max(0, term(nDone + 1)) : 0;
+    const currentDist = Math.min(distDone + vCurr * frac, Math.max(1, sumN(effectiveN)));
+    const totalDist = sumN(N);   // formula value (can be negative — shown as-is)
     const lastTerm = term(N);
 
     document.getElementById('statSecond').textContent = nDone + ' / ' + N;
-    document.getElementById('statDistance').textContent = Math.round(currentDist) + ' м';
-    document.getElementById('statSpeed').textContent = vCurr + ' м/с';
-    document.getElementById('statTotal').textContent = totalDist + ' м';
+    const units = (a1 > 0 && d >= 0) ? ' м' : '';
+    document.getElementById('statDistance').textContent = Math.round(currentDist) + units;
+    document.getElementById('statSpeed').textContent = vCurr + (units ? ' м/с' : '');
+    document.getElementById('statTotal').textContent = totalDist + units;
 
     const pct = totalDist > 0 ? (currentDist / totalDist) * 100 : 0;
     document.getElementById('progressFill').style.width = pct + '%';
@@ -665,8 +769,8 @@ function updateUI() {
     document.getElementById('displayD').textContent = d;
 
     const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[c] || c).join('');
-    document.getElementById('formulaAn').innerHTML = `a${sub(N)} = ${a1} + (${N}−1)·${d} = <span class="result">${lastTerm} м</span>`;
-    document.getElementById('formulaSn').innerHTML = `S${sub(N)} = ${N}·(${a1}+${lastTerm})/2 = <span class="result">${totalDist} м</span>`;
+    document.getElementById('formulaAn').innerHTML = `a${sub(N)} = ${a1} + (${N}−1)·${d} = <span class="result">${lastTerm}${units}</span>`;
+    document.getElementById('formulaSn').innerHTML = `S${sub(N)} = ${N}·(${a1}+${lastTerm})/2 = <span class="result">${totalDist}${units}</span>`;
 
     const termsList = document.getElementById('termsList');
     const maxShow = 30;
@@ -679,10 +783,10 @@ function updateUI() {
     termsList.innerHTML = html;
 
     document.getElementById('compManual').textContent = N + ' сложений';
-    document.getElementById('compFormula').textContent = 'S = ' + totalDist + ' м';
+    document.getElementById('compFormula').textContent = 'S = ' + totalDist + units;
 
     const banner = document.getElementById('insightBanner'), insightText = document.getElementById('insightText');
-    if (N > 15) { banner.classList.add('visible'); insightText.textContent = `${N} чисел вручную? Формула Sₙ даёт ${totalDist} м мгновенно!`; }
+    if (N > 15) { banner.classList.add('visible'); insightText.textContent = `${N} чисел вручную? Формула Sₙ даёт ${totalDist}${units} мгновенно!`; }
     else if (N > 8) { banner.classList.add('visible'); insightText.textContent = `${N} слагаемых — перебор утомителен. Формула проще!`; }
     else { banner.classList.remove('visible'); }
 }

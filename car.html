@@ -407,6 +407,12 @@
                 <input type="range" id="sliderD" min="1" max="20" value="5" step="1">
                 <label style="margin-left:2px;font-size:0.75em;color:var(--subtle)">м/с²</label>
             </div>
+            <div class="slider-group">
+                <label>N =</label>
+                <span class="val" id="displayN">6</span>
+                <input type="range" id="sliderN" min="1" max="6" value="6" step="1">
+                <label style="margin-left:2px;font-size:0.75em;color:var(--subtle)">с</label>
+            </div>
             <button class="btn btn-play"  id="btnPlay">&#9654; Пуск</button>
             <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
             <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
@@ -436,9 +442,9 @@
                 <div class="calculation" id="formulaSn">S&#8326; = 6&middot;(30+5)/2 = <span class="result">105 м</span></div>
             </div>
             <div class="formula-card">
-                <div class="card-title">Автомобиль останавливается</div>
-                <div class="formula" id="formulaStop" style="color:#f87171;font-size:1.1em">
-                    через 6 с, проехав 105 м
+                <div class="card-title">Полный тормозной путь</div>
+                <div class="formula" style="color:#f87171;font-size:1.05em" id="formulaStop">
+                    n_stop = 6 с &rarr; S = 105 м
                 </div>
             </div>
             <div class="progress-bar-bg">
@@ -487,8 +493,9 @@
 // ─── State ───────────────────────────────────────────────
 let v1 = 30;   // initial speed (a₁)
 let d  = 5;    // deceleration per second
+let N  = 6;    // how many seconds to show (default = nStop)
 
-let animTime = 0;   // 0..nStop; integer part = completed seconds
+let animTime = 0;   // 0..N; integer part = completed seconds
 let isPlaying = false, speed = 1, lastFrameTime = 0;
 
 // compute speed at second k (1-indexed)
@@ -510,6 +517,7 @@ function totalDist() { return sumToSec(nStop()); }
 
 const sliderV1 = document.getElementById('sliderV1');
 const sliderD  = document.getElementById('sliderD');
+const sliderN  = document.getElementById('sliderN');
 const btnPlay  = document.getElementById('btnPlay');
 const btnReset = document.getElementById('btnReset');
 const btnTheme = document.getElementById('btnTheme');
@@ -593,8 +601,9 @@ function drawRoad() {
     ctx.beginPath(); ctx.moveTo(0, roadTop); ctx.lineTo(W, roadTop); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, roadBot); ctx.lineTo(W, roadBot); ctx.stroke();
 
-    const ns = nStop();
+    const ns     = nStop();
     const totalS = totalDist();
+    const sN     = sumToSec(N);
 
     // Scale: total stopping distance maps to (W * 0.85)
     const usableW = W * 0.85;
@@ -605,7 +614,7 @@ function drawRoad() {
     const step  = Math.floor(animTime);
     const frac  = animTime - step;
 
-    // Draw completed + current segments
+    // Draw all segments (dimmed beyond N)
     let cumDist = 0;
     for (let k = 1; k <= ns; k++) {
         const segLen = distInSec(k);
@@ -614,12 +623,15 @@ function drawRoad() {
         const midX = (x0 + x1) / 2;
         const colors = light ? SEG_COLORS_LIGHT : SEG_COLORS_DARK;
         const col = colors[(k - 1) % colors.length];
+        const beyondN = k > N;
 
-        // Determine visibility
-        let alpha = 0;
-        if (k < step) alpha = 1;
-        else if (k === step + 1) alpha = Math.min(1, frac * 1.5);
-        else if (k <= step + 1) alpha = 1;
+        // Visibility within chosen N
+        let alpha = beyondN ? 0.18 : 0;
+        if (!beyondN) {
+            if (k < step) alpha = 1;
+            else if (k === step + 1) alpha = Math.min(1, frac * 1.5);
+            else if (k <= step + 1) alpha = 1;
+        }
 
         if (alpha <= 0) { cumDist += segLen; continue; }
 
@@ -672,15 +684,28 @@ function drawRoad() {
     ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     ctx.fillText('0', startX, roadTop - 12);
 
+    // N-marker line (if N < ns — show where we're measuring to)
+    if (N < ns) {
+        const markerX = startX + sN * scale;
+        ctx.strokeStyle = light ? '#7c3aed' : '#a78bfa';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(markerX, roadTop - 8); ctx.lineTo(markerX, roadBot + 4); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = light ? '#7c3aed' : '#a78bfa';
+        ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.fillText(`N=${N}с`, markerX, roadTop - 10);
+    }
+
     // Car position
     const carDistCovered = (() => {
         let dist = 0;
-        for (let k = 1; k <= step && k <= ns; k++) dist += distInSec(k);
-        if (step < ns) dist += distInSec(step + 1) * frac;
-        return Math.min(dist, totalS);
+        for (let k = 1; k <= step && k <= N; k++) dist += distInSec(k);
+        if (step < N) dist += distInSec(step + 1) * frac;
+        return Math.min(dist, sN);
     })();
     const carX = startX + carDistCovered * scale;
-    drawCar(ctx, carX, roadY, roadHeight * 0.55, light, animTime >= ns);
+    drawCar(ctx, carX, roadY, roadHeight * 0.55, light, animTime >= N);
 }
 
 function drawCar(ctx, cx, roadY, size, light, stopped) {
@@ -743,42 +768,53 @@ function drawCar(ctx, cx, roadY, size, light, stopped) {
     }
 }
 
+// ─── Update N slider max to match nStop ──────────────────
+function syncNSlider() {
+    const ns = nStop();
+    sliderN.max = ns;
+    if (N > ns) N = ns;
+    sliderN.value = N;
+    document.getElementById('displayN').textContent = N;
+}
+
 // ─── UI update ───────────────────────────────────────────
 function updateUI() {
-    const ns = nStop();
-    const totalS = totalDist();
+    const ns     = nStop();
+    const totalS = totalDist();        // full stopping distance
+    const sN     = sumToSec(N);        // distance for chosen N seconds
+    const vN     = Math.max(0, vAtSec(N)); // speed at second N
+
     const step  = Math.floor(animTime);
     const frac  = animTime - step;
 
     // Current speed (interpolated)
     const vStep     = Math.max(0, vAtSec(step + 1));
-    const vStepNext = step < ns ? Math.max(0, vAtSec(step + 2)) : 0;
+    const vStepNext = step < N ? Math.max(0, vAtSec(step + 2)) : 0;
     const vNow      = vStep - (vStep - vStepNext) * frac;
 
     // Current distance covered
     let distNow = 0;
-    for (let k = 1; k <= step && k <= ns; k++) distNow += distInSec(k);
-    if (step < ns) distNow += distInSec(step + 1) * frac;
-    distNow = Math.min(distNow, totalS);
+    for (let k = 1; k <= step && k <= N; k++) distNow += distInSec(k);
+    if (step < N) distNow += distInSec(step + 1) * frac;
+    distNow = Math.min(distNow, sN);
 
     // Formula cards
-    const vns = Math.max(0, vAtSec(ns));
     const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c] ?? c).join('');
     document.getElementById('formulaVn').innerHTML =
-        `v&#8321; = ${v1} м/с &nbsp; v${sub(ns)} = ` +
-        `<span class="result">${vns} м/с</span>`;
+        `v&#8321; = ${v1} м/с &nbsp;&nbsp; v${sub(N)} = ` +
+        `<span class="result">${vN} м/с</span>`;
     document.getElementById('formulaSn').innerHTML =
-        `S${sub(ns)} = ${ns}&middot;(${v1}+${vns})/2 = ` +
-        `<span class="result">${totalS} м</span>`;
+        `S${sub(N)} = ${N}&middot;(${v1}+${vN})/2 = ` +
+        `<span class="result">${sN} м</span>`;
     document.getElementById('formulaStop').innerHTML =
-        `через <b>${ns}</b> с, проехав <b>${totalS}</b> м`;
+        `n = <b>${ns}</b> с &rarr; S<sub>stop</sub> = <b>${totalS}</b> м`;
 
-    // Progress bar (current position / total)
+    // Progress bar (current / chosen-N distance)
     document.getElementById('progressFill').style.width =
-        (totalS > 0 ? (distNow / totalS) * 100 : 0) + '%';
+        (sN > 0 ? (distNow / sN) * 100 : 0) + '%';
 
     // Status bar
-    document.getElementById('statSecond').textContent = step + ' / ' + ns;
+    document.getElementById('statSecond').textContent = step + ' / ' + N;
     document.getElementById('statSpeed').textContent  = Math.round(vNow) + ' м/с';
     document.getElementById('statDist').textContent   = Math.round(distNow) + ' м';
     document.getElementById('statStop').textContent   = totalS + ' м';
@@ -790,6 +826,7 @@ function updateUI() {
     // Header displays
     document.getElementById('displayV1').textContent = v1;
     document.getElementById('displayD').textContent  = d;
+    document.getElementById('displayN').textContent  = N;
 
     // Terms list (path per second)
     const maxShow = 16;
@@ -797,9 +834,10 @@ function updateUI() {
     for (let k = 1; k <= Math.min(ns, maxShow); k++) {
         const dist = distInSec(k);
         let cls;
-        if (k < step + 1)       cls = 'done';
+        if (k > N)              cls = 'stopped';
+        else if (k <= step)     cls = 'done';
         else if (k === step + 1) cls = 'active';
-        else                     cls = 'future';
+        else                    cls = 'future';
         html += `<span class="term-badge ${cls}">${dist}</span>`;
     }
     if (ns > maxShow) html += `<span class="term-badge future">&hellip;</span>`;
@@ -815,9 +853,8 @@ function animate(ts) {
     const dt = (ts - lastFrameTime) / 1000;
     lastFrameTime = ts;
     animTime += dt * speed * 0.8;
-    const ns = nStop();
-    if (animTime >= ns) {
-        animTime = ns;
+    if (animTime >= N) {
+        animTime = N;
         isPlaying = false;
         btnPlay.textContent = '▶ Пуск';
     }
@@ -835,7 +872,7 @@ function resetAnim() {
 }
 
 btnPlay.addEventListener('click', () => {
-    if (animTime >= nStop()) resetAnim();
+    if (animTime >= N) resetAnim();
     isPlaying = !isPlaying;
     btnPlay.textContent = isPlaying ? '⏸ Пауза' : '▶ Пуск';
     if (isPlaying) { lastFrameTime = 0; requestAnimationFrame(animate); }
@@ -844,10 +881,17 @@ btnReset.addEventListener('click', resetAnim);
 
 sliderV1.addEventListener('input', () => {
     v1 = parseInt(sliderV1.value);
+    syncNSlider();
     resetAnim();
 });
 sliderD.addEventListener('input', () => {
     d = parseInt(sliderD.value);
+    syncNSlider();
+    resetAnim();
+});
+sliderN.addEventListener('input', () => {
+    N = parseInt(sliderN.value);
+    document.getElementById('displayN').textContent = N;
     resetAnim();
 });
 
@@ -863,6 +907,7 @@ window.addEventListener('resize', () => { resizeCanvas(); render(); });
 
 // ─── Init ─────────────────────────────────────────────────
 resizeCanvas();
+syncNSlider();  // set N = nStop() and fix slider max
 render();
 </script>
 </body>
