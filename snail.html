@@ -195,7 +195,7 @@ function drawTree(x,y,h,light){
 }
 
 function drawSnail(x,y,sz,light){
-  // Shell (spiral)
+  // Shell (ракушка — позади, улитка ползёт вправо)
   const sc=light?'#d97706':'#f59e0b';
   ctx.fillStyle=sc;
   ctx.beginPath();ctx.ellipse(x,y-sz*.3,sz*.5,sz*.38,0,0,Math.PI*2);ctx.fill();
@@ -203,18 +203,18 @@ function drawSnail(x,y,sz,light){
   ctx.strokeStyle=light?'#92400e':'#78350f';ctx.lineWidth=sz*.06;
   ctx.beginPath();ctx.arc(x,y-sz*.28,sz*.28,-.5,Math.PI*1.3);ctx.stroke();
   ctx.beginPath();ctx.arc(x,y-sz*.28,sz*.14,-.3,Math.PI);ctx.stroke();
-  // Body
+  // Body (спереди = справа)
   ctx.fillStyle=light?'#d9f99d':'#84cc16';
-  ctx.beginPath();ctx.ellipse(x-sz*.25,y,sz*.35,sz*.18,-.15,0,Math.PI*2);ctx.fill();
-  // Head
-  ctx.beginPath();ctx.ellipse(x-sz*.6,y-sz*.05,sz*.18,sz*.14,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(x+sz*.25,y,sz*.35,sz*.18,.15,0,Math.PI*2);ctx.fill();
+  // Head (ещё правее)
+  ctx.beginPath();ctx.ellipse(x+sz*.6,y-sz*.05,sz*.18,sz*.14,0,0,Math.PI*2);ctx.fill();
   // Eyes (antennae)
   ctx.strokeStyle=light?'#4d7c0f':'#86efac';ctx.lineWidth=sz*.05;
-  ctx.beginPath();ctx.moveTo(x-sz*.55,y-sz*.12);ctx.lineTo(x-sz*.5,y-sz*.3);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(x-sz*.65,y-sz*.1);ctx.lineTo(x-sz*.62,y-sz*.28);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x+sz*.55,y-sz*.12);ctx.lineTo(x+sz*.5,y-sz*.3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x+sz*.65,y-sz*.1);ctx.lineTo(x+sz*.62,y-sz*.28);ctx.stroke();
   ctx.fillStyle=sc;
-  ctx.beginPath();ctx.arc(x-sz*.5,y-sz*.3,sz*.05,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.arc(x-sz*.62,y-sz*.28,sz*.05,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+sz*.5,y-sz*.3,sz*.05,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x+sz*.62,y-sz*.28,sz*.05,0,Math.PI*2);ctx.fill();
 }
 
 function render(){

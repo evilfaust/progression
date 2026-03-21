@@ -199,11 +199,12 @@ function drawCity(x,y,h,light,label){
 
 function drawHiker(x,y,sz,light,step){
   const bob=Math.sin(step*Math.PI*2)*sz*.08;
+  // Head
   ctx.fillStyle=light?'#fde68a':'#fef3c7';
   ctx.beginPath();ctx.arc(x,y-sz*1.8+bob,sz*.28,0,Math.PI*2);ctx.fill();
-  // Backpack
+  // Backpack (сзади = слева, т.к. турист идёт вправо)
   ctx.fillStyle=light?'#dc2626':'#ef4444';
-  ctx.fillRect(x+sz*.18,y-sz*1.55+bob,sz*.22,sz*.4);
+  ctx.fillRect(x-sz*.40,y-sz*1.55+bob,sz*.22,sz*.4);
   // Body
   ctx.fillStyle=light?'#2563eb':'#60a5fa';
   ctx.fillRect(x-sz*.22,y-sz*1.5+bob,sz*.44,sz*.7);
@@ -212,9 +213,9 @@ function drawHiker(x,y,sz,light,step){
   ctx.strokeStyle=light?'#1e3a8a':'#bfdbfe';ctx.lineWidth=sz*.14;ctx.lineCap='round';
   ctx.beginPath();ctx.moveTo(x,y-sz*.8+bob);ctx.lineTo(x-legA*.4,y+bob);ctx.stroke();
   ctx.beginPath();ctx.moveTo(x,y-sz*.8+bob);ctx.lineTo(x+legA*.4,y+bob);ctx.stroke();
-  // Stick / trekking pole
+  // Stick / trekking pole (спереди = справа)
   ctx.strokeStyle=light?'#6b7280':'#9ca3af';ctx.lineWidth=sz*.06;
-  ctx.beginPath();ctx.moveTo(x+sz*.2,y-sz*1.2+bob);ctx.lineTo(x+sz*.4,y+bob);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x+sz*.2,y-sz*1.2+bob);ctx.lineTo(x+sz*.5,y+bob);ctx.stroke();
 }
 
 function render(){
