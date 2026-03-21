@@ -137,6 +137,8 @@
         html.light .card-icon.bio { background: linear-gradient(135deg, #f5f3ff, #ede9fe); }
         .card-icon.ball { background: linear-gradient(135deg, #0c1a2e, #1c1207); }
         html.light .card-icon.ball { background: linear-gradient(135deg, #fff7ed, #ffedd5); }
+        .card-icon.car { background: linear-gradient(135deg, #431407, #1c0505); }
+        html.light .card-icon.car { background: linear-gradient(135deg, #fee2e2, #fecaca); }
 
         .card-body {
             padding: 18px 20px;
@@ -165,6 +167,8 @@
         html.light .card-body h2.bio-title { color: #7e22ce; }
         .card-body h2.ball-title { color: #fb923c; }
         html.light .card-body h2.ball-title { color: #c2410c; }
+        .card-body h2.car-title { color: #f87171; }
+        html.light .card-body h2.car-title { color: #dc2626; }
 
         .card-body .task-text {
             font-size: 0.92em;
@@ -362,6 +366,25 @@
         <div class="card-footer">
             <span class="open-btn">Открыть модель &rarr;</span>
             <span class="answer">S = 14 520</span>
+        </div>
+    </a>
+
+    <a class="card" href="car.html">
+        <div class="card-icon car">🚗</div>
+        <div class="card-body">
+            <h2 class="car-title">Торможение автомобиля</h2>
+            <div class="task-text">
+                Автомобиль начал тормозить. За первую секунду он проехал v₁&nbsp;метров, а за каждую следующую секунду — на d&nbsp;метров меньше. Найдите полный тормозной путь и через сколько секунд автомобиль остановится.
+            </div>
+            <div class="params">
+                <span class="param-tag">d &lt; 0</span>
+                <span class="param-tag">v₁ = 5..80</span>
+                <span class="param-tag">найти S и n</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">v₁=30, d=5 → S=105 м</span>
         </div>
     </a>
 

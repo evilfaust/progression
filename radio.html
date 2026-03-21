@@ -297,6 +297,8 @@
         }
         .status-item .value { font-size: 1.3em; font-weight: 700; }
         .status-item .value.green  { color: #4ade80; }
+        .status-item .value.orange { color: #fb923c; }
+        html.light .status-item .value.orange { color: #c2410c; }
         .status-item .value.amber  { color: #facc15; }
         .status-item .value.blue   { color: #60a5fa; }
         .status-item .value.red    { color: #f87171; }
@@ -408,9 +410,14 @@
                 <div class="calculation" id="formulaAn">a&#8327; = 640 &middot; (1/2)&#x2076; = <span class="result">10 мг</span></div>
             </div>
             <div class="formula-card">
+                <div class="card-title">Образовалось продукта распада B</div>
+                <div class="formula" style="color:#fb923c">B = a&#8321; &minus; a&#8345; = a&#8321;&middot;(1&minus;(1/2)<sup>n</sup>)</div>
+                <div class="calculation" id="formulaProduct">B&#8327; = 640 &minus; 10 = <span style="color:#fb923c;font-weight:700">630 мг</span></div>
+            </div>
+            <div class="formula-card">
                 <div class="card-title">Текущий момент</div>
                 <div class="formula" id="formulaCurrent">t = 0 мин</div>
-                <div class="calculation" id="formulaMass">Масса: <span class="result">640 мг</span></div>
+                <div class="calculation" id="formulaMass">Масса A: <span class="result">640 мг</span></div>
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
@@ -440,15 +447,19 @@
                 <span class="label">Осталось %</span>
                 <span class="value red" id="statPct">100%</span>
             </div>
+            <div class="status-item">
+                <span class="label">Распалось</span>
+                <span class="value orange" id="statProduct">0 мг</span>
+            </div>
         </div>
         <div class="comparison-items">
             <div class="comp-card info">
-                <div class="comp-title">Период полураспада</div>
-                <div class="comp-value">T&#189; = 7 минут</div>
+                <div class="comp-title">Осталось A</div>
+                <div class="comp-value" id="compRemaining">a&#8327; = 10 мг</div>
             </div>
             <div class="comp-card answer">
-                <div class="comp-title">Через 42 минуты</div>
-                <div class="comp-value">640 &middot; (1/2)&#x2076; = 10 мг</div>
+                <div class="comp-title">Образовалось B</div>
+                <div class="comp-value" id="compProduct" style="color:#fb923c">B = 630 мг</div>
             </div>
         </div>
     </div>
@@ -565,10 +576,14 @@ function drawDecay() {
         }
 
         if (alpha <= 0) {
-            // Draw ghost (very faint)
-            ctx.globalAlpha = 0.06;
-            ctx.fillStyle = light ? '#6b7280' : '#475569';
-            ctx.beginPath(); ctx.arc(cx, cy, r * 0.6, 0, Math.PI * 2); ctx.fill();
+            // Draw as product isotope B (orange/amber)
+            ctx.globalAlpha = 0.55;
+            const pGrad2 = ctx.createRadialGradient(cx - r*0.25, cy - r*0.25, r*0.05, cx, cy, r * 0.7);
+            pGrad2.addColorStop(0, light ? '#fed7aa' : '#fdba74');
+            pGrad2.addColorStop(0.6, light ? '#f97316' : '#fb923c');
+            pGrad2.addColorStop(1,   light ? '#c2410c' : '#ea580c');
+            ctx.fillStyle = pGrad2;
+            ctx.beginPath(); ctx.arc(cx, cy, r * 0.7, 0, Math.PI * 2); ctx.fill();
             ctx.globalAlpha = 1;
             continue;
         }
@@ -653,10 +668,16 @@ function updateUI() {
     document.getElementById('formulaAn').innerHTML =
         `a${sub(N+1)} = ${a1} &middot; (1/2)${sup6(N)} = <span class="result">${mFinal} мг</span>`;
 
+    // Product mass B = a1 - a_n
+    const bFinal = a1 - mFinal;
+    const bNow   = a1 - Math.round(mNow);
+    document.getElementById('formulaProduct').innerHTML =
+        `B${sub(N+1)} = ${a1} &minus; ${mFinal} = <span style="color:#fb923c;font-weight:700">${bFinal} мг</span>`;
+
     const tMin = step * PERIOD_MIN;
     document.getElementById('formulaCurrent').textContent = `t = ${tMin} мин (период ${step})`;
     document.getElementById('formulaMass').innerHTML =
-        `Масса: <span class="result">${Math.round(mNow)} мг</span>`;
+        `Масса A: <span class="result">${Math.round(mNow)} мг</span> &nbsp; B: <span style="color:#fb923c;font-weight:700">${bNow} мг</span>`;
 
     const pct = (mNow / a1) * 100;
     document.getElementById('progressFill').style.width = pct + '%';
@@ -664,10 +685,18 @@ function updateUI() {
     document.getElementById('displayA1').textContent = a1;
     document.getElementById('displayN').textContent  = N;
 
-    document.getElementById('statStep').textContent = step + ' / ' + N;
-    document.getElementById('statTime').textContent = (step * PERIOD_MIN) + ' мин';
-    document.getElementById('statMass').textContent = Math.round(mNow) + ' мг';
-    document.getElementById('statPct').textContent  = Math.round(pct) + '%';
+    document.getElementById('statStep').textContent   = step + ' / ' + N;
+    document.getElementById('statTime').textContent   = (step * PERIOD_MIN) + ' мин';
+    document.getElementById('statMass').textContent   = Math.round(mNow) + ' мг';
+    document.getElementById('statPct').textContent    = Math.round(pct) + '%';
+    document.getElementById('statProduct').textContent = bNow + ' мг';
+
+    // Comparison items
+    const sub2 = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c] ?? c).join('');
+    document.getElementById('compRemaining').innerHTML =
+        `a${sub2(N+1)} = <b>${mFinal}</b> мг`;
+    document.getElementById('compProduct').innerHTML =
+        `B = ${a1}&minus;${mFinal} = <b>${bFinal}</b> мг`;
 
     // Terms list
     const maxShow = 14;

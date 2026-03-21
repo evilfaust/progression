@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Торможение автомобиля — Арифметическая прогрессия</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #1a120a;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --bg3: #fff7ed;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.2s, color 0.2s;
+        }
+        .app {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fb923c, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        html.light .top-bar h1 {
+            background: linear-gradient(135deg, #c2410c, #b91c1c);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slider-group label {
+            font-size: 0.8em;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+        .slider-group .val {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #fb923c;
+            min-width: 32px;
+            text-align: center;
+        }
+        html.light .slider-group .val { color: #c2410c; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 110px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--track);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fb923c;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(251,146,60,0.4);
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-play  { background: linear-gradient(135deg, #ea580c, #dc2626); color: white; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
+        .btn-speed.active { background: #ea580c; color: white; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
+        .btn-theme:hover { opacity: 0.85; }
+
+        /* ═══ MAIN GRID ═══ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══ LEFT: Road scene ═══ */
+        .scene-cell {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border2);
+            background: var(--bg3);
+            min-height: 0;
+            overflow: hidden;
+        }
+        .cell-title {
+            font-size: 0.8em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 8px 14px 4px;
+        }
+        .scene-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        canvas#roadCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ═══ RIGHT: Formulas ═══ */
+        .right-cell {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            padding: 14px 18px;
+            gap: 10px;
+        }
+        .formula-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 13px 16px;
+            border: 1px solid var(--border);
+        }
+        .formula-card .card-title {
+            font-size: 0.78em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .formula-card .formula {
+            font-size: 1.25em;
+            color: #fb923c;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+        }
+        html.light .formula-card .formula { color: #c2410c; }
+        .formula-card .calculation {
+            font-size: 1.05em;
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.7;
+        }
+        .result {
+            color: #4ade80;
+            font-size: 1.15em;
+            font-weight: 700;
+        }
+        html.light .result { color: #15803d; }
+        .result-red {
+            color: #f87171;
+            font-size: 1.15em;
+            font-weight: 700;
+        }
+        html.light .result-red { color: #dc2626; }
+
+        .progress-bar-bg {
+            height: 5px;
+            background: var(--card);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ea580c, #fb923c);
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        .terms-section {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        .terms-section::-webkit-scrollbar { width: 4px; }
+        .terms-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .terms-title {
+            font-size: 0.82em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .terms-list {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .term-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.88em;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        .term-badge.done {
+            background: rgba(251,146,60,0.15);
+            color: #fb923c;
+            border: 1px solid rgba(251,146,60,0.3);
+        }
+        html.light .term-badge.done { background: rgba(194,65,12,0.1); color: #c2410c; border-color: rgba(194,65,12,0.3); }
+        .term-badge.active {
+            background: rgba(250,204,21,0.2);
+            color: #facc15;
+            border: 1px solid rgba(250,204,21,0.4);
+            transform: scale(1.05);
+            box-shadow: 0 0 6px rgba(250,204,21,0.2);
+        }
+        html.light .term-badge.active { background: rgba(180,83,9,0.12); color: #b45309; border-color: rgba(180,83,9,0.4); }
+        .term-badge.future {
+            background: rgba(100,116,139,0.1);
+            color: var(--muted);
+            border: 1px solid rgba(100,116,139,0.2);
+        }
+        .term-badge.stopped {
+            background: rgba(239,68,68,0.1);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.25);
+        }
+
+        /* ═══ BOTTOM BAR ═══ */
+        .bottom-bar {
+            display: flex;
+            align-items: stretch;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
+        }
+        .status-items {
+            display: flex;
+            gap: 18px;
+            padding: 8px 20px;
+            align-items: center;
+        }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label {
+            font-size: 0.7em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .v-orange { color: #fb923c; }
+        .v-green  { color: #4ade80; }
+        .v-red    { color: #f87171; }
+        .v-blue   { color: #60a5fa; }
+        .v-amber  { color: #fbbf24; }
+        html.light .v-green  { color: #15803d; }
+        html.light .v-orange { color: #c2410c; }
+        html.light .v-red    { color: #dc2626; }
+
+        .comparison-items {
+            display: flex;
+            gap: 8px;
+            padding: 8px 20px;
+            align-items: center;
+            border-left: 1px solid var(--border2);
+            flex: 1;
+        }
+        .comp-card {
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comp-card.info { background: rgba(251,146,60,0.08); border-color: rgba(251,146,60,0.2); }
+        .comp-card.answer { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
+        html.light .comp-card.answer { background: rgba(22,163,74,0.06); }
+        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; }
+        .comp-card.info .comp-title { color: #fb923c; }
+        html.light .comp-card.info .comp-title { color: #c2410c; }
+        .comp-card.answer .comp-title { color: #4ade80; }
+        html.light .comp-card.answer .comp-title { color: #15803d; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.info .comp-value { color: #fb923c; }
+        html.light .comp-card.info .comp-value { color: #c2410c; }
+        .comp-card.answer .comp-value { color: #22c55e; }
+        html.light .comp-card.answer .comp-value { color: #15803d; }
+
+        /* ═══ MOBILE ═══ */
+        @media (max-width: 700px) {
+            html, body { height: auto; overflow-y: auto; }
+            .app { height: auto; min-height: 100svh; grid-template-rows: auto auto auto; }
+
+            .top-bar { padding: 8px 12px; gap: 8px; }
+            .top-bar h1 { font-size: 1em; white-space: normal; }
+            .top-controls { gap: 8px; }
+            .slider-group .val { font-size: 1.1em; min-width: 24px; }
+            input[type="range"] { width: 76px; }
+            .btn-theme { margin-left: 0; }
+
+            .main-grid { grid-template-columns: 1fr; overflow: visible; }
+
+            .scene-cell {
+                height: 56vw;
+                min-height: 220px;
+                max-height: 340px;
+                border-right: none;
+                border-bottom: 1px solid var(--border2);
+            }
+
+            .right-cell {
+                overflow: visible;
+                height: auto;
+                padding: 12px 14px;
+                gap: 8px;
+            }
+            .terms-section { max-height: 200px; }
+
+            .bottom-bar { flex-wrap: wrap; }
+            .status-items { flex-wrap: wrap; gap: 10px; padding: 8px 12px; }
+            .comparison-items { flex-wrap: wrap; padding: 8px 12px; gap: 8px; }
+            .comp-card { padding: 5px 12px; }
+            .comp-card .comp-value { font-size: 0.95em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <h1>Торможение автомобиля</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>v&#8321; =</label>
+                <span class="val" id="displayV1">30</span>
+                <input type="range" id="sliderV1" min="5" max="80" value="30" step="1">
+                <label style="margin-left:2px;font-size:0.75em;color:var(--subtle)">м/с</label>
+            </div>
+            <div class="slider-group">
+                <label>d =</label>
+                <span class="val" id="displayD">5</span>
+                <input type="range" id="sliderD" min="1" max="20" value="5" step="1">
+                <label style="margin-left:2px;font-size:0.75em;color:var(--subtle)">м/с²</label>
+            </div>
+            <button class="btn btn-play"  id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">&#9728; Светлая</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="scene-cell">
+            <div class="cell-title">Движение по дороге</div>
+            <div class="scene-wrap">
+                <canvas id="roadCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="right-cell">
+            <div class="formula-card">
+                <div class="card-title">Скорость на n-й секунде</div>
+                <div class="formula">v&#8345; = v&#8321; &minus; (n&minus;1)&middot;d</div>
+                <div class="calculation" id="formulaVn">v&#8321; = 30 м/с &nbsp; v&#8326; = <span class="result">5 м/с</span></div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Путь за N секунд</div>
+                <div class="formula">S&#8345; = n&middot;(v&#8321; + v&#8345;) / 2</div>
+                <div class="calculation" id="formulaSn">S&#8326; = 6&middot;(30+5)/2 = <span class="result">105 м</span></div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Автомобиль останавливается</div>
+                <div class="formula" id="formulaStop" style="color:#f87171;font-size:1.1em">
+                    через 6 с, проехав 105 м
+                </div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="terms-section">
+                <div class="terms-title">Путь за каждую секунду (м)</div>
+                <div class="terms-list" id="termsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Секунда</span>
+                <span class="value v-orange" id="statSecond">0</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Скорость</span>
+                <span class="value v-blue" id="statSpeed">30 м/с</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Пройдено</span>
+                <span class="value v-green" id="statDist">0 м</span>
+            </div>
+            <div class="status-item">
+                <span class="label">До остановки</span>
+                <span class="value v-red" id="statStop">105 м</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card info">
+                <div class="comp-title">Секунд до остановки</div>
+                <div class="comp-value" id="compStopN">n = 6 с</div>
+            </div>
+            <div class="comp-card answer">
+                <div class="comp-title">Тормозной путь</div>
+                <div class="comp-value" id="compStopS">S = 105 м</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let v1 = 30;   // initial speed (a₁)
+let d  = 5;    // deceleration per second
+
+let animTime = 0;   // 0..nStop; integer part = completed seconds
+let isPlaying = false, speed = 1, lastFrameTime = 0;
+
+// compute speed at second k (1-indexed)
+function vAtSec(k) { return v1 - (k - 1) * d; }
+// number of seconds the car moves (last k where vAtSec(k) > 0)
+function nStop() {
+    if (d <= 0) return 40;
+    return v1 % d === 0 ? v1 / d : Math.ceil(v1 / d);
+}
+// distance covered in second k
+function distInSec(k) { return Math.max(0, vAtSec(k)); }
+// partial sum S_n = n*(v1 + v_n)/2
+function sumToSec(n) {
+    const vn = Math.max(0, vAtSec(n));
+    return n * (v1 + vn) / 2;
+}
+// total stopping distance
+function totalDist() { return sumToSec(nStop()); }
+
+const sliderV1 = document.getElementById('sliderV1');
+const sliderD  = document.getElementById('sliderD');
+const btnPlay  = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
+const canvas   = document.getElementById('roadCanvas');
+const ctx      = canvas.getContext('2d');
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') {
+    document.documentElement.classList.add('light');
+    btnTheme.textContent = '\uD83C\uDF19 Тёмная';
+}
+btnTheme.addEventListener('click', () => {
+    const light = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', light ? 'light' : 'dark');
+    btnTheme.textContent = light ? '\uD83C\uDF19 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+// ─── Canvas resize ───────────────────────────────────────
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr  = window.devicePixelRatio || 1;
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+}
+
+// ─── Drawing ─────────────────────────────────────────────
+// Segment colors (hue spread from orange to red)
+const SEG_COLORS_DARK  = ['#fb923c','#f97316','#ef4444','#fbbf24','#f87171','#fcd34d','#fca5a5','#fdba74'];
+const SEG_COLORS_LIGHT = ['#c2410c','#b45309','#b91c1c','#92400e','#7c2d12','#c2410c','#9a3412','#78350f'];
+
+function drawRoad() {
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.width / dpr;
+    const H = canvas.height / dpr;
+    const light = isLight();
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Sky / background
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.45);
+    if (light) {
+        skyGrad.addColorStop(0, '#bae6fd');
+        skyGrad.addColorStop(1, '#e0f2fe');
+    } else {
+        skyGrad.addColorStop(0, '#0c1a2e');
+        skyGrad.addColorStop(1, '#1e293b');
+    }
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H * 0.45);
+
+    // Ground
+    ctx.fillStyle = light ? '#d1fae5' : '#0a1a0a';
+    ctx.fillRect(0, H * 0.45, W, H * 0.55);
+
+    // Road
+    const roadTop    = H * 0.38;
+    const roadBot    = H * 0.72;
+    const roadHeight = roadBot - roadTop;
+    const roadGrad = ctx.createLinearGradient(0, roadTop, 0, roadBot);
+    if (light) {
+        roadGrad.addColorStop(0, '#9ca3af');
+        roadGrad.addColorStop(0.5, '#6b7280');
+        roadGrad.addColorStop(1, '#9ca3af');
+    } else {
+        roadGrad.addColorStop(0, '#374151');
+        roadGrad.addColorStop(0.5, '#1f2937');
+        roadGrad.addColorStop(1, '#374151');
+    }
+    ctx.fillStyle = roadGrad;
+    ctx.fillRect(0, roadTop, W, roadHeight);
+
+    // Road edge lines
+    ctx.strokeStyle = light ? '#f9fafb' : '#f8fafc';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, roadTop); ctx.lineTo(W, roadTop); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, roadBot); ctx.lineTo(W, roadBot); ctx.stroke();
+
+    const ns = nStop();
+    const totalS = totalDist();
+
+    // Scale: total stopping distance maps to (W * 0.85)
+    const usableW = W * 0.85;
+    const startX  = W * 0.06;
+    const scale   = totalS > 0 ? usableW / totalS : 1;
+    const roadY   = (roadTop + roadBot) / 2;
+
+    const step  = Math.floor(animTime);
+    const frac  = animTime - step;
+
+    // Draw completed + current segments
+    let cumDist = 0;
+    for (let k = 1; k <= ns; k++) {
+        const segLen = distInSec(k);
+        const x0 = startX + cumDist * scale;
+        const x1 = x0 + segLen * scale;
+        const midX = (x0 + x1) / 2;
+        const colors = light ? SEG_COLORS_LIGHT : SEG_COLORS_DARK;
+        const col = colors[(k - 1) % colors.length];
+
+        // Determine visibility
+        let alpha = 0;
+        if (k < step) alpha = 1;
+        else if (k === step + 1) alpha = Math.min(1, frac * 1.5);
+        else if (k <= step + 1) alpha = 1;
+
+        if (alpha <= 0) { cumDist += segLen; continue; }
+
+        // Segment bar on road
+        const segH = roadHeight * 0.45;
+        const segY = roadY - segH / 2;
+        ctx.globalAlpha = alpha * 0.75;
+        ctx.fillStyle = col;
+        ctx.fillRect(x0 + 1, segY, (x1 - x0 - 2) * (k === step + 1 ? frac : 1), segH);
+
+        // Segment border
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x0 + 1, segY, x1 - x0 - 2, segH);
+
+        // Label above road
+        if ((x1 - x0) > 20) {
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = light ? '#1e293b' : '#f1f5f9';
+            ctx.font = `bold ${Math.min(13, (x1 - x0) * 0.4)}px system-ui`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(segLen + ' м', midX, segY - 3);
+
+            ctx.fillStyle = col;
+            ctx.font = `${Math.min(11, (x1 - x0) * 0.3)}px system-ui`;
+            ctx.textBaseline = 'top';
+            ctx.fillText(k + ' с', midX, segY + segH + 3);
+        }
+
+        ctx.globalAlpha = 1;
+        cumDist += segLen;
+    }
+
+    // Dashed center line (white)
+    ctx.setLineDash([14, 10]);
+    ctx.strokeStyle = light ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, roadY); ctx.lineTo(W, roadY); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Start marker
+    ctx.strokeStyle = light ? '#1e293b' : '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(startX, roadTop - 10); ctx.lineTo(startX, roadBot + 4); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = light ? '#1e293b' : '#94a3b8';
+    ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.fillText('0', startX, roadTop - 12);
+
+    // Car position
+    const carDistCovered = (() => {
+        let dist = 0;
+        for (let k = 1; k <= step && k <= ns; k++) dist += distInSec(k);
+        if (step < ns) dist += distInSec(step + 1) * frac;
+        return Math.min(dist, totalS);
+    })();
+    const carX = startX + carDistCovered * scale;
+    drawCar(ctx, carX, roadY, roadHeight * 0.55, light, animTime >= ns);
+}
+
+function drawCar(ctx, cx, roadY, size, light, stopped) {
+    const bw = size * 1.4, bh = size * 0.5;
+    const cabH = size * 0.35;
+    const wr = size * 0.18; // wheel radius
+
+    // Body
+    ctx.fillStyle = stopped ? (light ? '#dc2626' : '#ef4444') : (light ? '#1d4ed8' : '#3b82f6');
+    ctx.strokeStyle = light ? '#1e3a8a' : '#1e40af';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(cx - bw/2, roadY - bh/2, bw, bh, 4);
+    ctx.fill(); ctx.stroke();
+
+    // Cabin
+    ctx.fillStyle = stopped ? (light ? '#b91c1c' : '#dc2626') : (light ? '#1e40af' : '#2563eb');
+    ctx.beginPath();
+    ctx.roundRect(cx - bw * 0.28, roadY - bh/2 - cabH, bw * 0.55, cabH, [4, 4, 0, 0]);
+    ctx.fill(); ctx.stroke();
+
+    // Windows
+    ctx.fillStyle = stopped ? 'rgba(255,200,200,0.4)' : 'rgba(186,230,253,0.6)';
+    ctx.beginPath();
+    ctx.roundRect(cx - bw * 0.24, roadY - bh/2 - cabH + 4, bw * 0.46, cabH - 8, 3);
+    ctx.fill();
+
+    // Wheels
+    ctx.fillStyle = light ? '#1f2937' : '#111827';
+    ctx.strokeStyle = light ? '#6b7280' : '#4b5563';
+    ctx.lineWidth = 1;
+    for (const wx of [cx - bw * 0.28, cx + bw * 0.28]) {
+        ctx.beginPath(); ctx.arc(wx, roadY + bh/2 - wr*0.4, wr, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        // hub
+        ctx.fillStyle = light ? '#9ca3af' : '#6b7280';
+        ctx.beginPath(); ctx.arc(wx, roadY + bh/2 - wr*0.4, wr*0.4, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = light ? '#1f2937' : '#111827';
+    }
+
+    // Brake lights (red) when stopped
+    if (stopped) {
+        ctx.fillStyle = 'rgba(239,68,68,0.9)';
+        ctx.beginPath(); ctx.arc(cx - bw/2 + 4, roadY, 4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx + bw/2 - 4, roadY, 4, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Speed indicator (smoke/skid marks when braking)
+    if (!stopped && animTime > 0) {
+        const alpha = Math.min(0.5, 0.1 + 0.4 * (1 - (animTime / nStop())));
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = light ? '#6b7280' : '#9ca3af';
+        ctx.lineWidth = 2;
+        for (let i = 1; i <= 3; i++) {
+            ctx.beginPath();
+            ctx.moveTo(cx - bw/2 - i * 8, roadY + bh/2 - wr*0.4);
+            ctx.lineTo(cx - bw/2 - i * 8 - 10, roadY + bh/2 - wr*0.4);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+    }
+}
+
+// ─── UI update ───────────────────────────────────────────
+function updateUI() {
+    const ns = nStop();
+    const totalS = totalDist();
+    const step  = Math.floor(animTime);
+    const frac  = animTime - step;
+
+    // Current speed (interpolated)
+    const vStep     = Math.max(0, vAtSec(step + 1));
+    const vStepNext = step < ns ? Math.max(0, vAtSec(step + 2)) : 0;
+    const vNow      = vStep - (vStep - vStepNext) * frac;
+
+    // Current distance covered
+    let distNow = 0;
+    for (let k = 1; k <= step && k <= ns; k++) distNow += distInSec(k);
+    if (step < ns) distNow += distInSec(step + 1) * frac;
+    distNow = Math.min(distNow, totalS);
+
+    // Formula cards
+    const vns = Math.max(0, vAtSec(ns));
+    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c] ?? c).join('');
+    document.getElementById('formulaVn').innerHTML =
+        `v&#8321; = ${v1} м/с &nbsp; v${sub(ns)} = ` +
+        `<span class="result">${vns} м/с</span>`;
+    document.getElementById('formulaSn').innerHTML =
+        `S${sub(ns)} = ${ns}&middot;(${v1}+${vns})/2 = ` +
+        `<span class="result">${totalS} м</span>`;
+    document.getElementById('formulaStop').innerHTML =
+        `через <b>${ns}</b> с, проехав <b>${totalS}</b> м`;
+
+    // Progress bar (current position / total)
+    document.getElementById('progressFill').style.width =
+        (totalS > 0 ? (distNow / totalS) * 100 : 0) + '%';
+
+    // Status bar
+    document.getElementById('statSecond').textContent = step + ' / ' + ns;
+    document.getElementById('statSpeed').textContent  = Math.round(vNow) + ' м/с';
+    document.getElementById('statDist').textContent   = Math.round(distNow) + ' м';
+    document.getElementById('statStop').textContent   = totalS + ' м';
+
+    // Comparison
+    document.getElementById('compStopN').textContent = 'n = ' + ns + ' с';
+    document.getElementById('compStopS').textContent = 'S = ' + totalS + ' м';
+
+    // Header displays
+    document.getElementById('displayV1').textContent = v1;
+    document.getElementById('displayD').textContent  = d;
+
+    // Terms list (path per second)
+    const maxShow = 16;
+    let html = '';
+    for (let k = 1; k <= Math.min(ns, maxShow); k++) {
+        const dist = distInSec(k);
+        let cls;
+        if (k < step + 1)       cls = 'done';
+        else if (k === step + 1) cls = 'active';
+        else                     cls = 'future';
+        html += `<span class="term-badge ${cls}">${dist}</span>`;
+    }
+    if (ns > maxShow) html += `<span class="term-badge future">&hellip;</span>`;
+    document.getElementById('termsList').innerHTML = html;
+}
+
+function render() { drawRoad(); updateUI(); }
+
+// ─── Animation ───────────────────────────────────────────
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrameTime === 0) lastFrameTime = ts;
+    const dt = (ts - lastFrameTime) / 1000;
+    lastFrameTime = ts;
+    animTime += dt * speed * 0.8;
+    const ns = nStop();
+    if (animTime >= ns) {
+        animTime = ns;
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+// ─── Controls ────────────────────────────────────────────
+function resetAnim() {
+    isPlaying = false;
+    animTime = 0;
+    lastFrameTime = 0;
+    btnPlay.textContent = '▶ Пуск';
+    render();
+}
+
+btnPlay.addEventListener('click', () => {
+    if (animTime >= nStop()) resetAnim();
+    isPlaying = !isPlaying;
+    btnPlay.textContent = isPlaying ? '⏸ Пауза' : '▶ Пуск';
+    if (isPlaying) { lastFrameTime = 0; requestAnimationFrame(animate); }
+});
+btnReset.addEventListener('click', resetAnim);
+
+sliderV1.addEventListener('input', () => {
+    v1 = parseInt(sliderV1.value);
+    resetAnim();
+});
+sliderD.addEventListener('input', () => {
+    d = parseInt(sliderD.value);
+    resetAnim();
+});
+
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => {
+        speed = parseFloat(btn.dataset.speed);
+        document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+
+// ─── Init ─────────────────────────────────────────────────
+resizeCanvas();
+render();
+</script>
+</body>
+</html>
