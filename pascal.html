@@ -563,14 +563,16 @@ updatePanel();
 resizeCanvas();
 render();
 
-// ── Info Modal ──
-const btnInfo     = document.getElementById('btnInfo');
-const infoOverlay = document.getElementById('infoOverlay');
-const infoClose   = document.getElementById('infoClose');
-btnInfo.addEventListener('click', () => infoOverlay.classList.add('open'));
-infoClose.addEventListener('click', () => infoOverlay.classList.remove('open'));
-infoOverlay.addEventListener('click', e => { if (e.target === infoOverlay) infoOverlay.classList.remove('open'); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') infoOverlay.classList.remove('open'); });
+// ── Info Modal (defer until full DOM is parsed) ──
+document.addEventListener('DOMContentLoaded', () => {
+  const btnInfo     = document.getElementById('btnInfo');
+  const infoOverlay = document.getElementById('infoOverlay');
+  const infoClose   = document.getElementById('infoClose');
+  btnInfo.addEventListener('click', () => infoOverlay.classList.add('open'));
+  infoClose.addEventListener('click', () => infoOverlay.classList.remove('open'));
+  infoOverlay.addEventListener('click', e => { if (e.target === infoOverlay) infoOverlay.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') infoOverlay.classList.remove('open'); });
+});
 </script>
 
 <div class="info-overlay" id="infoOverlay">
