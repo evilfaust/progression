@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Турист между городами — Арифметическая прогрессия</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#3b82f6;--acc2:#1d4ed8;--acc-glow:rgba(59,130,246,.4);}
+html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#1d4ed8;--acc2:#1e3a8a;--acc-glow:rgba(29,78,216,.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
+.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
+.back-link:hover{color:var(--text);border-color:var(--muted);}
+.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
+.slider-group{display:flex;align-items:center;gap:6px;}
+.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:36px;text-align:center;}
+input[type=range]{-webkit-appearance:none;width:110px;height:6px;border-radius:3px;background:var(--track);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+.btn-reset{background:var(--btn2);color:var(--btn2-text);}
+.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
+.btn-speed.active{background:var(--acc);color:#fff;}
+.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
+.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
+.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
+.scene-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;width:100%;height:100%;}
+.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;justify-content:center;}
+.formulas-cell::-webkit-scrollbar{width:4px;}
+.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
+.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
+.formula-card .formula{font-size:1.25em;color:#a78bfa;font-family:'Courier New',monospace;margin-bottom:4px;}
+html.light .formula-card .formula{color:#6d28d9;}
+.formula-card .calculation{font-size:1.1em;color:var(--text);font-weight:600;}
+.formula-card .result{font-size:1.4em;color:#60a5fa;font-weight:700;}
+html.light .formula-card .result{color:#1d4ed8;}
+.hl-g{color:#4ade80;}html.light .hl-g{color:#15803d;}
+.hl-b{color:#60a5fa;}html.light .hl-b{color:#1d4ed8;}
+.hl-a{color:var(--acc);}
+.terms-section{background:var(--card);border-radius:12px;padding:12px 18px;border:1px solid var(--border);}
+.terms-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:6px;}
+.terms-list{display:flex;gap:5px;flex-wrap:wrap;}
+.term-badge{padding:4px 10px;border-radius:6px;font-size:.9em;font-weight:600;font-family:'Courier New',monospace;}
+.term-badge.done{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.3);}
+html.light .term-badge.done{background:rgba(29,78,216,.1);color:#1d4ed8;border-color:rgba(29,78,216,.3);}
+.term-badge.active{background:rgba(59,130,246,.25);color:#bfdbfe;border:1px solid rgba(59,130,246,.5);box-shadow:0 0 6px rgba(59,130,246,.2);}
+html.light .term-badge.active{color:#1d4ed8;}
+.term-badge.future{background:rgba(100,116,139,.15);color:var(--muted);border:1px solid rgba(100,116,139,.2);}
+.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
+.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
+.status-item{display:flex;flex-direction:column;align-items:center;}
+.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
+.status-item .value{font-size:1.3em;font-weight:700;}
+.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
+.sv-b{color:#60a5fa;}html.light .sv-b{color:#1d4ed8;}
+.sv-a{color:var(--acc);}
+.sv-p{color:#a78bfa;}html.light .sv-p{color:#6d28d9;}
+.insight-item{padding:8px 20px;font-size:.9em;color:#93c5fd;display:none;align-items:center;border-left:1px solid var(--border);max-width:340px;}
+html.light .insight-item{color:#1d4ed8;}
+.insight-item.visible{display:flex;}
+@media(max-width:700px){
+html,body{height:auto;overflow-y:auto;}
+.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
+.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
+.top-controls{gap:8px;}.slider-group .val{font-size:1.1em;min-width:28px;}
+input[type=range]{width:76px;}.btn-theme{margin-left:0;}
+.main-grid{grid-template-columns:1fr;overflow:visible;}
+.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
+.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
+.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top-bar">
+  <a href="index.html" class="back-link">← К задачам</a>
+  <h1>🧗 Турист между городами</h1>
+  <div class="top-controls">
+    <div class="slider-group">
+      <label>N =</label>
+      <span class="val" id="dN">6</span>
+      <input type="range" id="slN" min="3" max="12" step="1" value="6">
+    </div>
+    <div class="slider-group">
+      <label>a₁ =</label>
+      <span class="val" id="dA1">10</span>
+      <input type="range" id="slA1" min="3" max="25" step="1" value="10">
+      <label style="font-size:.75em;color:var(--subtle)">км</label>
+    </div>
+    <div class="slider-group">
+      <label>d =</label>
+      <span class="val" id="dD">4</span>
+      <input type="range" id="slD" min="1" max="15" step="1" value="4">
+    </div>
+    <button class="btn btn-play" id="btnPlay">▶ Пуск</button>
+    <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
+    <div style="display:flex;gap:4px">
+      <button class="btn btn-speed active" data-speed="1">1×</button>
+      <button class="btn btn-speed" data-speed="2">2×</button>
+      <button class="btn btn-speed" data-speed="0.5">½×</button>
+    </div>
+    <button class="btn btn-theme" id="btnTheme">☀</button>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="scene-cell">
+    <div class="cell-title">Сцена</div>
+    <div class="scene-wrap"><canvas id="c"></canvas></div>
+  </div>
+  <div class="formulas-cell">
+    <div class="formula-card" style="border-left:4px solid #3b82f6">
+      <div class="card-title">📝 Задача</div>
+      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">Турист шёл от одного города до другого 6 дней. В первый день прошёл 10 км, каждый следующий день проходил на 4 км больше. Сколько километров туристу предстояло пройти на третий день?</p>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Член прогрессии</div>
+      <div class="formula">aₖ = a₁ + (k−1)·d</div>
+      <div class="calculation" id="fak"></div>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Ответ — третий день</div>
+      <div class="formula">a₃ = a₁ + 2·d</div>
+      <div class="calculation" id="fa3calc"></div>
+      <div class="result" id="fa3res"></div>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Сумма (весь путь)</div>
+      <div class="formula">S = n·(a₁+aₙ)/2</div>
+      <div class="calculation" id="fS"></div>
+    </div>
+    <div class="terms-section">
+      <div class="terms-title">Км по дням</div>
+      <div class="terms-list" id="termsList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="status-items">
+    <div class="status-item"><span class="label">День</span><span class="value sv-a" id="stDay">0</span></div>
+    <div class="status-item"><span class="label">Сегодня, км</span><span class="value sv-b" id="stToday">—</span></div>
+    <div class="status-item"><span class="label">Пройдено, км</span><span class="value sv-g" id="stDist">0</span></div>
+    <div class="status-item"><span class="label">a₃ (ответ), км</span><span class="value sv-a" id="stA3">—</span></div>
+  </div>
+  <div class="insight-item" id="insight">✓ Турист прибыл!</div>
+</div>
+</div>
+
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let N=6,a1=10,d=4;
+let animTime=0,isPlaying=false,speed=1,lastFT=0;
+
+const slN=document.getElementById('slN'),slA1=document.getElementById('slA1'),slD=document.getElementById('slD');
+const dN=document.getElementById('dN'),dA1=document.getElementById('dA1'),dD=document.getElementById('dD');
+const btnPlay=document.getElementById('btnPlay'),btnReset=document.getElementById('btnReset'),btnTheme=document.getElementById('btnTheme');
+
+function isLight(){return document.documentElement.classList.contains('light');}
+function getTerms(){const t=[];for(let k=0;k<N;k++) t.push(a1+k*d);return t;}
+
+function drawCity(x,y,h,light,label){
+  const col=light?'#94a3b8':'#334155';
+  const win=light?'#fef3c7':'#fbbf24';
+  // Buildings
+  const bw=h*.25;
+  const heights=[h*.6,h*.9,h*.7,h*.5,h*.8];
+  const xs=[-bw*2.2,-bw*1.1,0,bw*1.1,bw*2.2];
+  for(let i=0;i<5;i++){
+    const bh=heights[i];
+    ctx.fillStyle=col;
+    ctx.fillRect(x+xs[i]-bw/2,y-bh,bw,bh);
+    // Windows
+    ctx.fillStyle=win;
+    const rows=Math.floor(bh/(h*.18));
+    const cols=2;
+    const ww=bw*.25,wh=h*.08;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const wx=x+xs[i]-bw/2+bw*(c+1)/(cols+1)-ww/2;
+        const wy=y-bh+h*.1+r*h*.18;
+        if(Math.random()>.3) ctx.fillRect(wx,wy,ww,wh);
+      }
+    }
+  }
+  ctx.fillStyle=light?'#475569':'#94a3b8';
+  ctx.font=`bold ${Math.min(12,h*.12)}px 'Segoe UI',sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(label,x,y+16);
+}
+
+function drawHiker(x,y,sz,light,step){
+  const bob=Math.sin(step*Math.PI*2)*sz*.08;
+  ctx.fillStyle=light?'#fde68a':'#fef3c7';
+  ctx.beginPath();ctx.arc(x,y-sz*1.8+bob,sz*.28,0,Math.PI*2);ctx.fill();
+  // Backpack
+  ctx.fillStyle=light?'#dc2626':'#ef4444';
+  ctx.fillRect(x+sz*.18,y-sz*1.55+bob,sz*.22,sz*.4);
+  // Body
+  ctx.fillStyle=light?'#2563eb':'#60a5fa';
+  ctx.fillRect(x-sz*.22,y-sz*1.5+bob,sz*.44,sz*.7);
+  // Legs (walking animation)
+  const legA=Math.sin(step*Math.PI*4)*sz*.4;
+  ctx.strokeStyle=light?'#1e3a8a':'#bfdbfe';ctx.lineWidth=sz*.14;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x,y-sz*.8+bob);ctx.lineTo(x-legA*.4,y+bob);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,y-sz*.8+bob);ctx.lineTo(x+legA*.4,y+bob);ctx.stroke();
+  // Stick / trekking pole
+  ctx.strokeStyle=light?'#6b7280':'#9ca3af';ctx.lineWidth=sz*.06;
+  ctx.beginPath();ctx.moveTo(x+sz*.2,y-sz*1.2+bob);ctx.lineTo(x+sz*.4,y+bob);ctx.stroke();
+}
+
+function render(){
+  const W=cv.width,H=cv.height;
+  if(!W||!H) return;
+  ctx.clearRect(0,0,W,H);
+  const light=isLight();
+  const terms=getTerms();
+  const S=terms.reduce((a,b)=>a+b,0);
+  const an=terms[N-1];
+  const a3=N>=3?a1+2*d:null;
+
+  // Sky gradient
+  const sg=ctx.createLinearGradient(0,0,0,H*.6);
+  sg.addColorStop(0,light?'#bfdbfe':'#0c1a35');
+  sg.addColorStop(1,light?'#e0f2fe':'#152b55');
+  ctx.fillStyle=sg;ctx.fillRect(0,0,W,H*.6);
+
+  // Mountains in bg
+  const groundY=H*.7;
+  ctx.fillStyle=light?'#c7d2fe':'#1e3a5f';
+  function mountain(px,ph){
+    ctx.beginPath();ctx.moveTo(px-ph*.8,groundY);ctx.lineTo(px,groundY-ph);ctx.lineTo(px+ph*.8,groundY);ctx.closePath();ctx.fill();
+  }
+  mountain(W*.15,H*.25);mountain(W*.35,H*.18);mountain(W*.55,H*.22);mountain(W*.75,H*.19);mountain(W*.9,H*.24);
+
+  // Ground
+  ctx.fillStyle=light?'#bbf7d0':'#052e16';
+  ctx.fillRect(0,groundY,W,H-groundY);
+
+  // Road
+  const roadL=W*.12,roadR=W*.88;
+  const roadY=groundY,roadH=H*.08;
+  ctx.fillStyle=light?'#9ca3af':'#374151';
+  ctx.fillRect(roadL,roadY,roadR-roadL,roadH);
+  // Road markings
+  ctx.strokeStyle=light?'#e5e7eb':'#6b7280';ctx.lineWidth=2;ctx.setLineDash([20,15]);
+  ctx.beginPath();ctx.moveTo(roadL,roadY+roadH/2);ctx.lineTo(roadR,roadY+roadH/2);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Day segments on road
+  const step=Math.min(Math.floor(animTime),N);
+  const frac=animTime-Math.floor(animTime);
+  let traveled=0;
+  for(let k=0;k<step;k++) traveled+=terms[k];
+  if(step<N) traveled+=terms[step]*Math.min(frac,1);
+
+  let xPos=roadL;
+  const colors=['#3b82f6','#06b6d4','#8b5cf6','#ec4899','#f59e0b','#22c55e','#ef4444','#14b8a6','#a78bfa','#fb923c','#2dd4bf','#f472b6'];
+  for(let k=0;k<N;k++){
+    const sw=(terms[k]/S)*(roadR-roadL);
+    let pf=0;
+    if(k<step) pf=1;
+    else if(k===step) pf=Math.min(frac,1);
+    if(pf>0){
+      ctx.fillStyle=colors[k%colors.length]+(light?'99':'88');
+      ctx.fillRect(xPos,roadY,sw*pf,roadH);
+      // Highlight day 3 specially
+      if(k===2&&N>=3){
+        ctx.strokeStyle=light?'#f59e0b':'#fbbf24';ctx.lineWidth=2;
+        ctx.strokeRect(xPos,roadY,sw,roadH);
+      }
+    }
+    // Tick at boundary
+    ctx.strokeStyle=light?'rgba(0,0,0,.3)':'rgba(255,255,255,.2)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(xPos,roadY);ctx.lineTo(xPos,roadY+roadH);ctx.stroke();
+    // Label
+    if(sw>22){
+      ctx.fillStyle=light?'#1e293b':'#f1f5f9';
+      ctx.font=`bold ${Math.min(10,sw*.2)}px 'Segoe UI',sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText(`${terms[k]}`,xPos+sw/2,roadY+roadH*.65);
+    }
+    xPos+=sw;
+  }
+
+  // Cities (drawn after segments)
+  const cityH=Math.min(H*.38,110);
+  // Re-seed random for deterministic windows
+  Math.seedrandom=()=>{};
+  drawCity(roadL,groundY,cityH,light,'Город A');
+  drawCity(roadR,groundY,cityH,light,'Город B');
+
+  // Hiker
+  const hikerX=roadL+(traveled/S)*(roadR-roadL);
+  const sz=Math.min(H*.07,22);
+  drawHiker(hikerX,roadY,sz,light,animTime);
+
+  // Total distance arrow
+  ctx.strokeStyle=light?'#3b82f6':'#60a5fa';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(roadL,roadY-14);ctx.lineTo(roadR,roadY-14);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=light?'#1d4ed8':'#93c5fd';
+  ctx.font=`${Math.min(11,W*.018)}px 'Segoe UI',sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(`S = ${Math.round(S)} км`,roadL+(roadR-roadL)/2,roadY-18);
+
+  // UI updates
+  document.getElementById('stDay').textContent=step<N?step:N;
+  document.getElementById('stToday').textContent=step<N?terms[step]:terms[N-1];
+  document.getElementById('stDist').textContent=traveled.toFixed(1);
+  document.getElementById('stA3').textContent=a3!==null?a3:'—';
+  document.getElementById('insight').classList.toggle('visible',animTime>=N);
+
+  document.getElementById('fak').innerHTML=`a<sub>k</sub> = ${a1} + (k−1)·${d}`;
+  if(a3!==null){
+    document.getElementById('fa3calc').innerHTML=`a₃ = ${a1} + 2·${d} = ${a1} + ${2*d}`;
+    document.getElementById('fa3res').innerHTML=`a₃ = <span class="hl-b">${a3}</span> км`;
+  }
+  document.getElementById('fS').innerHTML=`S = ${N}·(${a1}+${an})/2 = <span class="hl-g">${Math.round(S)}</span> км`;
+
+  const tl=document.getElementById('termsList');tl.innerHTML='';
+  for(let k=0;k<N;k++){
+    const b=document.createElement('span');
+    b.className='term-badge '+(k<step?'done':k===step?'active':'future');
+    if(k===2&&N>=3) b.style.outline=`2px solid ${light?'#f59e0b':'#fbbf24'}`;
+    b.textContent=`a${k+1}=${terms[k]}`;tl.appendChild(b);
+  }
+}
+
+function animate(ts){
+  if(!isPlaying) return;
+  if(!lastFT) lastFT=ts;
+  animTime+=((ts-lastFT)/1000)*speed*.8;lastFT=ts;
+  if(animTime>=N){animTime=N;isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  render();
+  if(isPlaying) requestAnimationFrame(animate);
+}
+
+btnPlay.addEventListener('click',()=>{
+  if(isPlaying){isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  else{if(animTime>=N) animTime=0;isPlaying=true;lastFT=0;btnPlay.textContent='⏸ Пауза';requestAnimationFrame(animate);}
+});
+btnReset.addEventListener('click',()=>{isPlaying=false;animTime=0;lastFT=0;btnPlay.textContent='▶ Пуск';render();});
+btnTheme.addEventListener('click',()=>{const l=document.documentElement.classList.toggle('light');btnTheme.textContent=l?'🌙':'☀';render();});
+document.querySelectorAll('.btn-speed').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.btn-speed').forEach(b=>b.classList.remove('active'));btn.classList.add('active');speed=parseFloat(btn.dataset.speed);}));
+slN.addEventListener('input',()=>{N=parseInt(slN.value);dN.textContent=N;animTime=Math.min(animTime,N);render();});
+slA1.addEventListener('input',()=>{a1=parseInt(slA1.value);dA1.textContent=a1;animTime=Math.min(animTime,N);render();});
+slD.addEventListener('input',()=>{d=parseInt(slD.value);dD.textContent=d;animTime=Math.min(animTime,N);render();});
+window.addEventListener('resize',()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;render();});
+setTimeout(()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;animTime=0;render();},50);
+</script>
+</body>
+</html>

@@ -243,6 +243,48 @@
         .section-heading.gp { color: #4ade80; }
         html.light .section-heading.ap { color: #1d4ed8; }
         html.light .section-heading.gp { color: #15803d; }
+        .section-heading.grade-9 { color: #f97316; }
+        .section-heading.grade-11 { color: #a78bfa; }
+        html.light .section-heading.grade-9 { color: #c2410c; }
+        html.light .section-heading.grade-11 { color: #6d28d9; }
+        .grade-badge {
+            font-size: 0.6em;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+        .badge-9 { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+        .badge-11 { background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+        html.light .badge-9 { background: rgba(194,65,12,0.1); color: #c2410c; border-color: rgba(194,65,12,0.3); }
+        html.light .badge-11 { background: rgba(109,40,217,0.1); color: #6d28d9; border-color: rgba(109,40,217,0.3); }
+        /* 11th grade card icon backgrounds */
+        .card-icon.fence  { background: linear-gradient(135deg, #052e16, #0f2d0a); }
+        .card-icon.snail  { background: linear-gradient(135deg, #042f2e, #0f2926); }
+        .card-icon.tourist{ background: linear-gradient(135deg, #0c1a35, #162040); }
+        .card-icon.postcards{ background: linear-gradient(135deg, #500724, #2d0618); }
+        .card-icon.vasya  { background: linear-gradient(135deg, #2e1065, #1a0a3d); }
+        .card-icon.bubbly { background: linear-gradient(135deg, #431407, #1c0a02); }
+        html.light .card-icon.fence   { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+        html.light .card-icon.snail   { background: linear-gradient(135deg, #ccfbf1, #99f6e4); }
+        html.light .card-icon.tourist { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+        html.light .card-icon.postcards{ background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+        html.light .card-icon.vasya   { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
+        html.light .card-icon.bubbly  { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .card-body h2.fence-title   { color: #4ade80; }
+        .card-body h2.snail-title   { color: #2dd4bf; }
+        .card-body h2.tourist-title { color: #60a5fa; }
+        .card-body h2.postcards-title{ color: #f472b6; }
+        .card-body h2.vasya-title   { color: #a78bfa; }
+        .card-body h2.bubbly-title  { color: #fbbf24; }
+        html.light .card-body h2.fence-title   { color: #15803d; }
+        html.light .card-body h2.snail-title   { color: #0f766e; }
+        html.light .card-body h2.tourist-title { color: #1d4ed8; }
+        html.light .card-body h2.postcards-title{ color: #be185d; }
+        html.light .card-body h2.vasya-title   { color: #6d28d9; }
+        html.light .card-body h2.bubbly-title  { color: #d97706; }
 
         .cards { padding: 12px 20px 16px; }
 
@@ -272,9 +314,10 @@
 
 <div class="hero">
     <h1>Прогрессии</h1>
-    <p>Интерактивные модели для изучения арифметических и геометрических прогрессий. Нажмите на задачу, чтобы открыть модель.</p>
+    <p>Интерактивные модели для изучения арифметических и геометрических прогрессий.<br>Нажмите на задачу, чтобы открыть модель.</p>
 </div>
 
+<h2 class="section-heading grade-9">9 класс <span class="grade-badge badge-9">ОГЭ</span></h2>
 <h2 class="section-heading ap">Арифметическая прогрессия</h2>
 <div class="cards">
 
@@ -447,6 +490,116 @@
         <div class="card-footer">
             <span class="open-btn">Открыть модель &rarr;</span>
             <span class="answer">a&#8327; = 10 мг</span>
+        </div>
+    </a>
+
+</div>
+
+<h2 class="section-heading grade-11" style="margin-top:40px">11 класс <span class="grade-badge badge-11">ЕГЭ база</span></h2>
+<h2 class="section-heading ap">Арифметическая прогрессия</h2>
+<div class="cards">
+
+    <a class="card" href="fence.html">
+        <div class="card-icon fence">🖌</div>
+        <div class="card-body">
+            <h2 class="fence-title">Маляры красят забор</h2>
+            <p class="task-text">Бригада красит забор длиной 270 м, ежедневно увеличивая норму на одно и то же число метров. За первый и последний день в сумме покрасили 90 м. Сколько дней красили забор?</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">S = 270</span>
+                    <span class="param-tag">a₁+aₙ = 90</span>
+                </div>
+                <span class="answer">n = 6</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="card" href="snail.html">
+        <div class="card-icon snail">🐌</div>
+        <div class="card-body">
+            <h2 class="snail-title">Улитка между деревьями</h2>
+            <p class="task-text">Улитка ползёт от одного дерева до другого, каждый день проползая на одинаковое расстояние больше. За первый и последний дни в сумме — 10 м. Расстояние между деревьями 150 м. Сколько дней в пути?</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">S = 150</span>
+                    <span class="param-tag">a₁+aₙ = 10</span>
+                </div>
+                <span class="answer">n = 30</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="card" href="tourist.html">
+        <div class="card-icon tourist">🧗</div>
+        <div class="card-body">
+            <h2 class="tourist-title">Турист между городами</h2>
+            <p class="task-text">Турист идёт из одного города в другой, каждый день проходя больше на одно и то же расстояние. В первый день прошёл 10 км, всего 6 дней, расстояние 120 км. Сколько км прошёл за третий день?</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">a₁ = 10</span>
+                    <span class="param-tag">n = 6</span>
+                    <span class="param-tag">S = 120</span>
+                </div>
+                <span class="answer">a₃ = 18</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="card" href="postcards.html">
+        <div class="card-icon postcards">💌</div>
+        <div class="card-body">
+            <h2 class="postcards-title">Открытки Веры</h2>
+            <p class="task-text">Вере надо подписать 640 открыток. Ежедневно она подписывает на одинаковое количество больше. В первый день — 10 открыток, вся работа за 16 дней. Сколько открыток за четвёртый день?</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">a₁ = 10</span>
+                    <span class="param-tag">n = 16</span>
+                    <span class="param-tag">S = 640</span>
+                </div>
+                <span class="answer">a₄ = 22</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="card" href="vasya.html">
+        <div class="card-icon vasya">📚</div>
+        <div class="card-body">
+            <h2 class="vasya-title">Задачи Васи</h2>
+            <p class="task-text">Васе надо решить 525 задач. Ежедневно он решает на одинаковое количество задач больше. В первый день решил 5 задач, справился за 14 дней. Сколько задач решил в последний день?</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">a₁ = 5</span>
+                    <span class="param-tag">n = 14</span>
+                    <span class="param-tag">S = 525</span>
+                </div>
+                <span class="answer">aₙ = 70</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+</div>
+
+<h2 class="section-heading gp">Геометрическая прогрессия</h2>
+<div class="cards">
+
+    <a class="card" href="bubbly.html">
+        <div class="card-icon bubbly">💰</div>
+        <div class="card-body">
+            <h2 class="bubbly-title">Прибыль Бубликова</h2>
+            <p class="task-text">Бизнесмен Бубликов получил в 2000 году прибыль 5000 рублей. Каждый следующий год его прибыль увеличивалась на 300% по сравнению с предыдущим. Сколько рублей заработал за 2003 год?</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">a₁ = 5000</span>
+                    <span class="param-tag">q = 4</span>
+                </div>
+                <span class="answer">a₄ = 320 000</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
         </div>
     </a>
 

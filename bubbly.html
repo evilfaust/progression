@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Прибыль Бубликова — Геометрическая прогрессия</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#f59e0b;--acc2:#d97706;--acc-glow:rgba(245,158,11,.4);}
+html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#d97706;--acc2:#92400e;--acc-glow:rgba(217,119,6,.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
+.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
+.back-link:hover{color:var(--text);border-color:var(--muted);}
+.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
+.slider-group{display:flex;align-items:center;gap:6px;}
+.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:58px;text-align:center;}
+input[type=range]{-webkit-appearance:none;width:110px;height:6px;border-radius:3px;background:var(--track);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+.btn-reset{background:var(--btn2);color:var(--btn2-text);}
+.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
+.btn-speed.active{background:var(--acc);color:#fff;}
+.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
+.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
+.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
+.scene-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;width:100%;height:100%;}
+.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;justify-content:center;}
+.formulas-cell::-webkit-scrollbar{width:4px;}
+.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
+.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
+.formula-card .formula{font-size:1.25em;color:#a78bfa;font-family:'Courier New',monospace;margin-bottom:4px;}
+html.light .formula-card .formula{color:#6d28d9;}
+.formula-card .calculation{font-size:1.05em;color:var(--text);font-weight:600;line-height:1.5;}
+.formula-card .result{font-size:1.4em;color:#fbbf24;font-weight:700;}
+html.light .formula-card .result{color:#d97706;}
+.hl-g{color:#4ade80;}html.light .hl-g{color:#15803d;}
+.hl-y{color:#fbbf24;}html.light .hl-y{color:#d97706;}
+.hl-b{color:#60a5fa;}html.light .hl-b{color:#1d4ed8;}
+.hl-a{color:var(--acc);}
+.note-card{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:12px 18px;font-size:.9em;color:var(--muted);line-height:1.5;}
+html.light .note-card{background:rgba(217,119,6,.06);}
+.terms-section{background:var(--card);border-radius:12px;padding:12px 18px;border:1px solid var(--border);}
+.terms-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:6px;}
+.terms-list{display:flex;gap:5px;flex-wrap:wrap;}
+.term-badge{padding:4px 10px;border-radius:6px;font-size:.85em;font-weight:600;font-family:'Courier New',monospace;}
+.term-badge.done{background:rgba(245,158,11,.15);color:#fcd34d;border:1px solid rgba(245,158,11,.3);}
+html.light .term-badge.done{background:rgba(217,119,6,.1);color:#d97706;border-color:rgba(217,119,6,.3);}
+.term-badge.active{background:rgba(245,158,11,.25);color:#fde68a;border:1px solid rgba(245,158,11,.5);box-shadow:0 0 8px rgba(245,158,11,.25);}
+html.light .term-badge.active{color:#d97706;}
+.term-badge.future{background:rgba(100,116,139,.15);color:var(--muted);border:1px solid rgba(100,116,139,.2);}
+.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
+.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
+.status-item{display:flex;flex-direction:column;align-items:center;}
+.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
+.status-item .value{font-size:1.3em;font-weight:700;}
+.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
+.sv-y{color:#fbbf24;}html.light .sv-y{color:#d97706;}
+.sv-a{color:var(--acc);}
+.sv-b{color:#60a5fa;}html.light .sv-b{color:#1d4ed8;}
+.insight-item{padding:8px 20px;font-size:.9em;color:#fcd34d;display:none;align-items:center;border-left:1px solid var(--border);max-width:380px;}
+html.light .insight-item{color:#d97706;}
+.insight-item.visible{display:flex;}
+@media(max-width:700px){
+html,body{height:auto;overflow-y:auto;}
+.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
+.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
+.top-controls{gap:8px;}.slider-group .val{font-size:1.1em;min-width:50px;}
+input[type=range]{width:76px;}.btn-theme{margin-left:0;}
+.main-grid{grid-template-columns:1fr;overflow:visible;}
+.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
+.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
+.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top-bar">
+  <a href="index.html" class="back-link">← К задачам</a>
+  <h1>💰 Прибыль Бубликова</h1>
+  <div class="top-controls">
+    <div class="slider-group">
+      <label>N =</label>
+      <span class="val" id="dN">4</span>
+      <input type="range" id="slN" min="2" max="7" step="1" value="4">
+      <label style="font-size:.75em;color:var(--subtle)">лет</label>
+    </div>
+    <div class="slider-group">
+      <label>a₁ =</label>
+      <span class="val" id="dA1">5000</span>
+      <input type="range" id="slA1" min="500" max="10000" step="500" value="5000">
+      <label style="font-size:.75em;color:var(--subtle)">₽</label>
+    </div>
+    <div class="slider-group">
+      <label>q =</label>
+      <span class="val" id="dQ">4</span>
+      <input type="range" id="slQ" min="2" max="6" step="1" value="4">
+    </div>
+    <button class="btn btn-play" id="btnPlay">▶ Пуск</button>
+    <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
+    <div style="display:flex;gap:4px">
+      <button class="btn btn-speed active" data-speed="1">1×</button>
+      <button class="btn btn-speed" data-speed="2">2×</button>
+      <button class="btn btn-speed" data-speed="0.5">½×</button>
+    </div>
+    <button class="btn btn-theme" id="btnTheme">☀</button>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="scene-cell">
+    <div class="cell-title">Рост прибыли</div>
+    <div class="scene-wrap"><canvas id="c"></canvas></div>
+  </div>
+  <div class="formulas-cell">
+    <div class="formula-card" style="border-left:4px solid #f59e0b">
+      <div class="card-title">📝 Задача</div>
+      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">Прибыль предпринимателя Бубликова каждый год увеличивается в 4 раза. В первый год прибыль составила 5&nbsp;000 руб. Какова прибыль Бубликова в четвёртый год работы?</p>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Геометрическая прогрессия</div>
+      <div class="formula">aₙ = a₁ · q^(n−1)</div>
+      <div class="calculation" id="fan"></div>
+      <div class="result" id="fanres"></div>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Рост «на 300%» означает</div>
+      <div class="formula">+300% → ×4 (q = 4)</div>
+      <div class="calculation" id="fgrowth"></div>
+    </div>
+    <div class="note-card" id="fnote">
+      💡 При q=4 каждый следующий год прибыль <strong>в 4 раза</strong> больше предыдущего. За 4 года рост в <span id="ftimes">—</span> раз!
+    </div>
+    <div class="terms-section">
+      <div class="terms-title">Прибыль по годам</div>
+      <div class="terms-list" id="termsList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="status-items">
+    <div class="status-item"><span class="label">Год</span><span class="value sv-a" id="stYear">—</span></div>
+    <div class="status-item"><span class="label">Прибыль, ₽</span><span class="value sv-y" id="stProfit">—</span></div>
+    <div class="status-item"><span class="label">×q от прошлого</span><span class="value sv-b" id="stMult">—</span></div>
+    <div class="status-item"><span class="label">aₙ (ответ), ₽</span><span class="value sv-y" id="stAn">—</span></div>
+  </div>
+  <div class="insight-item" id="insight">✓ Бубликов разбогател! 🤑</div>
+</div>
+</div>
+
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let N=4,a1=5000,q=4;
+let animTime=0,isPlaying=false,speed=1,lastFT=0;
+
+const slN=document.getElementById('slN'),slA1=document.getElementById('slA1'),slQ=document.getElementById('slQ');
+const dN=document.getElementById('dN'),dA1=document.getElementById('dA1'),dQ=document.getElementById('dQ');
+const btnPlay=document.getElementById('btnPlay'),btnReset=document.getElementById('btnReset'),btnTheme=document.getElementById('btnTheme');
+
+function isLight(){return document.documentElement.classList.contains('light');}
+function getTerms(){const t=[];for(let k=0;k<N;k++) t.push(a1*Math.pow(q,k));return t;}
+
+function fmt(v){
+  if(v>=1000000) return (v/1000000).toFixed(1)+'M';
+  if(v>=1000) return (v/1000).toFixed(1)+'K';
+  return v.toLocaleString('ru');
+}
+
+// Coin bounce parameters per bar
+const coinBounce=[];
+
+function drawCoins(x,y,r,count,light){
+  const c=light?'#fbbf24':'#f59e0b';
+  const cs=light?'#d97706':'#b45309';
+  const n=Math.min(count,8);
+  for(let i=0;i<n;i++){
+    const cy=y-i*r*1.2;
+    ctx.beginPath();ctx.ellipse(x,cy,r,r*.35,0,0,Math.PI*2);
+    ctx.fillStyle=c;ctx.fill();
+    ctx.strokeStyle=cs;ctx.lineWidth=1;ctx.stroke();
+    // Dollar sign
+    if(r>8){
+      ctx.fillStyle=cs;
+      ctx.font=`bold ${r*.8}px sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText('₽',x,cy+r*.12);
+    }
+  }
+}
+
+function render(){
+  const W=cv.width,H=cv.height;
+  if(!W||!H) return;
+  ctx.clearRect(0,0,W,H);
+  const light=isLight();
+  const terms=getTerms();
+  const an=terms[N-1];
+  const maxVal=terms[N-1];
+
+  const step=Math.min(Math.floor(animTime),N);
+  const frac=animTime-Math.floor(animTime);
+
+  // Background
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,light?'#fffbeb':'#1a0a00');
+  bg.addColorStop(1,light?'#fef3c7':'#0f172a');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // Chart
+  const padL=60,padR=20,padT=30,padB=60;
+  const cW=W-padL-padR,cH=H-padT-padB;
+  const barGap=cW*.04;
+  const barW=(cW-barGap*(N+1))/N;
+
+  // Year labels (2000, 2001, ...)
+  const startYear=2000;
+
+  // Grid
+  ctx.strokeStyle=light?'rgba(180,140,0,.15)':'rgba(245,158,11,.1)';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const gy=padT+cH*(1-i/5);
+    ctx.beginPath();ctx.moveTo(padL,gy);ctx.lineTo(padL+cW,gy);ctx.stroke();
+    // Log-scale labels based on max value
+    const lv=maxVal*i/5;
+    ctx.fillStyle=light?'#92400e':'#d97706';
+    ctx.font=`${Math.min(9,W*.014)}px 'Segoe UI',sans-serif`;
+    ctx.textAlign='right';
+    ctx.fillText(fmt(lv),padL-4,gy+4);
+  }
+
+  for(let k=0;k<N;k++){
+    const x=padL+barGap*(k+1)+k*barW;
+    const fullH=(terms[k]/maxVal)*cH;
+    const isActive=(k===step);
+    const isDone=k<step;
+
+    // Bar background
+    ctx.fillStyle=light?'rgba(245,158,11,.08)':'rgba(245,158,11,.05)';
+    ctx.fillRect(x,padT+cH-fullH,barW,fullH);
+
+    // Filled portion
+    let fH=0;
+    if(isDone) fH=fullH;
+    else if(isActive) fH=fullH*Math.min(frac,1);
+
+    if(fH>0){
+      const grad=ctx.createLinearGradient(0,padT+cH-fH,0,padT+cH);
+      grad.addColorStop(0,light?'#fbbf24':'#f59e0b');
+      grad.addColorStop(0.5,light?'#f59e0b':'#d97706');
+      grad.addColorStop(1,light?'#d97706':'#92400e');
+      ctx.fillStyle=grad;
+      ctx.fillRect(x,padT+cH-fH,barW,fH);
+
+      // Glow on active bar
+      if(isActive){
+        ctx.shadowColor='rgba(245,158,11,.5)';
+        ctx.shadowBlur=16;
+        ctx.fillRect(x,padT+cH-fH,barW,fH);
+        ctx.shadowBlur=0;
+      }
+
+      // Value label
+      ctx.fillStyle=light?'#92400e':'#fde68a';
+      ctx.font=`bold ${Math.min(11,barW*.35)}px 'Segoe UI',sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText(fmt(Math.round(terms[k]*Math.min(isDone?1:frac,1))),x+barW/2,padT+cH-fH-5);
+    }
+
+    // Border
+    ctx.strokeStyle=light?'rgba(245,158,11,.3)':'rgba(245,158,11,.2)';ctx.lineWidth=1;
+    ctx.strokeRect(x,padT+cH-fullH,barW,fullH);
+
+    // Coins on top (for done bars)
+    if(isDone||isActive){
+      const coinR=Math.min(barW*.14,10);
+      const nCoins=Math.min(8,Math.ceil(Math.log(terms[k]/a1+1)));
+      drawCoins(x+barW/2,padT+cH-fH-coinR,coinR,nCoins,light);
+    }
+
+    // Year label
+    ctx.fillStyle=light?'#78350f':'#d97706';
+    ctx.font=`bold ${Math.min(12,barW*.38)}px 'Segoe UI',sans-serif`;
+    ctx.textAlign='center';
+    ctx.fillText(startYear+k,x+barW/2,padT+cH+16);
+
+    // ×q arrows between bars
+    if(k<N-1&&k<step&&barGap>8){
+      const mx=x+barW+barGap/2;
+      const my=padT+cH*0.35;
+      ctx.fillStyle=light?'#d97706':'#fbbf24';
+      ctx.font=`bold ${Math.min(11,W*.016)}px 'Segoe UI',sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText(`×${q}`,mx,my);
+      ctx.beginPath();
+      ctx.moveTo(mx-6,my+4);ctx.lineTo(mx+6,my+4);ctx.lineTo(mx+2,my+10);ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // Axes
+  ctx.strokeStyle=light?'#d97706':'#92400e';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(padL,padT);ctx.lineTo(padL,padT+cH);ctx.lineTo(padL+cW,padT+cH);ctx.stroke();
+
+  // UI
+  const curYear=step<N?startYear+step:startYear+N-1;
+  const curProfit=step<N?Math.round(terms[step]*Math.min(frac,1)):terms[N-1];
+  document.getElementById('stYear').textContent=curYear;
+  document.getElementById('stProfit').textContent=fmt(curProfit);
+  document.getElementById('stMult').textContent=step>0?`×${q}`:'—';
+  document.getElementById('stAn').textContent=fmt(an);
+  document.getElementById('insight').classList.toggle('visible',animTime>=N);
+
+  document.getElementById('fan').innerHTML=`a${N} = ${fmt(a1)} · ${q}^(${N}−1) = ${fmt(a1)} · ${Math.pow(q,N-1)}`;
+  document.getElementById('fanres').innerHTML=`a${N} = <span class="hl-y">${fmt(an)}</span> ₽`;
+  document.getElementById('fgrowth').innerHTML=`${q-1}00% роста: было → стало = 1 + ${(q-1)} = <span class="hl-y">${q}</span>`;
+  document.getElementById('ftimes').textContent=Math.pow(q,N-1).toLocaleString('ru');
+
+  const tl=document.getElementById('termsList');tl.innerHTML='';
+  for(let k=0;k<N;k++){
+    const b=document.createElement('span');
+    b.className='term-badge '+(k<step?'done':k===step?'active':'future');
+    b.textContent=`${startYear+k}: ${fmt(terms[k])}`;tl.appendChild(b);
+  }
+}
+
+function animate(ts){
+  if(!isPlaying) return;
+  if(!lastFT) lastFT=ts;
+  animTime+=((ts-lastFT)/1000)*speed*.6;lastFT=ts;
+  if(animTime>=N){animTime=N;isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  render();
+  if(isPlaying) requestAnimationFrame(animate);
+}
+
+btnPlay.addEventListener('click',()=>{
+  if(isPlaying){isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  else{if(animTime>=N) animTime=0;isPlaying=true;lastFT=0;btnPlay.textContent='⏸ Пауза';requestAnimationFrame(animate);}
+});
+btnReset.addEventListener('click',()=>{isPlaying=false;animTime=0;lastFT=0;btnPlay.textContent='▶ Пуск';render();});
+btnTheme.addEventListener('click',()=>{const l=document.documentElement.classList.toggle('light');btnTheme.textContent=l?'🌙':'☀';render();});
+document.querySelectorAll('.btn-speed').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.btn-speed').forEach(b=>b.classList.remove('active'));btn.classList.add('active');speed=parseFloat(btn.dataset.speed);}));
+slN.addEventListener('input',()=>{N=parseInt(slN.value);dN.textContent=N;animTime=Math.min(animTime,N);render();});
+slA1.addEventListener('input',()=>{a1=parseInt(slA1.value);dA1.textContent=a1;animTime=Math.min(animTime,N);render();});
+slQ.addEventListener('input',()=>{q=parseInt(slQ.value);dQ.textContent=q;render();});
+window.addEventListener('resize',()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;render();});
+setTimeout(()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;animTime=0;render();},50);
+</script>
+</body>
+</html>

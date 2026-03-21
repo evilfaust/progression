@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Маляры красят забор — Арифметическая прогрессия</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#22c55e;--acc2:#16a34a;--acc-glow:rgba(34,197,94,0.4);}
+html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#16a34a;--acc2:#14532d;--acc-glow:rgba(22,163,74,0.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
+.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
+.back-link:hover{color:var(--text);border-color:var(--muted);}
+.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
+.slider-group{display:flex;align-items:center;gap:6px;}
+.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:40px;text-align:center;}
+input[type=range]{-webkit-appearance:none;width:110px;height:6px;border-radius:3px;background:var(--track);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+.btn-reset{background:var(--btn2);color:var(--btn2-text);}
+.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
+.btn-speed.active{background:var(--acc);color:#fff;}
+.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
+.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
+.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
+.scene-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;width:100%;height:100%;}
+.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;justify-content:center;}
+.formulas-cell::-webkit-scrollbar{width:4px;}
+.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
+.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
+.formula-card .formula{font-size:1.25em;color:#a78bfa;font-family:'Courier New',monospace;margin-bottom:4px;}
+html.light .formula-card .formula{color:#6d28d9;}
+.formula-card .calculation{font-size:1.1em;color:var(--text);font-weight:600;}
+.formula-card .result{font-size:1.4em;color:#4ade80;font-weight:700;}
+html.light .formula-card .result{color:#15803d;}
+.formula-card .hl-g{color:#4ade80;}html.light .formula-card .hl-g{color:#15803d;}
+.formula-card .hl-b{color:#60a5fa;}html.light .formula-card .hl-b{color:#1d4ed8;}
+.formula-card .hl-a{color:var(--acc);}
+.terms-section{background:var(--card);border-radius:12px;padding:12px 18px;border:1px solid var(--border);}
+.terms-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:6px;}
+.terms-list{display:flex;gap:5px;flex-wrap:wrap;}
+.term-badge{padding:4px 10px;border-radius:6px;font-size:.9em;font-weight:600;font-family:'Courier New',monospace;}
+.term-badge.done{background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.3);}
+html.light .term-badge.done{background:rgba(22,163,74,.12);color:#15803d;border-color:rgba(22,163,74,.35);}
+.term-badge.active{background:rgba(34,197,94,.25);color:#86efac;border:1px solid rgba(34,197,94,.5);box-shadow:0 0 6px rgba(34,197,94,.2);}
+html.light .term-badge.active{color:#15803d;border-color:rgba(22,163,74,.5);}
+.term-badge.future{background:rgba(100,116,139,.15);color:var(--muted);border:1px solid rgba(100,116,139,.2);}
+.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
+.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
+.status-item{display:flex;flex-direction:column;align-items:center;}
+.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
+.status-item .value{font-size:1.3em;font-weight:700;}
+.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
+.sv-b{color:#60a5fa;}html.light .sv-b{color:#1d4ed8;}
+.sv-a{color:var(--acc);}
+.sv-p{color:#a78bfa;}html.light .sv-p{color:#6d28d9;}
+.insight-item{padding:8px 20px;font-size:.9em;color:#86efac;display:none;align-items:center;border-left:1px solid var(--border);max-width:340px;}
+html.light .insight-item{color:#15803d;}
+.insight-item.visible{display:flex;}
+@media(max-width:700px){
+html,body{height:auto;overflow-y:auto;}
+.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
+.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
+.top-controls{gap:8px;}.slider-group .val{font-size:1.1em;min-width:28px;}
+input[type=range]{width:76px;}.btn-theme{margin-left:0;}
+.main-grid{grid-template-columns:1fr;overflow:visible;}
+.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
+.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
+.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top-bar">
+  <a href="index.html" class="back-link">← К задачам</a>
+  <h1>🖌 Маляры красят забор</h1>
+  <div class="top-controls">
+    <div class="slider-group">
+      <label>S =</label>
+      <span class="val" id="dS">270</span>
+      <input type="range" id="slS" min="90" max="400" step="10" value="270">
+      <label style="font-size:.75em;color:var(--subtle)">м</label>
+    </div>
+    <div class="slider-group">
+      <label>a₁+aₙ =</label>
+      <span class="val" id="dSum">90</span>
+      <input type="range" id="slSum" min="30" max="150" step="5" value="90">
+    </div>
+    <div class="slider-group">
+      <label>a₁ =</label>
+      <span class="val" id="dA1">15</span>
+      <input type="range" id="slA1" min="5" max="40" step="1" value="15">
+    </div>
+    <button class="btn btn-play" id="btnPlay">▶ Пуск</button>
+    <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
+    <div style="display:flex;gap:4px">
+      <button class="btn btn-speed active" data-speed="1">1×</button>
+      <button class="btn btn-speed" data-speed="2">2×</button>
+      <button class="btn btn-speed" data-speed="0.5">½×</button>
+    </div>
+    <button class="btn btn-theme" id="btnTheme">☀</button>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="scene-cell">
+    <div class="cell-title">Сцена</div>
+    <div class="scene-wrap"><canvas id="c"></canvas></div>
+  </div>
+  <div class="formulas-cell">
+    <div class="formula-card" style="border-left:4px solid #22c55e">
+      <div class="card-title">📝 Задача</div>
+      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">Маляры красят деревянный забор из 270 секций. В первый день покрасили 15 секций, каждый следующий день — на одинаковое количество больше. Сумма секций за первый и последний день равна 90. За сколько дней покрасят весь забор?</p>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Условие задачи</div>
+      <div class="formula">S = n·(a₁+aₙ)/2</div>
+      <div class="calculation" id="fcond"></div>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Ответ — количество дней</div>
+      <div class="formula">n = 2S / (a₁+aₙ)</div>
+      <div class="calculation" id="fcalc"></div>
+      <div class="result" id="fresult"></div>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Шаг прогрессии</div>
+      <div class="formula">d = (aₙ−a₁)/(n−1)</div>
+      <div class="calculation" id="fd"></div>
+    </div>
+    <div class="terms-section">
+      <div class="terms-title">Метры по дням</div>
+      <div class="terms-list" id="termsList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="status-items">
+    <div class="status-item"><span class="label">День</span><span class="value sv-a" id="stDay">0</span></div>
+    <div class="status-item"><span class="label">Сегодня, м</span><span class="value sv-b" id="stToday">—</span></div>
+    <div class="status-item"><span class="label">Покрашено, м</span><span class="value sv-g" id="stPainted">0</span></div>
+    <div class="status-item"><span class="label">Всего, м</span><span class="value sv-p" id="stTotal">—</span></div>
+    <div class="status-item"><span class="label">Дней (ответ)</span><span class="value sv-a" id="stN">—</span></div>
+  </div>
+  <div class="insight-item" id="insight">✓ Весь забор покрашен!</div>
+</div>
+</div>
+
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let S=270, sumFL=90, a1=15;
+let animTime=0, isPlaying=false, speed=1, lastFT=0;
+
+const slS=document.getElementById('slS'), slSum=document.getElementById('slSum'), slA1=document.getElementById('slA1');
+const dS=document.getElementById('dS'), dSum=document.getElementById('dSum'), dA1=document.getElementById('dA1');
+const btnPlay=document.getElementById('btnPlay'), btnReset=document.getElementById('btnReset'), btnTheme=document.getElementById('btnTheme');
+
+function getN(){ return 2*S/sumFL; }
+function isLight(){ return document.documentElement.classList.contains('light'); }
+
+function getTerms(N){
+  const n=Math.round(N);
+  const an=sumFL-a1;
+  if(n<=1) return [a1];
+  const d=(an-a1)/(n-1);
+  const t=[];
+  for(let k=0;k<n;k++) t.push(a1+k*d);
+  return t;
+}
+
+function drawPainter(x,y,sz,light){
+  // Body
+  ctx.fillStyle=light?'#d1fae5':'#1e3a2e';
+  ctx.fillRect(x-sz*.3,y-sz*.9,sz*.6,sz*.75);
+  // Head
+  ctx.beginPath();ctx.arc(x,y-sz,sz*.3,0,Math.PI*2);
+  ctx.fillStyle=light?'#fde68a':'#fef3c7';ctx.fill();
+  // Hat
+  ctx.fillStyle=light?'#16a34a':'#22c55e';
+  ctx.fillRect(x-sz*.35,y-sz*1.35,sz*.7,sz*.2);
+  // Roller arm
+  ctx.strokeStyle=light?'#374151':'#94a3b8';ctx.lineWidth=sz*.1;
+  ctx.beginPath();ctx.moveTo(x+sz*.2,y-sz*.6);ctx.lineTo(x+sz*.65,y-sz*.35);ctx.stroke();
+  // Roller
+  ctx.fillStyle=light?'#16a34a':'#4ade80';
+  ctx.fillRect(x+sz*.55,y-sz*.5,sz*.12,sz*.32);
+  // Legs
+  ctx.lineWidth=sz*.08;
+  ctx.beginPath();ctx.moveTo(x-sz*.12,y-sz*.15);ctx.lineTo(x-sz*.18,y+sz*.35);
+  ctx.moveTo(x+sz*.12,y-sz*.15);ctx.lineTo(x+sz*.08,y+sz*.35);ctx.stroke();
+}
+
+function render(){
+  const W=cv.width,H=cv.height;
+  if(!W||!H) return;
+  ctx.clearRect(0,0,W,H);
+  const light=isLight();
+  const N=getN();
+  const Nround=Math.max(2,Math.round(N));
+  const terms=getTerms(N);
+  const Sact=terms.reduce((a,b)=>a+b,0);
+  const an=terms[Nround-1];
+  const d_val=Nround>1?(an-a1)/(Nround-1):0;
+
+  // Sky
+  ctx.fillStyle=light?'#dbeafe':'#0c1425';
+  ctx.fillRect(0,0,W,H);
+
+  // Ground
+  const groundY=H*.82;
+  ctx.fillStyle=light?'#d1fae5':'#052e16';
+  ctx.fillRect(0,groundY,W,H-groundY);
+  // Ground line
+  ctx.strokeStyle=light?'#86efac':'#166534';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(W,groundY);ctx.stroke();
+
+  // Grass tufts
+  ctx.strokeStyle=light?'#4ade80':'#22c55e';ctx.lineWidth=1.5;
+  for(let gx=15;gx<W;gx+=25){
+    ctx.beginPath();ctx.moveTo(gx,groundY);ctx.lineTo(gx-3,groundY-6);
+    ctx.moveTo(gx,groundY);ctx.lineTo(gx+3,groundY-6);ctx.stroke();
+  }
+
+  const pad=28;
+  const fenceLeft=pad, fenceRight=W-pad;
+  const fenceW=fenceRight-fenceLeft;
+  const fenceTop=H*.3, fenceBot=groundY;
+  const fenceH=fenceBot-fenceTop;
+  const railH=Math.max(4,fenceH*.06);
+
+  const step=Math.min(Math.floor(animTime),Nround);
+  const frac=animTime-Math.floor(animTime);
+
+  // Painted meters
+  let painted=0;
+  for(let k=0;k<step;k++) painted+=terms[k];
+  if(step<Nround) painted+=terms[step]*Math.min(frac,1);
+
+  // Draw fence sections
+  let xPos=fenceLeft;
+  for(let k=0;k<Nround;k++){
+    const sw=(terms[k]/Sact)*fenceW;
+    let pf=0;
+    if(k<step) pf=1;
+    else if(k===step) pf=Math.min(frac,1);
+
+    // Wood background
+    ctx.fillStyle=light?'#d4a96a':'#78350f';
+    ctx.fillRect(xPos,fenceTop,sw,fenceH);
+
+    // Painted overlay
+    if(pf>0){
+      const alpha=0.55+0.15*(k/Nround);
+      ctx.fillStyle=`rgba(34,197,94,${alpha})`;
+      ctx.fillRect(xPos,fenceTop,sw*pf,fenceH);
+    }
+
+    // Vertical planks inside section
+    const nPlanks=Math.max(1,Math.round(sw/14));
+    const ps=sw/(nPlanks+1);
+    ctx.strokeStyle=light?'rgba(120,53,15,.25)':'rgba(200,150,80,.15)';ctx.lineWidth=1;
+    for(let p=1;p<=nPlanks;p++){
+      ctx.beginPath();ctx.moveTo(xPos+p*ps,fenceTop);ctx.lineTo(xPos+p*ps,fenceBot);ctx.stroke();
+    }
+
+    // Section border
+    ctx.strokeStyle=light?'#92400e':'#451a03';ctx.lineWidth=1;
+    ctx.strokeRect(xPos,fenceTop,sw,fenceH);
+
+    // Labels
+    const lx=xPos+sw/2;
+    if(sw>18){
+      ctx.fillStyle=light?'#374151':'#94a3b8';
+      ctx.font=`${Math.min(10,sw*.22)}px 'Segoe UI',sans-serif`;
+      ctx.textAlign='center';
+      ctx.fillText(`День ${k+1}`,lx,fenceBot+13);
+      if(sw>36){
+        ctx.fillStyle=pf===1?(light?'#15803d':'#4ade80'):(light?'#92400e':'#d97706');
+        ctx.font=`bold ${Math.min(11,sw*.2)}px 'Segoe UI',sans-serif`;
+        ctx.fillText(`${terms[k].toFixed(1)}м`,lx,fenceTop+fenceH/2+5);
+      }
+    }
+    xPos+=sw;
+  }
+
+  // Rails
+  ctx.fillStyle=light?'#92400e':'#3b1000';
+  ctx.fillRect(fenceLeft,fenceTop,fenceW,railH);
+  ctx.fillRect(fenceLeft,fenceBot-railH,fenceW,railH);
+
+  // Fence posts at boundaries
+  ctx.fillStyle=light?'#7c2d12':'#2c0e00';
+  let xP2=fenceLeft;
+  for(let k=0;k<=Nround;k++){
+    ctx.fillRect(xP2-2,fenceTop-4,4,fenceH+8);
+    if(k<Nround) xP2+=(terms[k]/Sact)*fenceW;
+  }
+
+  // Painter
+  const painterX=fenceLeft+(painted/Sact)*fenceW;
+  const sz=Math.min(H*.07,24);
+  if(animTime<Nround||Nround<1) drawPainter(painterX,fenceTop,sz,light);
+
+  // UI updates
+  document.getElementById('stDay').textContent=step<Nround?step:Nround;
+  document.getElementById('stToday').textContent=step<Nround?terms[step].toFixed(1):terms[Nround-1].toFixed(1);
+  document.getElementById('stPainted').textContent=painted.toFixed(1);
+  document.getElementById('stTotal').textContent=Sact.toFixed(0);
+  document.getElementById('stN').textContent=Number.isInteger(N)?N:N.toFixed(1);
+  document.getElementById('insight').classList.toggle('visible',animTime>=Nround);
+
+  // Formula cards
+  document.getElementById('fcond').innerHTML=`<span class="hl-b">${S}</span> = n·(${a1}+${an.toFixed(1)})/2`;
+  document.getElementById('fcalc').innerHTML=`n = 2·${S} / (${a1}+${an.toFixed(1)}) = 2·${S} / ${sumFL}`;
+  document.getElementById('fresult').innerHTML=`n = <span class="hl-g">${N.toFixed(1)}</span> дней`;
+  document.getElementById('fd').innerHTML=Nround>1?`d = (${an.toFixed(1)}−${a1}) / (${Nround}−1) = <span class="hl-a">${d_val.toFixed(2)}</span>`:'—';
+
+  // Badges
+  const tl=document.getElementById('termsList');tl.innerHTML='';
+  for(let k=0;k<Nround;k++){
+    const b=document.createElement('span');
+    b.className='term-badge '+(k<step?'done':k===step?'active':'future');
+    b.textContent=terms[k].toFixed(1);tl.appendChild(b);
+  }
+}
+
+function animate(ts){
+  if(!isPlaying) return;
+  if(!lastFT) lastFT=ts;
+  const N=getN();const Nround=Math.round(N);
+  animTime+=((ts-lastFT)/1000)*speed*.7;lastFT=ts;
+  if(animTime>=Nround){animTime=Nround;isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  render();
+  if(isPlaying) requestAnimationFrame(animate);
+}
+
+btnPlay.addEventListener('click',()=>{
+  const Nround=Math.round(getN());
+  if(isPlaying){isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  else{if(animTime>=Nround) animTime=0;isPlaying=true;lastFT=0;btnPlay.textContent='⏸ Пауза';requestAnimationFrame(animate);}
+});
+btnReset.addEventListener('click',()=>{isPlaying=false;animTime=0;lastFT=0;btnPlay.textContent='▶ Пуск';render();});
+btnTheme.addEventListener('click',()=>{const l=document.documentElement.classList.toggle('light');btnTheme.textContent=l?'🌙':'☀';render();});
+document.querySelectorAll('.btn-speed').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.btn-speed').forEach(b=>b.classList.remove('active'));btn.classList.add('active');speed=parseFloat(btn.dataset.speed);}));
+slS.addEventListener('input',()=>{S=parseInt(slS.value);dS.textContent=S;animTime=Math.min(animTime,Math.round(getN()));render();});
+slSum.addEventListener('input',()=>{sumFL=parseInt(slSum.value);dSum.textContent=sumFL;animTime=Math.min(animTime,Math.round(getN()));render();});
+slA1.addEventListener('input',()=>{a1=parseInt(slA1.value);dA1.textContent=a1;render();});
+window.addEventListener('resize',()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;render();});
+setTimeout(()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;animTime=0;render();},50);
+</script>
+</body>
+</html>

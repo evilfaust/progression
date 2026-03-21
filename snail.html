@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Улитка между деревьями — Арифметическая прогрессия</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#14b8a6;--acc2:#0d9488;--acc-glow:rgba(20,184,166,.4);}
+html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#0d9488;--acc2:#0f766e;--acc-glow:rgba(13,148,136,.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
+.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
+.back-link:hover{color:var(--text);border-color:var(--muted);}
+.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
+.slider-group{display:flex;align-items:center;gap:6px;}
+.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:40px;text-align:center;}
+input[type=range]{-webkit-appearance:none;width:110px;height:6px;border-radius:3px;background:var(--track);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+.btn-reset{background:var(--btn2);color:var(--btn2-text);}
+.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
+.btn-speed.active{background:var(--acc);color:#fff;}
+.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
+.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
+.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
+.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
+.scene-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;width:100%;height:100%;}
+.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;justify-content:center;}
+.formulas-cell::-webkit-scrollbar{width:4px;}
+.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
+.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
+.formula-card .formula{font-size:1.25em;color:#a78bfa;font-family:'Courier New',monospace;margin-bottom:4px;}
+html.light .formula-card .formula{color:#6d28d9;}
+.formula-card .calculation{font-size:1.1em;color:var(--text);font-weight:600;}
+.formula-card .result{font-size:1.4em;color:#2dd4bf;font-weight:700;}
+html.light .formula-card .result{color:#0f766e;}
+.hl-g{color:#2dd4bf;}html.light .hl-g{color:#0f766e;}
+.hl-b{color:#60a5fa;}html.light .hl-b{color:#1d4ed8;}
+.hl-a{color:var(--acc);}
+.terms-section{background:var(--card);border-radius:12px;padding:12px 18px;border:1px solid var(--border);}
+.terms-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:6px;}
+.terms-list{display:flex;gap:5px;flex-wrap:wrap;}
+.term-badge{padding:4px 10px;border-radius:6px;font-size:.9em;font-weight:600;font-family:'Courier New',monospace;}
+.term-badge.done{background:rgba(20,184,166,.15);color:#2dd4bf;border:1px solid rgba(20,184,166,.3);}
+html.light .term-badge.done{background:rgba(13,148,136,.12);color:#0f766e;border-color:rgba(13,148,136,.35);}
+.term-badge.active{background:rgba(20,184,166,.25);color:#5eead4;border:1px solid rgba(20,184,166,.5);box-shadow:0 0 6px rgba(20,184,166,.2);}
+html.light .term-badge.active{color:#0f766e;}
+.term-badge.future{background:rgba(100,116,139,.15);color:var(--muted);border:1px solid rgba(100,116,139,.2);}
+.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
+.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
+.status-item{display:flex;flex-direction:column;align-items:center;}
+.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
+.status-item .value{font-size:1.3em;font-weight:700;}
+.sv-g{color:#2dd4bf;}html.light .sv-g{color:#0f766e;}
+.sv-b{color:#60a5fa;}html.light .sv-b{color:#1d4ed8;}
+.sv-a{color:var(--acc);}
+.sv-p{color:#a78bfa;}html.light .sv-p{color:#6d28d9;}
+.insight-item{padding:8px 20px;font-size:.9em;color:#5eead4;display:none;align-items:center;border-left:1px solid var(--border);max-width:340px;}
+html.light .insight-item{color:#0f766e;}
+.insight-item.visible{display:flex;}
+@media(max-width:700px){
+html,body{height:auto;overflow-y:auto;}
+.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
+.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
+.top-controls{gap:8px;}.slider-group .val{font-size:1.1em;min-width:28px;}
+input[type=range]{width:76px;}.btn-theme{margin-left:0;}
+.main-grid{grid-template-columns:1fr;overflow:visible;}
+.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
+.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
+.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top-bar">
+  <a href="index.html" class="back-link">← К задачам</a>
+  <h1>🐌 Улитка между деревьями</h1>
+  <div class="top-controls">
+    <div class="slider-group">
+      <label>S =</label>
+      <span class="val" id="dS">150</span>
+      <input type="range" id="slS" min="30" max="300" step="10" value="150">
+      <label style="font-size:.75em;color:var(--subtle)">м</label>
+    </div>
+    <div class="slider-group">
+      <label>a₁+aₙ =</label>
+      <span class="val" id="dSum">10</span>
+      <input type="range" id="slSum" min="4" max="30" step="1" value="10">
+    </div>
+    <div class="slider-group">
+      <label>a₁ =</label>
+      <span class="val" id="dA1">2</span>
+      <input type="range" id="slA1" min="1" max="8" step="0.5" value="2">
+    </div>
+    <button class="btn btn-play" id="btnPlay">▶ Пуск</button>
+    <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
+    <div style="display:flex;gap:4px">
+      <button class="btn btn-speed active" data-speed="1">1×</button>
+      <button class="btn btn-speed" data-speed="2">2×</button>
+      <button class="btn btn-speed" data-speed="0.5">½×</button>
+    </div>
+    <button class="btn btn-theme" id="btnTheme">☀</button>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="scene-cell">
+    <div class="cell-title">Сцена</div>
+    <div class="scene-wrap"><canvas id="c"></canvas></div>
+  </div>
+  <div class="formulas-cell">
+    <div class="formula-card" style="border-left:4px solid #14b8a6">
+      <div class="card-title">📝 Задача</div>
+      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">Улитка ползёт от одного дерева до другого. В первый час она проползла 2 м, каждый следующий час — на одинаковое расстояние больше. Расстояние между деревьями 150 м, а сумма пути за первый и последний час равна 10 м. За сколько часов улитка доберётся до дерева?</p>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Условие задачи</div>
+      <div class="formula">S = n·(a₁+aₙ)/2</div>
+      <div class="calculation" id="fcond"></div>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Ответ — количество дней</div>
+      <div class="formula">n = 2S / (a₁+aₙ)</div>
+      <div class="calculation" id="fcalc"></div>
+      <div class="result" id="fresult"></div>
+    </div>
+    <div class="formula-card">
+      <div class="card-title">Шаг прогрессии</div>
+      <div class="formula">d = (aₙ−a₁)/(n−1)</div>
+      <div class="calculation" id="fd"></div>
+    </div>
+    <div class="terms-section">
+      <div class="terms-title">Метры по дням</div>
+      <div class="terms-list" id="termsList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="status-items">
+    <div class="status-item"><span class="label">День</span><span class="value sv-a" id="stDay">0</span></div>
+    <div class="status-item"><span class="label">Сегодня, м</span><span class="value sv-b" id="stToday">—</span></div>
+    <div class="status-item"><span class="label">Пройдено, м</span><span class="value sv-g" id="stDist">0</span></div>
+    <div class="status-item"><span class="label">Всего, м</span><span class="value sv-p" id="stTotal">—</span></div>
+    <div class="status-item"><span class="label">Дней (ответ)</span><span class="value sv-a" id="stN">—</span></div>
+  </div>
+  <div class="insight-item" id="insight">✓ Улитка добралась!</div>
+</div>
+</div>
+
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let S=150,sumFL=10,a1=2;
+let animTime=0,isPlaying=false,speed=1,lastFT=0;
+
+const slS=document.getElementById('slS'),slSum=document.getElementById('slSum'),slA1=document.getElementById('slA1');
+const dS=document.getElementById('dS'),dSum=document.getElementById('dSum'),dA1=document.getElementById('dA1');
+const btnPlay=document.getElementById('btnPlay'),btnReset=document.getElementById('btnReset'),btnTheme=document.getElementById('btnTheme');
+
+function getN(){return 2*S/sumFL;}
+function isLight(){return document.documentElement.classList.contains('light');}
+
+function getTerms(Nround){
+  const an=Math.min(sumFL-a1,sumFL*.95);
+  const a1c=sumFL-an;
+  if(Nround<=1) return [a1c];
+  const d=(an-a1c)/(Nround-1);
+  const t=[];
+  for(let k=0;k<Nround;k++) t.push(a1c+k*d);
+  return t;
+}
+
+function drawTree(x,y,h,light){
+  // Trunk
+  const tw=h*.12,th=h*.4;
+  ctx.fillStyle=light?'#92400e':'#5c2d0a';
+  ctx.fillRect(x-tw/2,y-th,tw,th);
+  // Foliage (layered circles)
+  const fc=light?'#22c55e':'#166534';
+  const fc2=light?'#4ade80':'#14532d';
+  ctx.fillStyle=fc2;
+  ctx.beginPath();ctx.ellipse(x,y-th-h*.35,h*.28,h*.22,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=fc;
+  ctx.beginPath();ctx.ellipse(x,y-th-h*.45,h*.22,h*.18,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=light?'#86efac':'#4ade80';
+  ctx.beginPath();ctx.ellipse(x,y-th-h*.53,h*.15,h*.12,0,0,Math.PI*2);ctx.fill();
+}
+
+function drawSnail(x,y,sz,light){
+  // Shell (spiral)
+  const sc=light?'#d97706':'#f59e0b';
+  ctx.fillStyle=sc;
+  ctx.beginPath();ctx.ellipse(x,y-sz*.3,sz*.5,sz*.38,0,0,Math.PI*2);ctx.fill();
+  // Shell spiral lines
+  ctx.strokeStyle=light?'#92400e':'#78350f';ctx.lineWidth=sz*.06;
+  ctx.beginPath();ctx.arc(x,y-sz*.28,sz*.28,-.5,Math.PI*1.3);ctx.stroke();
+  ctx.beginPath();ctx.arc(x,y-sz*.28,sz*.14,-.3,Math.PI);ctx.stroke();
+  // Body
+  ctx.fillStyle=light?'#d9f99d':'#84cc16';
+  ctx.beginPath();ctx.ellipse(x-sz*.25,y,sz*.35,sz*.18,-.15,0,Math.PI*2);ctx.fill();
+  // Head
+  ctx.beginPath();ctx.ellipse(x-sz*.6,y-sz*.05,sz*.18,sz*.14,0,0,Math.PI*2);ctx.fill();
+  // Eyes (antennae)
+  ctx.strokeStyle=light?'#4d7c0f':'#86efac';ctx.lineWidth=sz*.05;
+  ctx.beginPath();ctx.moveTo(x-sz*.55,y-sz*.12);ctx.lineTo(x-sz*.5,y-sz*.3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x-sz*.65,y-sz*.1);ctx.lineTo(x-sz*.62,y-sz*.28);ctx.stroke();
+  ctx.fillStyle=sc;
+  ctx.beginPath();ctx.arc(x-sz*.5,y-sz*.3,sz*.05,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(x-sz*.62,y-sz*.28,sz*.05,0,Math.PI*2);ctx.fill();
+}
+
+function render(){
+  const W=cv.width,H=cv.height;
+  if(!W||!H) return;
+  ctx.clearRect(0,0,W,H);
+  const light=isLight();
+  const N=getN();
+  const Nround=Math.max(2,Math.round(N));
+  const terms=getTerms(Nround);
+  const Sact=terms.reduce((a,b)=>a+b,0);
+  const an=terms[Nround-1];
+  const d_val=Nround>1?(an-a1)/(Nround-1):0;
+
+  // Sky gradient
+  const skyGrad=ctx.createLinearGradient(0,0,0,H*.65);
+  skyGrad.addColorStop(0,light?'#bae6fd':'#071a2e');
+  skyGrad.addColorStop(1,light?'#e0f2fe':'#0c2a42');
+  ctx.fillStyle=skyGrad;ctx.fillRect(0,0,W,H*.65);
+
+  // Ground
+  const groundY=H*.68;
+  ctx.fillStyle=light?'#bbf7d0':'#052e16';
+  ctx.fillRect(0,groundY,W,H-groundY);
+
+  // Path (dirt)
+  const treeW=W*.08;
+  const pathL=treeW+W*.02,pathR=W-treeW-W*.02;
+  const pathY=groundY,pathH=H*.1;
+  ctx.fillStyle=light?'#d4a96a':'#3b2509';
+  ctx.fillRect(pathL,pathY,pathR-pathL,pathH);
+
+  // Day segments on path
+  const step=Math.min(Math.floor(animTime),Nround);
+  const frac=animTime-Math.floor(animTime);
+  let traveled=0;
+  for(let k=0;k<step;k++) traveled+=terms[k];
+  if(step<Nround) traveled+=terms[step]*Math.min(frac,1);
+
+  let xPos=pathL;
+  for(let k=0;k<Nround;k++){
+    const sw=(terms[k]/Sact)*(pathR-pathL);
+    let pf=0;
+    if(k<step) pf=1;
+    else if(k===step) pf=Math.min(frac,1);
+    if(pf>0){
+      const hue=180+k*3;
+      ctx.fillStyle=light?`rgba(13,148,136,${.35+.2*(k/Nround)})`:`rgba(20,184,166,${.4+.15*(k/Nround)})`;
+      ctx.fillRect(xPos,pathY,sw*pf,pathH*.5);
+    }
+    // Tick mark
+    ctx.strokeStyle=light?'rgba(0,0,0,.2)':'rgba(255,255,255,.15)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(xPos,pathY);ctx.lineTo(xPos,pathY+pathH*.5);ctx.stroke();
+    xPos+=sw;
+  }
+
+  // Slime trail
+  if(traveled>0){
+    const trailX=pathL+(traveled/Sact)*(pathR-pathL);
+    const grad=ctx.createLinearGradient(pathL,0,trailX,0);
+    grad.addColorStop(0,'rgba(20,184,166,0)');
+    grad.addColorStop(1,light?'rgba(13,148,136,.6)':'rgba(20,184,166,.5)');
+    ctx.fillStyle=grad;
+    ctx.fillRect(pathL,pathY+pathH*.2,trailX-pathL,pathH*.15);
+  }
+
+  // Trees
+  const treeH=Math.min(H*.5,120);
+  drawTree(treeW/2+4,groundY,treeH,light);
+  drawTree(W-treeW/2-4,groundY,treeH,light);
+
+  // Labels
+  ctx.fillStyle=light?'#134e4a':'#5eead4';
+  ctx.font=`bold ${Math.min(13,W*.02)}px 'Segoe UI',sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText('Дерево A',treeW/2+4,groundY+pathH+16);
+  ctx.fillText('Дерево B',W-treeW/2-4,groundY+pathH+16);
+
+  // Distance marker
+  ctx.strokeStyle=light?'#0d9488':'#14b8a6';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(pathL,pathY-12);ctx.lineTo(pathR,pathY-12);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=light?'#0d9488':'#14b8a6';
+  ctx.font=`${Math.min(11,W*.018)}px 'Segoe UI',sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(`${S} м`,pathL+(pathR-pathL)/2,pathY-16);
+
+  // Snail
+  const snailX=pathL+(traveled/Sact)*(pathR-pathL);
+  const sz=Math.min(H*.08,28);
+  drawSnail(snailX,pathY,sz,light);
+
+  // UI
+  document.getElementById('stDay').textContent=step<Nround?step:Nround;
+  document.getElementById('stToday').textContent=step<Nround?terms[step].toFixed(2):terms[Nround-1].toFixed(2);
+  document.getElementById('stDist').textContent=traveled.toFixed(2);
+  document.getElementById('stTotal').textContent=Sact.toFixed(1);
+  document.getElementById('stN').textContent=Number.isInteger(N)?N:N.toFixed(1);
+  document.getElementById('insight').classList.toggle('visible',animTime>=Nround);
+
+  document.getElementById('fcond').innerHTML=`<span class="hl-b">${S}</span> = n·(${a1}+${an.toFixed(2)})/2`;
+  document.getElementById('fcalc').innerHTML=`n = 2·${S} / (${a1}+${an.toFixed(2)}) = 2·${S} / ${sumFL}`;
+  document.getElementById('fresult').innerHTML=`n = <span class="hl-g">${N.toFixed(1)}</span> дней`;
+  document.getElementById('fd').innerHTML=Nround>1?`d = (${an.toFixed(2)}−${a1}) / (${Nround}−1) = <span class="hl-a">${d_val.toFixed(3)}</span>`:'—';
+
+  const tl=document.getElementById('termsList');tl.innerHTML='';
+  for(let k=0;k<Math.min(Nround,30);k++){
+    const b=document.createElement('span');
+    b.className='term-badge '+(k<step?'done':k===step?'active':'future');
+    b.textContent=terms[k].toFixed(2);tl.appendChild(b);
+  }
+}
+
+function animate(ts){
+  if(!isPlaying) return;
+  if(!lastFT) lastFT=ts;
+  const Nround=Math.max(2,Math.round(getN()));
+  animTime+=((ts-lastFT)/1000)*speed*.5;lastFT=ts;
+  if(animTime>=Nround){animTime=Nround;isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  render();
+  if(isPlaying) requestAnimationFrame(animate);
+}
+
+btnPlay.addEventListener('click',()=>{
+  const Nround=Math.max(2,Math.round(getN()));
+  if(isPlaying){isPlaying=false;btnPlay.textContent='▶ Пуск';}
+  else{if(animTime>=Nround) animTime=0;isPlaying=true;lastFT=0;btnPlay.textContent='⏸ Пауза';requestAnimationFrame(animate);}
+});
+btnReset.addEventListener('click',()=>{isPlaying=false;animTime=0;lastFT=0;btnPlay.textContent='▶ Пуск';render();});
+btnTheme.addEventListener('click',()=>{const l=document.documentElement.classList.toggle('light');btnTheme.textContent=l?'🌙':'☀';render();});
+document.querySelectorAll('.btn-speed').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.btn-speed').forEach(b=>b.classList.remove('active'));btn.classList.add('active');speed=parseFloat(btn.dataset.speed);}));
+slS.addEventListener('input',()=>{S=parseInt(slS.value);dS.textContent=S;animTime=Math.min(animTime,Math.round(getN()));render();});
+slSum.addEventListener('input',()=>{sumFL=parseInt(slSum.value);dSum.textContent=sumFL;animTime=Math.min(animTime,Math.round(getN()));render();});
+slA1.addEventListener('input',()=>{a1=parseFloat(slA1.value);dA1.textContent=a1;render();});
+window.addEventListener('resize',()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;render();});
+setTimeout(()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;animTime=0;render();},50);
+</script>
+</body>
+</html>
