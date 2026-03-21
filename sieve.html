@@ -48,6 +48,11 @@ html.light .prime-badge{background:rgba(225,29,72,.1);color:#be123c;border-color
 .prime-badge.current{background:rgba(244,63,94,.35);color:#fecdd3;border:1px solid rgba(244,63,94,.7);box-shadow:0 0 8px rgba(244,63,94,.35);}
 html.light .prime-badge.current{color:#be123c;}
 .note-card{background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.2);border-radius:12px;padding:12px 18px;font-size:.88em;color:var(--muted);line-height:1.55;}
+.ratio-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border2);font-size:.88em;gap:8px;}
+.ratio-row:last-child{border-bottom:none;}
+.ratio-label{color:var(--muted);white-space:nowrap;}
+.ratio-val{font-family:'Courier New',monospace;font-weight:700;color:var(--text);}
+.ratio-val.converged{color:#fbbf24;}html.light .ratio-val.converged{color:#d97706;}
 .bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
 .status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
 .status-item{display:flex;flex-direction:column;align-items:center;}
@@ -72,7 +77,7 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
 <div class="app">
   <div class="top-bar">
     <a href="index.html" class="back-link">← Назад</a>
-    <h1>🔴 Решето Эратосфена</h1>
+    <h1>🔴 Простые числа — Решето Эратосфена</h1>
     <div class="top-controls">
       <div class="slider-group">
         <label>До N</label>
@@ -372,58 +377,79 @@ function updatePanel() {
   // Collect found primes so far
   const foundPrimes = [];
   for (let s = 0; s < animStep; s++) foundPrimes.push(steps[s].prime);
-
   const currentPrime = animStep < steps.length ? steps[animStep].prime : null;
   if (currentPrime && animStep === foundPrimes.length) foundPrimes.push(currentPrime);
 
-  const badgesHtml = foundPrimes.map((p, i) => {
-    const isCur = p === currentPrime;
-    return `<span class="prime-badge${isCur?' current':''}">${p}</span>`;
-  }).join('');
-
   const totalPrimes = steps.length;
-  const foundCount = animStep + (animStep < steps.length ? 1 : 0);
+
+  // Build numbered sequence rows: p₁=2, p₂=3, p₃=5...
+  const subNums = ['₁','₂','₃','₄','₅','₆','₇','₈','₉','₁₀','₁₁','₁₂','₁₃','₁₄','₁₅',
+    '₁₆','₁₇','₁₈','₁₉','₂₀','₂₁','₂₂','₂₃','₂₄','₂₅'];
+  let seqRows = '';
+  const showCount = Math.min(foundPrimes.length, 12);
+  for (let i = 0; i < showCount; i++) {
+    const isCur = foundPrimes[i] === currentPrime;
+    seqRows += `<div class="ratio-row">
+      <span class="ratio-label" style="font-family:'Courier New',monospace">p${subNums[i] || '…'}</span>
+      <span class="ratio-val${isCur ? ' converged' : ''}">${foundPrimes[i]}</span>
+    </div>`;
+  }
+  if (foundPrimes.length > 12) {
+    seqRows += `<div class="ratio-row"><span class="ratio-label">…ещё ${foundPrimes.length - 12}</span>
+      <span class="ratio-val converged">p${subNums[foundPrimes.length-1]||'ₙ'} = ${foundPrimes[foundPrimes.length-1]}</span></div>`;
+  }
+
+  // Approximate n-th prime via prime number theorem: pₙ ≈ n·ln(n)
+  const k = foundPrimes.length;
+  const approx = k > 1 ? Math.round(k * Math.log(k)) : '—';
 
   panel.innerHTML = `
     <div class="formula-card" style="border-left:4px solid #f43f5e">
-      <div class="card-title">📝 Описание</div>
+      <div class="card-title">📝 Что такое последовательность простых чисел?</div>
       <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">
-        Берём наименьшее невычеркнутое число — оно простое. Вычёркиваем все его кратные. Повторяем.
-        Оставшиеся числа — все <strong>простые числа</strong> до N.
+        <strong>Простое число</strong> делится только на 1 и само себя. Выпишем их по порядку —
+        получим бесконечную последовательность:
+        <span style="color:#fca5a5;font-family:'Courier New',monospace"> 2, 3, 5, 7, 11, 13, 17, 19…</span><br><br>
+        <strong>Решето Эратосфена</strong> — алгоритм, который строит эту последовательность:
+        берём наименьшее не зачёркнутое число — оно простое — и зачёркиваем все его кратные.
       </p>
     </div>
 
     <div class="formula-card">
-      <div class="card-title">📐 Алгоритм</div>
-      <div class="formula">p — простое → вычеркнуть p², 2p², 3p²…</div>
+      <div class="card-title">📐 Алгоритм (зачёркиваем кратные)</div>
+      <div class="formula">p простое → зачеркнуть p·p, p·(p+1), …</div>
       <div class="calculation">
         Достаточно проверить до <span class="hl-y">√${N} ≈ ${Math.ceil(Math.sqrt(N))}</span>
       </div>
     </div>
 
+    ${foundPrimes.length > 0 ? `<div class="formula-card">
+      <div class="card-title">🔢 Последовательность простых${currentPrime ? ' (строится…)' : ' (готово)'}</div>
+      ${seqRows}
+    </div>` : ''}
+
     ${currentPrime ? `<div class="formula-card">
-      <div class="card-title">🔴 Сейчас обрабатывается</div>
-      <div class="calculation" style="font-size:2em;text-align:center;padding:6px 0">
-        <span class="hl-r">${currentPrime}</span>
+      <div class="card-title">🔴 Текущий шаг</div>
+      <div class="calculation" style="font-size:1.8em;text-align:center;padding:4px 0">
+        p<sub>${subNums[foundPrimes.length-1]||'ₙ'}</sub> = <span class="hl-r">${currentPrime}</span>
       </div>
-      <div class="calculation" style="font-size:.9em">
-        Вычёркиваем: ${currentPrime}² = ${currentPrime*currentPrime}${currentPrime*currentPrime<=N?`, ${currentPrime*2*currentPrime<=N ? currentPrime*2+'²='+(currentPrime*currentPrime*2) : '…'}`:' — нет кратных в диапазоне'}
+      <div class="calculation" style="font-size:.88em;margin-top:4px">
+        Зачёркиваем ${currentPrime}² = ${currentPrime*currentPrime}${currentPrime*currentPrime<=N ? ' и далее…' : ' — за пределами N, ничего не зачёркиваем'}
       </div>
-    </div>` : `<div class="formula-card">
-      <div class="card-title">✅ Готово</div>
-      <div class="calculation" style="font-size:.95em">
-        Всего простых до ${N}: <span class="hl-g">${totalPrimes}</span>
+    </div>` : animStep >= steps.length && steps.length > 0 ? `<div class="formula-card">
+      <div class="card-title">✅ Последовательность построена</div>
+      <div class="calculation">
+        Простых до ${N}: <span class="hl-g">${totalPrimes}</span>
       </div>
-    </div>`}
+    </div>` : ''}
 
     <div class="formula-card">
-      <div class="card-title">⭐ Найденные простые (${foundPrimes.length})</div>
-      <div class="prime-badges">${badgesHtml}</div>
-    </div>
-
-    <div class="note-card">
-      💡 Теорема о простых числах: примерно N/ln(N) простых до N.<br>
-      До 100: ≈ 100/ln(100) ≈ <strong>21.7</strong>, реально — <strong>25</strong>.
+      <div class="card-title">✨ Формула для n-го простого числа</div>
+      <div class="formula">pₙ ≈ n · ln(n)</div>
+      <div class="calculation" style="font-size:.9em">
+        Точной формулы <strong>нет</strong> — в отличие от Фибоначчи!<br>
+        ${k > 1 ? `Приближение для p<sub>${k}</sub>: ${k}·ln(${k}) ≈ <span class="hl-y">${approx}</span>, реально — <span class="hl-g">${foundPrimes[k-1]||'?'}</span>` : 'Запусти анимацию, чтобы увидеть приближение'}
+      </div>
     </div>`;
 }
 

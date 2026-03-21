@@ -78,8 +78,8 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
     <div class="top-controls">
       <div class="slider-group">
         <label>Строки N</label>
-        <input type="range" id="slN" min="2" max="12" value="6">
-        <span class="val" id="valN">6</span>
+        <input type="range" id="slN" min="2" max="20" value="8">
+        <span class="val" id="valN">8</span>
       </div>
       <button class="btn btn-play" id="btnPlay">▶ Старт</button>
       <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
@@ -151,7 +151,7 @@ function resizeCanvas() {
 window.addEventListener('resize', () => { resizeCanvas(); render(); });
 
 // ─── State ───
-let N = 6;
+let N = 8;
 let animTime = 0;
 let isPlaying = false;
 let speed = 2;

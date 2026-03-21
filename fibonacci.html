@@ -80,8 +80,8 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
     <div class="top-controls">
       <div class="slider-group">
         <label>Члены N</label>
-        <input type="range" id="slN" min="2" max="10" value="8">
-        <span class="val" id="valN">8</span>
+        <input type="range" id="slN" min="2" max="15" value="10">
+        <span class="val" id="valN">10</span>
       </div>
       <button class="btn btn-play" id="btnPlay">▶ Старт</button>
       <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
@@ -120,7 +120,7 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
 </div>
 
 <script>
-const FIBS = [1,1,2,3,5,8,13,21,34,55,89,144];
+const FIBS = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584];
 const PI = Math.PI;
 
 // Arc config for each square by i%4:
@@ -175,7 +175,7 @@ function resizeCanvas() {
 window.addEventListener('resize', () => { resizeCanvas(); render(); });
 
 // ─── State ───
-let N = 8;
+let N = 10;
 let animTime = 0;
 let isPlaying = false;
 let speed = 2;
@@ -336,7 +336,7 @@ function updatePanel() {
   const panel = document.getElementById('panel');
 
   const badges = FIBS.slice(0, shown).map((f, i) =>
-    `<span class="fib-badge${i===shown-1?' active':''}">${f}</span>`
+    `<span class="fib-badge${i===shown-1?' active':''}">${f >= 1000 ? f.toLocaleString('ru') : f}</span>`
   ).join('');
 
   let ratiosHtml = '';
