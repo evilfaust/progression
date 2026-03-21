@@ -69,6 +69,17 @@
             background-clip: text;
             white-space: nowrap;
         }
+        .back-link {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.85em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .back-link:hover { color: var(--text); border-color: var(--muted); }
         html.light .top-bar h1 {
             background: linear-gradient(135deg, #b45309, #c2410c);
             -webkit-background-clip: text;
@@ -374,6 +385,7 @@
 
 <div class="app">
     <div class="top-bar">
+        <a href="index.html" class="back-link">← К задачам</a>
         <h1>Задача о столиках в кафе</h1>
         <div class="top-controls">
             <div class="slider-group">
@@ -657,7 +669,7 @@ function animate(ts) {
 
 sliderN.addEventListener('input', () => {
     N = parseInt(sliderN.value);
-    if (!isPlaying) animProgress = N; else animProgress = Math.min(animProgress, N);
+    animProgress = Math.min(animProgress, N);
     render();
 });
 btnPlay.addEventListener('click', () => {
@@ -671,7 +683,7 @@ document.querySelectorAll('.btn-speed').forEach(btn => {
 
 window.addEventListener('resize', resizeAll);
 setTimeout(resizeAll, 50);
-animProgress = N;
+animProgress = 0;
 render();
 </script>
 </body>

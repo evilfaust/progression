@@ -67,6 +67,17 @@
             background-clip: text;
             white-space: nowrap;
         }
+        .back-link {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.85em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .back-link:hover { color: var(--text); border-color: var(--muted); }
         html.light .top-bar h1 {
             background: linear-gradient(135deg, #7e22ce, #4c1d95);
             -webkit-background-clip: text;
@@ -344,6 +355,7 @@
 
 <div class="app">
     <div class="top-bar">
+        <a href="index.html" class="back-link">← К задачам</a>
         <h1>Амфитеатр</h1>
         <div class="top-controls">
             <div class="slider-group">
@@ -619,7 +631,7 @@ function animate(ts) {
     if (isPlaying) requestAnimationFrame(animate);
 }
 
-sliderN.addEventListener('input', () => { N = parseInt(sliderN.value); if (!isPlaying) animProgress = N; else animProgress = Math.min(animProgress, N); render(); });
+sliderN.addEventListener('input', () => { N = parseInt(sliderN.value); animProgress = Math.min(animProgress, N); render(); });
 sliderA5.addEventListener('input', () => { a5val = parseInt(sliderA5.value); render(); });
 sliderA8.addEventListener('input', () => { a8val = parseInt(sliderA8.value); render(); });
 btnPlay.addEventListener('click', () => {
@@ -633,7 +645,7 @@ document.querySelectorAll('.btn-speed').forEach(btn => {
 
 window.addEventListener('resize', resizeAll);
 setTimeout(resizeAll, 50);
-animProgress = N;
+animProgress = 0;
 render();
 </script>
 </body>

@@ -68,6 +68,17 @@
             background-clip: text;
             white-space: nowrap;
         }
+        .back-link {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.85em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .back-link:hover { color: var(--text); border-color: var(--muted); }
         html.light .top-bar h1 {
             background: linear-gradient(135deg, #c2410c, #b91c1c);
             -webkit-background-clip: text;
@@ -393,6 +404,7 @@
 
 <div class="app">
     <div class="top-bar">
+        <a href="index.html" class="back-link">← К задачам</a>
         <h1>Торможение автомобиля</h1>
         <div class="top-controls">
             <div class="slider-group">

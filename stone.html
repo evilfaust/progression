@@ -74,6 +74,17 @@
             background-clip: text;
             white-space: nowrap;
         }
+        .back-link {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.85em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .back-link:hover { color: var(--text); border-color: var(--muted); }
         .top-controls {
             display: flex;
             align-items: center;
@@ -413,6 +424,7 @@
 
 <div class="app">
     <div class="top-bar">
+        <a href="index.html" class="back-link">← К задачам</a>
         <h1>Камень в ущелье</h1>
         <div class="top-controls">
             <div class="slider-group">
@@ -803,7 +815,7 @@ function animate(ts) {
     if (isPlaying) requestAnimationFrame(animate);
 }
 
-sliderN.addEventListener('input', () => { N = parseInt(sliderN.value); if (!isPlaying) animTime = N; else animTime = Math.min(animTime, N); render(); });
+sliderN.addEventListener('input', () => { N = parseInt(sliderN.value); animTime = Math.min(animTime, N); render(); });
 sliderA1.addEventListener('input', () => { a1 = parseInt(sliderA1.value); render(); });
 sliderD.addEventListener('input', () => { d = parseInt(sliderD.value); render(); });
 btnPlay.addEventListener('click', () => {
@@ -817,7 +829,7 @@ document.querySelectorAll('.btn-speed').forEach(btn => {
 
 window.addEventListener('resize', resizeAll);
 setTimeout(resizeAll, 50);
-animTime = N;
+animTime = 0;
 render();
 </script>
 </body>

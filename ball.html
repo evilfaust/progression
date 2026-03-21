@@ -59,6 +59,17 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
             white-space: nowrap;
         }
+        .back-link {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.85em;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+        .back-link:hover { color: var(--text); border-color: var(--muted); }
         .top-controls { display: flex; align-items: center; gap: 14px; flex: 1; flex-wrap: wrap; }
         .slider-group { display: flex; align-items: center; gap: 6px; }
         .slider-group label { font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; }
@@ -190,6 +201,7 @@
 <body>
 <div class="app">
     <div class="top-bar">
+        <a href="index.html" class="back-link">← К задачам</a>
         <h1>Прыгающий мяч</h1>
         <div class="top-controls">
             <div class="slider-group">
@@ -657,7 +669,7 @@ document.querySelectorAll('.btn-speed').forEach(btn => {
 });
 
 window.addEventListener('resize', () => { resizeCanvas(); render(); });
-setTimeout(() => { resizeCanvas(); animTime = getHeights().length; render(); }, 50);
+setTimeout(() => { resizeCanvas(); animTime = 0; render(); }, 50);
 </script>
 </body>
 </html>
