@@ -54,17 +54,3 @@
 - Canvas масштабируется под `devicePixelRatio` — чёткий рисунок на Retina-экранах
 - Адаптируется под размер окна через `resize`-обработчик
 
----
-
-## Деплой
-
-Файлы хостятся на VPS, раздаются через Nginx.
-
-```bash
-# Скопировать все файлы на сервер
-scp /путь/к/progression/*.html root@147.45.158.148:/var/www/html/progression/
-```
-
-- **Сервер:** `147.45.158.148`
-- **Nginx конфиг:** `/etc/nginx/sites-enabled/math.oipav.ru`
-- **SSL:** Let's Encrypt (автообновление)
