@@ -95,7 +95,7 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
     <div class="top-controls">
       <div class="slider-group">
         <label>Члены N</label>
-        <input type="range" id="slN" min="2" max="15" value="10">
+        <input type="range" id="slN" min="2" max="30" value="10">
         <span class="val" id="valN">10</span>
       </div>
       <button class="btn btn-play" id="btnPlay">▶ Старт</button>
@@ -137,7 +137,8 @@ input[type=range]{width:76px;}.btn-theme{margin-left:0;}
 </div>
 
 <script>
-const FIBS = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584];
+const FIBS = [1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,
+              4181,6765,10946,17711,28657,46368,75025,121393,196418,317811,514229,832040];
 const PI = Math.PI;
 
 // Arc config for each square by i%4:
