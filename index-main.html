@@ -125,10 +125,18 @@
         .card-icon.tables { background: linear-gradient(135deg, #422006, #1c1917); }
         .card-icon.amphi { background: linear-gradient(135deg, #3b0764, #1e1b4b); }
         .card-icon.train { background: linear-gradient(135deg, #7c2d12, #1c1917); }
+        .card-icon.snake { background: linear-gradient(135deg, #451a03, #1c1917); }
+        .card-icon.radio { background: linear-gradient(135deg, #052e16, #0f172a); }
         html.light .card-icon.stone { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
         html.light .card-icon.tables { background: linear-gradient(135deg, #fef3c7, #fde68a); }
         html.light .card-icon.amphi { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
         html.light .card-icon.train { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+        html.light .card-icon.snake { background: linear-gradient(135deg, #fff7ed, #fed7aa); }
+        html.light .card-icon.radio { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+        .card-icon.bio { background: linear-gradient(135deg, #2e1065, #1e1b4b); }
+        html.light .card-icon.bio { background: linear-gradient(135deg, #f5f3ff, #ede9fe); }
+        .card-icon.ball { background: linear-gradient(135deg, #0c1a2e, #1c1207); }
+        html.light .card-icon.ball { background: linear-gradient(135deg, #fff7ed, #ffedd5); }
 
         .card-body {
             padding: 18px 20px;
@@ -145,10 +153,18 @@
         .card-body h2.tables-title { color: #f59e0b; }
         .card-body h2.amphi-title { color: #e879f9; }
         .card-body h2.train-title { color: #f97316; }
+        .card-body h2.snake-title { color: #fb923c; }
         html.light .card-body h2.stone-title { color: #1d4ed8; }
         html.light .card-body h2.tables-title { color: #b45309; }
         html.light .card-body h2.amphi-title { color: #7e22ce; }
         html.light .card-body h2.train-title { color: #c2410c; }
+        html.light .card-body h2.snake-title { color: #c2410c; }
+        .card-body h2.radio-title { color: #4ade80; }
+        html.light .card-body h2.radio-title { color: #15803d; }
+        .card-body h2.bio-title { color: #c084fc; }
+        html.light .card-body h2.bio-title { color: #7e22ce; }
+        .card-body h2.ball-title { color: #fb923c; }
+        html.light .card-body h2.ball-title { color: #c2410c; }
 
         .card-body .task-text {
             font-size: 0.92em;
@@ -295,6 +311,81 @@
         <div class="card-footer">
             <span class="open-btn">Открыть модель &rarr;</span>
             <span class="answer">S₁₀ = 20 м</span>
+        </div>
+    </a>
+
+    <a class="card" href="snake.html">
+        <div class="card-icon snake">〰️</div>
+        <div class="card-body">
+            <h2 class="snake-title">Змейка на клетчатой бумаге</h2>
+            <div class="task-text">
+                На клетчатой бумаге нарисована «змейка» — ломаная из чётного числа звеньев, идущих по линиям сетки. Длины звеньев образуют пары: 1,&nbsp;1,&nbsp;2,&nbsp;2,&nbsp;…,&nbsp;n,&nbsp;n. Последнее звено имеет длину 10. Найдите длину ломаной, у которой последнее звено имеет длину 120.
+            </div>
+            <div class="params">
+                <span class="param-tag">S = n·(n+1)</span>
+                <span class="param-tag">n = 1..20</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">S = 14 520</span>
+        </div>
+    </a>
+
+    <a class="card" href="ball.html">
+        <div class="card-icon ball">🏀</div>
+        <div class="card-body">
+            <h2 class="ball-title">Прыгающий мяч</h2>
+            <div class="task-text">
+                Мячик отскочил на высоту 5,4&nbsp;м, а при каждом следующем прыжке поднимается втрое ниже. При каком по счёту прыжке мячик впервые не достигнет высоты 10&nbsp;см?
+            </div>
+            <div class="params">
+                <span class="param-tag">h&#8321; = 5.4 м</span>
+                <span class="param-tag">q = 1/3</span>
+                <span class="param-tag">порог = 10 см</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">Прыжок №5</span>
+        </div>
+    </a>
+
+    <a class="card" href="bio.html">
+        <div class="card-icon bio">🦠</div>
+        <div class="card-body">
+            <h2 class="bio-title">Рост колонии микроорганизмов</h2>
+            <div class="task-text">
+                В чашку Петри поместили колонию микроорганизмов массой 13&nbsp;мг. Каждые 30&nbsp;минут масса колонии увеличивается в 3&nbsp;раза. Найдите массу колонии через 90&nbsp;минут.
+            </div>
+            <div class="params">
+                <span class="param-tag">a&#8321; = 13</span>
+                <span class="param-tag">q = 3</span>
+                <span class="param-tag">T = 30 мин</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">a&#8324; = 351 мг</span>
+        </div>
+    </a>
+
+    <a class="card" href="radio.html">
+        <div class="card-icon radio">&#9762;</div>
+        <div class="card-body">
+            <h2 class="radio-title">Радиоактивный распад</h2>
+            <div class="task-text">
+                Масса радиоактивного изотопа уменьшается вдвое каждые 7&nbsp;минут. В начальный момент масса составляла 640&nbsp;мг. Найдите массу изотопа через 42&nbsp;минуты.
+            </div>
+            <div class="params">
+                <span class="param-tag">a&#8321; = 640</span>
+                <span class="param-tag">q = 1/2</span>
+                <span class="param-tag">T&#189; = 7 мин</span>
+            </div>
+        </div>
+        <div class="card-footer">
+            <span class="open-btn">Открыть модель &rarr;</span>
+            <span class="answer">a&#8327; = 10 мг</span>
         </div>
     </a>
 

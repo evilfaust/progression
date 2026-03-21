@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рост колонии микроорганизмов — Геометрическая прогрессия</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #0d1020;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --bg3: #faf5ff;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.2s, color 0.2s;
+        }
+        .app {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #c084fc, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slider-group label {
+            font-size: 0.8em;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+        .slider-group .val {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #c084fc;
+            min-width: 32px;
+            text-align: center;
+        }
+        html.light .slider-group .val { color: #7e22ce; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--track);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #a855f7;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(168,85,247,0.4);
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-play  { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
+        .btn-speed.active { background: #7c3aed; color: white; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
+        .btn-theme:hover { opacity: 0.85; }
+
+        /* ═══ MAIN GRID ═══ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 310px;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══ LEFT: Canvas ═══ */
+        .canvas-cell {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border2);
+            background: var(--bg3);
+            min-height: 0;
+            overflow: hidden;
+        }
+        .cell-title {
+            font-size: 0.8em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 8px 14px 4px;
+        }
+        .canvas-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        canvas#bioCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ═══ RIGHT: Formulas ═══ */
+        .right-cell {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            padding: 14px 18px;
+            gap: 10px;
+        }
+        .formula-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 13px 16px;
+            border: 1px solid var(--border);
+        }
+        .formula-card .card-title {
+            font-size: 0.78em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+        .formula-card .formula {
+            font-size: 1.2em;
+            color: #c084fc;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+        }
+        html.light .formula-card .formula { color: #7e22ce; }
+        .formula-card .calculation {
+            font-size: 1.05em;
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.7;
+        }
+        .result {
+            color: #c084fc;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        html.light .result { color: #7e22ce; }
+
+        .progress-bar-bg {
+            height: 5px;
+            background: var(--card);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6d28d9, #c084fc);
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        .terms-section {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        .terms-section::-webkit-scrollbar { width: 4px; }
+        .terms-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .terms-title {
+            font-size: 0.82em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .terms-list { display: flex; gap: 5px; flex-wrap: wrap; }
+        .term-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.88em;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        .term-badge.done   { background: rgba(192,132,252,0.15); color: #c084fc; border: 1px solid rgba(192,132,252,0.3); }
+        .term-badge.active { background: rgba(250,204,21,0.2); color: #facc15; border: 1px solid rgba(250,204,21,0.4); transform: scale(1.05); box-shadow: 0 0 6px rgba(250,204,21,0.2); }
+        .term-badge.future { background: rgba(100,116,139,0.1); color: var(--muted); border: 1px solid rgba(100,116,139,0.2); }
+        html.light .term-badge.done   { background: rgba(126,34,206,0.1); color: #7e22ce; border-color: rgba(126,34,206,0.3); }
+        html.light .term-badge.active { background: rgba(180,83,9,0.12); color: #b45309; border-color: rgba(180,83,9,0.4); }
+
+        /* ═══ BOTTOM BAR ═══ */
+        .bottom-bar {
+            display: flex;
+            align-items: stretch;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
+        }
+        .status-items {
+            display: flex;
+            gap: 18px;
+            padding: 8px 20px;
+            align-items: center;
+        }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label { font-size: 0.7em; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.3px; }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .status-item .value.purple { color: #c084fc; }
+        .status-item .value.amber  { color: #facc15; }
+        .status-item .value.blue   { color: #60a5fa; }
+        .status-item .value.cyan   { color: #22d3ee; }
+        html.light .status-item .value.purple { color: #7e22ce; }
+        html.light .status-item .value.amber  { color: #b45309; }
+        html.light .status-item .value.cyan   { color: #0891b2; }
+
+        .comparison-items {
+            display: flex;
+            gap: 12px;
+            padding: 8px 20px;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+        }
+        .comp-card {
+            padding: 6px 18px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comp-card.info   { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.2); }
+        .comp-card.answer { background: rgba(192,132,252,0.08); border-color: rgba(192,132,252,0.2); }
+        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; }
+        .comp-card.info   .comp-title { color: #93c5fd; }
+        .comp-card.answer .comp-title { color: #c084fc; }
+        html.light .comp-card.answer .comp-title { color: #7e22ce; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.info   .comp-value { color: #60a5fa; }
+        .comp-card.answer .comp-value { color: #a855f7; }
+        html.light .comp-card.answer .comp-value { color: #7e22ce; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <h1>Рост колонии микроорганизмов</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>a&#8321; =</label>
+                <span class="val" id="displayA1">13</span>
+                <input type="range" id="sliderA1" min="1" max="100" value="13" step="1">
+            </div>
+            <div class="slider-group">
+                <label>q =</label>
+                <span class="val" id="displayQ">3</span>
+                <input type="range" id="sliderQ" min="2" max="5" value="3" step="1">
+            </div>
+            <div class="slider-group">
+                <label>периодов =</label>
+                <span class="val" id="displayN">3</span>
+                <input type="range" id="sliderN" min="1" max="6" value="3" step="1">
+            </div>
+            <button class="btn btn-play"  id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">&#9728; Светлая</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="canvas-cell">
+            <div class="cell-title">Чашка Петри</div>
+            <div class="canvas-wrap">
+                <canvas id="bioCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="right-cell">
+            <div class="formula-card">
+                <div class="card-title">n-й член геометрической прогрессии</div>
+                <div class="formula">a&#8345; = a&#8321; &middot; q<sup>n&minus;1</sup></div>
+                <div class="calculation" id="formulaAn">a&#8324; = 13 &middot; 3&#xB3; = <span class="result">351 мг</span></div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Текущий момент</div>
+                <div class="formula" id="formulaCurrent">t = 0 мин</div>
+                <div class="calculation" id="formulaMass">Масса: <span class="result">13 мг</span></div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="terms-section">
+                <div class="terms-title">Члены прогрессии (мг)</div>
+                <div class="terms-list" id="termsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Период</span>
+                <span class="value blue" id="statStep">0 / 3</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Время</span>
+                <span class="value amber" id="statTime">0 мин</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Масса</span>
+                <span class="value purple" id="statMass">13 мг</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Увеличение</span>
+                <span class="value cyan" id="statGrow">&times;1</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card info">
+                <div class="comp-title">Период удвоения</div>
+                <div class="comp-value">T = 30 минут</div>
+            </div>
+            <div class="comp-card answer">
+                <div class="comp-title">Через 90 минут</div>
+                <div class="comp-value">13 &middot; 3&#xB3; = 351 мг</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let a1 = 13, q = 3, N = 3;
+const PERIOD_MIN = 30;
+
+let animTime = 0;
+let isPlaying = false, speed = 1, lastFrameTime = 0;
+
+const sliderA1 = document.getElementById('sliderA1');
+const sliderQ  = document.getElementById('sliderQ');
+const sliderN  = document.getElementById('sliderN');
+const btnPlay  = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
+const canvas   = document.getElementById('bioCanvas');
+const ctx      = canvas.getContext('2d');
+
+function massFn(step) { return a1 * Math.pow(q, step); }
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') {
+    document.documentElement.classList.add('light');
+    btnTheme.textContent = '\uD83C\uDF19 Тёмная';
+}
+btnTheme.addEventListener('click', () => {
+    const light = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', light ? 'light' : 'dark');
+    btnTheme.textContent = light ? '\uD83C\uDF19 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+// ─── Canvas resize ───────────────────────────────────────
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr  = window.devicePixelRatio || 1;
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+}
+
+// ─── Level colors ────────────────────────────────────────
+const LEVEL_COLORS_DARK  = ['#e879f9','#a855f7','#818cf8','#22d3ee','#34d399','#facc15'];
+const LEVEL_COLORS_LIGHT = ['#a21caf','#7c3aed','#4338ca','#0e7490','#059669','#b45309'];
+
+function levelColor(lvl) {
+    const arr = isLight() ? LEVEL_COLORS_LIGHT : LEVEL_COLORS_DARK;
+    return arr[Math.min(lvl, arr.length - 1)];
+}
+
+// ─── Cell positions ──────────────────────────────────────
+// Ring layout: level k → ring at radius k/(maxLevel+1)*dishR
+// level 0: 1 cell at center
+// level k: q^k cells evenly on ring k
+// Max displayable levels: cap ring cell count at MAX_RING
+const MAX_RING = 72;
+
+function getPositions(maxLevel, dishR) {
+    const positions = []; // [{x,y,level,idx}]
+
+    for (let lv = 0; lv <= maxLevel; lv++) {
+        const count = Math.pow(q, lv);
+        const ringR = lv === 0 ? 0 : (lv / (maxLevel + 0.5)) * dishR * 0.88;
+
+        const displayCount = Math.min(count, MAX_RING);
+        for (let i = 0; i < displayCount; i++) {
+            let x, y;
+            if (count === 1) {
+                x = 0; y = 0;
+            } else {
+                // Offset angle per level for visual variety
+                const angleOffset = lv * (Math.PI / (q * 2));
+                const angle = (i / displayCount) * Math.PI * 2 + angleOffset;
+                x = Math.cos(angle) * ringR;
+                y = Math.sin(angle) * ringR;
+            }
+            positions.push({ x, y, level: lv });
+        }
+    }
+    return positions;
+}
+
+// ─── Drawing ─────────────────────────────────────────────
+function drawBio() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width / dpr, h = canvas.height / dpr;
+    const light = isLight();
+
+    ctx.clearRect(0, 0, w, h);
+
+    const step = Math.floor(animTime);
+    const frac = animTime - step;
+
+    // Background
+    ctx.fillStyle = light ? '#fdf4ff' : '#060810';
+    ctx.fillRect(0, 0, w, h);
+
+    const dishR = Math.min(w, h) * 0.44;
+    const cx = w / 2, cy = h / 2;
+    const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 500);
+
+    // ─ Petri dish ─
+    // Outer glass ring
+    const glassGrad = ctx.createRadialGradient(cx, cy, dishR * 0.9, cx, cy, dishR * 1.02);
+    if (light) {
+        glassGrad.addColorStop(0, 'rgba(167,139,250,0.25)');
+        glassGrad.addColorStop(1, 'rgba(167,139,250,0.05)');
+    } else {
+        glassGrad.addColorStop(0, 'rgba(139,92,246,0.3)');
+        glassGrad.addColorStop(1, 'rgba(139,92,246,0.04)');
+    }
+    ctx.fillStyle = glassGrad;
+    ctx.beginPath(); ctx.arc(cx, cy, dishR * 1.02, 0, Math.PI * 2); ctx.fill();
+
+    // Dish interior
+    const dishGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, dishR);
+    if (light) {
+        dishGrad.addColorStop(0, '#f5f0ff');
+        dishGrad.addColorStop(1, '#ede9fe');
+    } else {
+        dishGrad.addColorStop(0, '#0d0618');
+        dishGrad.addColorStop(1, '#080412');
+    }
+    ctx.fillStyle = dishGrad;
+    ctx.beginPath(); ctx.arc(cx, cy, dishR, 0, Math.PI * 2); ctx.fill();
+
+    // Dish border
+    ctx.strokeStyle = light ? 'rgba(139,92,246,0.5)' : 'rgba(139,92,246,0.4)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(cx, cy, dishR, 0, Math.PI * 2); ctx.stroke();
+
+    // Clip to dish
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, dishR * 0.97, 0, Math.PI * 2); ctx.clip();
+
+    // ─ Cells ─
+    const maxLevel = Math.min(N, 5);
+    const positions = getPositions(maxLevel, dishR);
+
+    // Gather which levels to show and with what alpha
+    const levelAlpha = [];
+    for (let lv = 0; lv <= maxLevel; lv++) {
+        if (lv < step)       levelAlpha[lv] = 1;           // fully grown
+        else if (lv === step) levelAlpha[lv] = 1;           // current gen — stable
+        else if (lv === step + 1) levelAlpha[lv] = frac;    // appearing
+        else                  levelAlpha[lv] = 0;
+    }
+
+    // Cell radius: larger for inner rings, smaller for outer
+    function cellR(level) {
+        const base = dishR * 0.12;
+        return Math.max(base * Math.pow(0.62, level), 4);
+    }
+
+    positions.forEach(({ x, y, level }) => {
+        const alpha = levelAlpha[level] ?? 0;
+        if (alpha <= 0) return;
+
+        const px = cx + x, py = cy + y;
+        const r = cellR(level);
+        const color = levelColor(level);
+        const isNew = level === step + 1;
+
+        // Glow
+        const glowR = r * (2.5 + (level === step ? pulse * 0.4 : 0));
+        const gGrad = ctx.createRadialGradient(px, py, 0, px, py, glowR);
+        const [rc, gc, bc] = hexToRgb(color);
+        gGrad.addColorStop(0, `rgba(${rc},${gc},${bc},${alpha * 0.5})`);
+        gGrad.addColorStop(1, `rgba(${rc},${gc},${bc},0)`);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = gGrad;
+        ctx.beginPath(); ctx.arc(px, py, glowR, 0, Math.PI * 2); ctx.fill();
+
+        // Cell body
+        ctx.globalAlpha = alpha;
+        const scale = isNew ? (0.3 + 0.7 * frac) : 1;
+        const effectiveR = r * scale;
+        const cGrad = ctx.createRadialGradient(px - effectiveR*0.3, py - effectiveR*0.3, effectiveR*0.05, px, py, effectiveR);
+        cGrad.addColorStop(0, lighten(color));
+        cGrad.addColorStop(0.55, color);
+        cGrad.addColorStop(1, darken(color));
+        ctx.fillStyle = cGrad;
+        ctx.beginPath(); ctx.arc(px, py, effectiveR, 0, Math.PI * 2); ctx.fill();
+
+        // Nucleus dot
+        if (effectiveR > 7) {
+            ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
+            ctx.beginPath(); ctx.arc(px - effectiveR*0.25, py - effectiveR*0.25, effectiveR*0.22, 0, Math.PI*2); ctx.fill();
+        }
+    });
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    // ─ Labels ─
+    const tNow = step * PERIOD_MIN;
+    ctx.font = 'bold 13px system-ui';
+    ctx.fillStyle = light ? '#374151' : '#94a3b8';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`Период ${step} / ${N}   (t = ${tNow} мин)`, w / 2, 6);
+
+    // Show cell count below dish
+    const visibleCells = positions.filter((_, i) => {
+        const lv = positions[i].level;
+        return levelAlpha[lv] > 0;
+    }).length;
+    const totalAtStep = Math.pow(q, step);
+    ctx.font = 'bold 12px system-ui';
+    ctx.fillStyle = light ? '#7e22ce' : '#c084fc';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    const cellLabel = totalAtStep > MAX_RING
+        ? `Видимых клеток: ${MAX_RING}+  (всего ×${totalAtStep})`
+        : `Клеток: ${totalAtStep}`;
+    ctx.fillText(cellLabel, w / 2, h - 6);
+}
+
+// ─── Color helpers ───────────────────────────────────────
+function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1,3),16);
+    const g = parseInt(hex.slice(3,5),16);
+    const b = parseInt(hex.slice(5,7),16);
+    return [r,g,b];
+}
+function lighten(hex) {
+    const [r,g,b] = hexToRgb(hex);
+    return `rgb(${Math.min(255,r+80)},${Math.min(255,g+80)},${Math.min(255,b+80)})`;
+}
+function darken(hex) {
+    const [r,g,b] = hexToRgb(hex);
+    return `rgb(${Math.max(0,r-60)},${Math.max(0,g-60)},${Math.max(0,b-60)})`;
+}
+
+// ─── UI update ───────────────────────────────────────────
+function updateUI() {
+    const step  = Math.floor(animTime);
+    const frac  = animTime - step;
+    const mStep = massFn(step);
+    const mNext = massFn(Math.min(step + 1, N));
+    const mNow  = mStep + (mNext - mStep) * frac;
+    const mFinal = massFn(N);
+
+    const sub = n => String(n).split('').map(c=>'₀₁₂₃₄₅₆₇₈₉'[+c]??c).join('');
+    const sup = n => String(n).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[+c]??c).join('');
+
+    document.getElementById('formulaAn').innerHTML =
+        `a${sub(N+1)} = ${a1} &middot; ${q}${sup(N)} = <span class="result">${mFinal} мг</span>`;
+
+    const tMin = step * PERIOD_MIN;
+    document.getElementById('formulaCurrent').textContent = `t = ${tMin} мин (период ${step})`;
+    document.getElementById('formulaMass').innerHTML =
+        `Масса: <span class="result">${Math.round(mNow)} мг</span>`;
+
+    const pct = Math.min((Math.log(mNow/a1+1) / Math.log(mFinal/a1+1)) * 100, 100);
+    document.getElementById('progressFill').style.width = (isFinite(pct) ? pct : 0) + '%';
+
+    document.getElementById('displayA1').textContent = a1;
+    document.getElementById('displayQ').textContent  = q;
+    document.getElementById('displayN').textContent  = N;
+
+    document.getElementById('statStep').textContent = step + ' / ' + N;
+    document.getElementById('statTime').textContent = (step * PERIOD_MIN) + ' мин';
+    document.getElementById('statMass').textContent = Math.round(mNow) + ' мг';
+    document.getElementById('statGrow').textContent = '×' + Math.pow(q, step);
+
+    // Terms
+    const maxShow = 8;
+    let html = '';
+    for (let k = 0; k <= Math.min(N, maxShow); k++) {
+        let cls;
+        if (k < step)        cls = 'done';
+        else if (k === step) cls = 'active';
+        else                 cls = 'future';
+        html += `<span class="term-badge ${cls}">${massFn(k)}</span>`;
+    }
+    if (N > maxShow) html += `<span class="term-badge future">&hellip;</span>`;
+    document.getElementById('termsList').innerHTML = html;
+}
+
+function render() { drawBio(); updateUI(); }
+
+// ─── Animation ───────────────────────────────────────────
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrameTime === 0) lastFrameTime = ts;
+    const dt = (ts - lastFrameTime) / 1000;
+    lastFrameTime = ts;
+    animTime += dt * speed * 0.6;
+    if (animTime >= N) {
+        animTime = N;
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+// Pulse loop for alive cells glow
+function pulseLoop() {
+    if (!isPlaying) drawBio();
+    requestAnimationFrame(pulseLoop);
+}
+pulseLoop();
+
+// ─── Controls ────────────────────────────────────────────
+sliderA1.addEventListener('input', () => { a1 = parseInt(sliderA1.value); if (!isPlaying) animTime = N; render(); });
+sliderQ.addEventListener('input',  () => { q  = parseInt(sliderQ.value);  if (!isPlaying) animTime = N; render(); });
+sliderN.addEventListener('input',  () => {
+    N = parseInt(sliderN.value);
+    if (!isPlaying) animTime = N;
+    else animTime = Math.min(animTime, N);
+    render();
+});
+
+btnPlay.addEventListener('click', () => {
+    if (isPlaying) {
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    } else {
+        if (animTime >= N) animTime = 0;
+        isPlaying = true;
+        lastFrameTime = 0;
+        btnPlay.textContent = '⏸ Пауза';
+        requestAnimationFrame(animate);
+    }
+});
+
+btnReset.addEventListener('click', () => {
+    isPlaying = false;
+    animTime  = 0;
+    lastFrameTime = 0;
+    btnPlay.textContent = '▶ Пуск';
+    render();
+});
+
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        speed = parseFloat(btn.dataset.speed);
+    });
+});
+
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+setTimeout(() => { resizeCanvas(); animTime = N; render(); }, 50);
+</script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прыгающий мяч — Геометрическая прогрессия</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #0c1622;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --bg3: #eff6ff;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.2s, color 0.2s;
+        }
+        .app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex; align-items: center; gap: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.2em; font-weight: 700;
+            background: linear-gradient(135deg, #fb923c, #fbbf24);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            white-space: nowrap;
+        }
+        .top-controls { display: flex; align-items: center; gap: 14px; flex: 1; flex-wrap: wrap; }
+        .slider-group { display: flex; align-items: center; gap: 6px; }
+        .slider-group label { font-size: 0.8em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; }
+        .slider-group .val { font-size: 1.3em; font-weight: 700; color: #fb923c; min-width: 38px; text-align: center; }
+        html.light .slider-group .val { color: #c2410c; }
+        input[type="range"] {
+            -webkit-appearance: none; width: 100px; height: 6px;
+            border-radius: 3px; background: var(--track); outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 20px; height: 20px;
+            border-radius: 50%; background: #f97316; cursor: pointer;
+            box-shadow: 0 0 8px rgba(249,115,22,0.4);
+        }
+        .btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-play  { background: linear-gradient(135deg, #ea580c, #d97706); color: white; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
+        .btn-speed.active { background: #ea580c; color: white; }
+        .btn-theme { background: var(--btn2); color: var(--btn2-text); padding: 8px 14px; font-size: 0.85em; margin-left: auto; border: 1px solid var(--border); }
+        .btn-theme:hover { opacity: 0.85; }
+
+        /* ═══ MAIN ═══ */
+        .main-grid { display: grid; grid-template-columns: 1fr 310px; gap: 0; min-height: 0; overflow: hidden; }
+        .canvas-cell {
+            display: flex; flex-direction: column;
+            border-right: 1px solid var(--border2);
+            background: var(--bg3); min-height: 0; overflow: hidden;
+        }
+        .cell-title { font-size: 0.8em; color: var(--subtle); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; padding: 8px 14px 4px; }
+        .canvas-wrap { flex: 1; min-height: 0; position: relative; }
+        canvas#ballCanvas { display: block; width: 100%; height: 100%; }
+
+        /* ═══ RIGHT ═══ */
+        .right-cell { display: flex; flex-direction: column; min-height: 0; overflow: hidden; padding: 14px 18px; gap: 10px; }
+        .formula-card { background: var(--card); border-radius: 12px; padding: 13px 16px; border: 1px solid var(--border); }
+        .formula-card .card-title { font-size: 0.78em; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; font-weight: 600; }
+        .formula-card .formula { font-size: 1.15em; color: #fb923c; font-family: 'Courier New', monospace; margin-bottom: 5px; }
+        html.light .formula-card .formula { color: #c2410c; }
+        .formula-card .calculation { font-size: 1.05em; color: var(--text); font-weight: 600; line-height: 1.7; }
+        .result { color: #fb923c; font-size: 1.2em; font-weight: 700; }
+        html.light .result { color: #c2410c; }
+        .result-ok  { color: #4ade80; font-weight: 700; }
+        .result-bad { color: #f87171; font-weight: 700; }
+        html.light .result-ok  { color: #15803d; }
+        html.light .result-bad { color: #dc2626; }
+
+        .progress-bar-bg { height: 5px; background: var(--card); border-radius: 3px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #ea580c, #fbbf24); border-radius: 3px; transition: width 0.1s linear; }
+
+        .terms-section { flex: 1; min-height: 0; overflow-y: auto; }
+        .terms-section::-webkit-scrollbar { width: 4px; }
+        .terms-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .terms-title { font-size: 0.82em; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px; }
+        .terms-list { display: flex; gap: 5px; flex-wrap: wrap; }
+        .term-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.88em; font-weight: 600; font-family: 'Courier New', monospace; }
+        .term-badge.done    { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+        .term-badge.active  { background: rgba(251,191,36,0.2); color: #fbbf24; border: 1px solid rgba(251,191,36,0.4); transform: scale(1.05); }
+        .term-badge.future  { background: rgba(100,116,139,0.1); color: var(--muted); border: 1px solid rgba(100,116,139,0.2); }
+        .term-badge.fail    { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        html.light .term-badge.done   { background: rgba(22,163,74,0.1);  color: #15803d; border-color: rgba(22,163,74,0.3); }
+        html.light .term-badge.active { background: rgba(180,83,9,0.12); color: #b45309; border-color: rgba(180,83,9,0.35); }
+        html.light .term-badge.fail   { background: rgba(220,38,38,0.1);  color: #dc2626; border-color: rgba(220,38,38,0.3); }
+
+        /* ═══ BOTTOM ═══ */
+        .bottom-bar { display: flex; align-items: stretch; border-top: 1px solid var(--border2); background: var(--bg2); }
+        .status-items { display: flex; gap: 18px; padding: 8px 20px; align-items: center; }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label { font-size: 0.7em; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.3px; }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .status-item .value.orange { color: #fb923c; }
+        .status-item .value.amber  { color: #fbbf24; }
+        .status-item .value.blue   { color: #60a5fa; }
+        .status-item .value.red    { color: #f87171; }
+        html.light .status-item .value.orange { color: #c2410c; }
+        html.light .status-item .value.amber  { color: #b45309; }
+        html.light .status-item .value.red    { color: #dc2626; }
+
+        .comparison-items { display: flex; gap: 12px; padding: 8px 20px; flex: 1; justify-content: center; align-items: center; }
+        .comp-card { padding: 6px 18px; border-radius: 8px; border: 1px solid; display: flex; align-items: center; gap: 10px; }
+        .comp-card.info   { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.2); }
+        .comp-card.answer { background: rgba(251,146,60,0.08); border-color: rgba(251,146,60,0.2); }
+        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; }
+        .comp-card.info   .comp-title { color: #93c5fd; }
+        .comp-card.answer .comp-title { color: #fb923c; }
+        html.light .comp-card.answer .comp-title { color: #c2410c; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.info   .comp-value { color: #60a5fa; }
+        .comp-card.answer .comp-value { color: #f97316; }
+        html.light .comp-card.answer .comp-value { color: #c2410c; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="top-bar">
+        <h1>Прыгающий мяч</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>h&#8321; =</label>
+                <span class="val" id="displayA1">5.4 м</span>
+                <input type="range" id="sliderA1" min="3" max="108" value="54" step="3">
+            </div>
+            <div class="slider-group">
+                <label>делитель =</label>
+                <span class="val" id="displayDiv">3</span>
+                <input type="range" id="sliderDiv" min="2" max="5" value="3" step="1">
+            </div>
+            <div class="slider-group">
+                <label>порог =</label>
+                <span class="val" id="displayThresh">10 см</span>
+                <input type="range" id="sliderThresh" min="1" max="100" value="10" step="1">
+            </div>
+            <button class="btn btn-play"  id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">&#9728; Светлая</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="canvas-cell">
+            <div class="cell-title">Траектория прыжков</div>
+            <div class="canvas-wrap"><canvas id="ballCanvas"></canvas></div>
+        </div>
+
+        <div class="right-cell">
+            <div class="formula-card">
+                <div class="card-title">n-й член геометрической прогрессии</div>
+                <div class="formula">a&#8345; = a&#8321; &middot; q<sup>n&minus;1</sup></div>
+                <div class="calculation" id="formulaAn">a&#8325; = 5.4 &middot; (1/3)&#x2074; &asymp; <span class="result">0.067 м</span></div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Условие: прыжок не достигнет порога</div>
+                <div class="formula" id="formulaCond">aₙ &lt; 0.1 м</div>
+                <div class="calculation" id="formulaAnswer">Впервые на прыжке <span class="result" id="answerSpan">5</span></div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="terms-section">
+                <div class="terms-title">Высоты прыжков</div>
+                <div class="terms-list" id="termsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Прыжок</span>
+                <span class="value blue" id="statBounce">0</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Высота</span>
+                <span class="value orange" id="statHeight">5.4 м</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Порог</span>
+                <span class="value red" id="statThresh">0.1 м</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Ответ</span>
+                <span class="value amber" id="statAnswer">прыжок 5</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card info">
+                <div class="comp-title">Коэффициент</div>
+                <div class="comp-value" id="compQ">q = 1/3</div>
+            </div>
+            <div class="comp-card answer">
+                <div class="comp-title">Первый раз ниже порога</div>
+                <div class="comp-value" id="compAnswer">прыжок №5 ≈ 0.07 м</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let a1Raw = 54;      // slider value: actual a1 = a1Raw/10 meters
+let divisor = 3;
+let threshCm = 10;
+
+let animTime = 0;    // 0..N, one unit = one bounce
+let isPlaying = false, speed = 1, lastFrameTime = 0;
+
+const sliderA1     = document.getElementById('sliderA1');
+const sliderDiv    = document.getElementById('sliderDiv');
+const sliderThresh = document.getElementById('sliderThresh');
+const btnPlay      = document.getElementById('btnPlay');
+const btnReset     = document.getElementById('btnReset');
+const btnTheme     = document.getElementById('btnTheme');
+const canvas       = document.getElementById('ballCanvas');
+const ctx          = canvas.getContext('2d');
+
+function a1()      { return a1Raw / 10; }
+function threshM() { return threshCm / 100; }
+function q()       { return 1 / divisor; }
+
+// ─── Math helpers ────────────────────────────────────────
+function bounceHeight(n) { return a1() * Math.pow(q(), n - 1); }
+
+function findAnswer() {
+    for (let n = 1; n <= 100; n++) {
+        if (bounceHeight(n) < threshM()) return n;
+    }
+    return 100;
+}
+
+function getHeights() {
+    const ans = findAnswer();
+    const heights = [];
+    for (let n = 1; n <= ans; n++) heights.push(bounceHeight(n));
+    return heights;
+}
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') { document.documentElement.classList.add('light'); btnTheme.textContent = '\uD83C\uDF19 Тёмная'; }
+btnTheme.addEventListener('click', () => {
+    const light = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', light ? 'light' : 'dark');
+    btnTheme.textContent = light ? '\uD83C\uDF19 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+// ─── Canvas resize ───────────────────────────────────────
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr  = window.devicePixelRatio || 1;
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+}
+
+// ─── Drawing ─────────────────────────────────────────────
+function drawScene() {
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.width / dpr, H = canvas.height / dpr;
+    const light = isLight();
+
+    ctx.clearRect(0, 0, W, H);
+
+    const heights = getHeights();
+    const N = heights.length;
+    const ans = findAnswer();
+
+    // Layout
+    const marginL = 52, marginR = 16, marginTop = 28, marginBot = 38;
+    const plotW = W - marginL - marginR;
+    const plotH = H - marginTop - marginBot;
+    const groundY = H - marginBot;
+    const scaleY  = plotH / a1();                  // px per meter
+    const bounceW = plotW / N;                     // px per bounce
+    const threshY = groundY - threshM() * scaleY;
+
+    // ── Sky gradient ──
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+    if (light) {
+        skyGrad.addColorStop(0, '#bfdbfe');
+        skyGrad.addColorStop(1, '#e0f2fe');
+    } else {
+        skyGrad.addColorStop(0, '#0c1830');
+        skyGrad.addColorStop(1, '#0a1525');
+    }
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(marginL, 0, plotW, groundY);
+
+    // ── Asphalt ──
+    const asphaltGrad = ctx.createLinearGradient(0, groundY, 0, H);
+    if (light) {
+        asphaltGrad.addColorStop(0, '#94a3b8');
+        asphaltGrad.addColorStop(1, '#64748b');
+    } else {
+        asphaltGrad.addColorStop(0, '#1e293b');
+        asphaltGrad.addColorStop(1, '#0f172a');
+    }
+    ctx.fillStyle = asphaltGrad;
+    ctx.fillRect(0, groundY, W, marginBot);
+
+    // Ground line
+    ctx.strokeStyle = light ? '#475569' : '#334155';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(marginL, groundY); ctx.lineTo(W - marginR, groundY); ctx.stroke();
+
+    // ── Y-axis scale ──
+    ctx.font = '10px system-ui';
+    ctx.fillStyle = light ? '#475569' : '#64748b';
+    ctx.textAlign = 'right';
+    const meterStep = a1() <= 3 ? 0.5 : 1;
+    for (let m = 0; m <= Math.ceil(a1()); m += meterStep) {
+        const y = groundY - m * scaleY;
+        if (y < marginTop - 5) break;
+        ctx.strokeStyle = light ? 'rgba(100,116,139,0.25)' : 'rgba(51,65,85,0.5)';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath(); ctx.moveTo(marginL, y); ctx.lineTo(W - marginR, y); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = light ? '#475569' : '#64748b';
+        ctx.fillText(m + ' м', marginL - 4, y + 3);
+    }
+
+    // ── Threshold line ──
+    if (threshY >= marginTop && threshY <= groundY) {
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.moveTo(marginL, threshY); ctx.lineTo(W - marginR, threshY); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Label
+        const label = threshCm + ' см';
+        ctx.font = 'bold 11px system-ui';
+        ctx.fillStyle = '#ef4444';
+        ctx.textAlign = 'right';
+        ctx.fillText(label, marginL - 4, threshY - 3);
+    }
+
+    // ── Bounce arcs ──
+    const step = Math.floor(animTime);
+    const frac = animTime - step;
+
+    for (let i = 0; i < heights.length; i++) {
+        const x0 = marginL + i * bounceW;
+        const x1 = x0 + bounceW;
+        const peakH = heights[i];
+        const isFail = (i + 1 === ans) && peakH < threshM();
+
+        if (i < step) {
+            // Completed arc
+            const arcColor = isFail
+                ? (light ? 'rgba(220,38,38,0.7)' : 'rgba(248,113,113,0.7)')
+                : (light ? 'rgba(37,99,235,0.5)' : 'rgba(96,165,250,0.5)');
+            drawArc(x0, x1, groundY, peakH, scaleY, arcColor, 2);
+
+            // Peak label
+            const peakY = groundY - peakH * scaleY;
+            if (peakH * scaleY > 12) {
+                ctx.font = `bold ${Math.max(9, Math.min(12, bounceW * 0.18))}px system-ui`;
+                ctx.fillStyle = isFail ? '#f87171' : (light ? '#1d4ed8' : '#93c5fd');
+                ctx.textAlign = 'center';
+                const labelTxt = peakH >= 0.1
+                    ? (peakH >= 1 ? peakH.toFixed(1) + 'м' : (peakH * 100).toFixed(0) + 'см')
+                    : (peakH * 100).toFixed(1) + 'см';
+                ctx.fillText(labelTxt, (x0 + x1) / 2, peakY - 5);
+            }
+
+            // Bounce number below ground
+            ctx.font = '10px system-ui';
+            ctx.fillStyle = isFail ? '#f87171' : (light ? '#64748b' : '#475569');
+            ctx.textAlign = 'center';
+            ctx.fillText('#' + (i + 1), (x0 + x1) / 2, groundY + 16);
+        } else if (i === step) {
+            // Partially drawn current arc
+            if (frac > 0) {
+                const arcColor = isFail
+                    ? 'rgba(251,191,36,0.8)'
+                    : (light ? 'rgba(37,99,235,0.4)' : 'rgba(96,165,250,0.35)');
+                const halfFrac = Math.min(frac * 2, 1);
+                drawArc(x0, x0 + bounceW * halfFrac, groundY, peakH, scaleY, arcColor, 2);
+            }
+            // Bounce number
+            ctx.font = '10px system-ui';
+            ctx.fillStyle = light ? '#f97316' : '#fb923c';
+            ctx.textAlign = 'center';
+            ctx.fillText('#' + (i + 1), (x0 + x1) / 2, groundY + 16);
+        }
+    }
+
+    // ── Animated ball ──
+    if (step < heights.length) {
+        const peakH = heights[step];
+        const x0 = marginL + step * bounceW;
+        const x1 = x0 + bounceW;
+        const ballX = x0 + frac * bounceW;
+        const ballY = groundY - peakH * scaleY * 4 * frac * (1 - frac);
+        const ballR = Math.max(5, Math.min(14, bounceW * 0.12));
+
+        // Shadow on ground
+        const shadowAlpha = 0.3 * (1 - Math.abs(frac - 0.5) * 2);
+        ctx.fillStyle = `rgba(0,0,0,${shadowAlpha})`;
+        ctx.beginPath();
+        ctx.ellipse(ballX, groundY - 1, ballR * 2, ballR * 0.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glow
+        const glowGrad = ctx.createRadialGradient(ballX, ballY, 0, ballX, ballY, ballR * 2.5);
+        glowGrad.addColorStop(0, 'rgba(251,146,60,0.4)');
+        glowGrad.addColorStop(1, 'rgba(251,146,60,0)');
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath(); ctx.arc(ballX, ballY, ballR * 2.5, 0, Math.PI * 2); ctx.fill();
+
+        // Squash/stretch: compress when near ground, stretch when in air
+        const airFraction = 4 * frac * (1 - frac); // 0 at ground, 1 at peak
+        const scaleX = 1 + (1 - airFraction) * 0.4;
+        const scaleYB = 1 - (1 - airFraction) * 0.25;
+
+        ctx.save();
+        ctx.translate(ballX, ballY);
+        ctx.scale(scaleX, scaleYB);
+
+        const ballGrad = ctx.createRadialGradient(-ballR * 0.3, -ballR * 0.3, ballR * 0.05, 0, 0, ballR);
+        ballGrad.addColorStop(0, '#fed7aa');
+        ballGrad.addColorStop(0.4, '#f97316');
+        ballGrad.addColorStop(1, '#9a3412');
+        ctx.fillStyle = ballGrad;
+        ctx.beginPath(); ctx.arc(0, 0, ballR, 0, Math.PI * 2); ctx.fill();
+
+        // Highlight
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.beginPath(); ctx.arc(-ballR * 0.28, -ballR * 0.28, ballR * 0.28, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    } else if (step >= heights.length) {
+        // Final state: ball resting on ground at last position
+        const x = marginL + (heights.length - 0.5) * bounceW;
+        const ballR = Math.max(4, Math.min(10, bounceW * 0.1));
+        const ballGrad = ctx.createRadialGradient(x - ballR*0.3, groundY - ballR*1.3 - ballR*0.3, ballR*0.05, x, groundY - ballR*1.1, ballR);
+        ballGrad.addColorStop(0, '#fed7aa'); ballGrad.addColorStop(0.4, '#f97316'); ballGrad.addColorStop(1, '#9a3412');
+        ctx.fillStyle = ballGrad;
+        ctx.beginPath(); ctx.arc(x, groundY - ballR * 1.1, ballR, 0, Math.PI * 2); ctx.fill();
+    }
+}
+
+function drawArc(x0, x1, groundY, peakH, scaleY, color, lw) {
+    const steps = 50;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
+    ctx.beginPath();
+    for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = x0 + t * (x1 - x0);
+        const y = groundY - peakH * scaleY * 4 * t * (1 - t);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+}
+
+// ─── UI update ───────────────────────────────────────────
+function updateUI() {
+    const heights = getHeights();
+    const ans = findAnswer();
+    const N   = heights.length;
+    const step = Math.min(Math.floor(animTime), N - 1);
+    const frac = animTime - Math.floor(animTime);
+
+    const curH = step < N ? heights[step] : heights[N - 1];
+    const pct  = (animTime / N) * 100;
+
+    document.getElementById('displayA1').textContent    = a1().toFixed(1) + ' м';
+    document.getElementById('displayDiv').textContent   = divisor;
+    document.getElementById('displayThresh').textContent = threshCm + ' см';
+
+    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c] ?? c).join('');
+    const sup = n => String(n).split('').map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c] ?? c).join('');
+
+    const ansFail = heights[ans - 1];
+    document.getElementById('formulaAn').innerHTML =
+        `a${sub(ans)} = ${a1().toFixed(1)} &middot; (1/${divisor})${sup(ans-1)} &asymp; <span class="result">${(ansFail).toFixed(3)} м</span>`;
+
+    document.getElementById('formulaCond').innerHTML = `a&#8345; &lt; ${threshM()} м`;
+    document.getElementById('formulaAnswer').innerHTML =
+        `Впервые на прыжке <span class="result" id="answerSpan">${ans}</span>`;
+
+    document.getElementById('progressFill').style.width = Math.min(pct, 100) + '%';
+
+    document.getElementById('statBounce').textContent = (step + 1) + ' / ' + N;
+    document.getElementById('statHeight').textContent = curH.toFixed(3) + ' м';
+    document.getElementById('statThresh').textContent = threshM() + ' м';
+    document.getElementById('statAnswer').textContent = 'прыжок ' + ans;
+
+    document.getElementById('compQ').textContent = 'q = 1/' + divisor;
+    document.getElementById('compAnswer').textContent =
+        'прыжок №' + ans + ' ≈ ' + ansFail.toFixed(3) + ' м';
+
+    // Terms
+    const maxShow = 10;
+    let html = '';
+    for (let i = 0; i < Math.min(N, maxShow); i++) {
+        const n = i + 1;
+        const h = heights[i];
+        const isFail = n === ans;
+        let cls;
+        if (isFail)           cls = 'fail';
+        else if (i < step)    cls = 'done';
+        else if (i === step)  cls = 'active';
+        else                  cls = 'future';
+        const txt = h >= 0.01 ? h.toFixed(h >= 1 ? 1 : 3) + 'м' : (h * 100).toFixed(1) + 'см';
+        html += `<span class="term-badge ${cls}" title="Прыжок ${n}">${txt}</span>`;
+    }
+    if (N > maxShow) html += `<span class="term-badge future">&hellip;</span>`;
+    document.getElementById('termsList').innerHTML = html;
+}
+
+function render() { drawScene(); updateUI(); }
+
+// ─── Animation ───────────────────────────────────────────
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrameTime === 0) lastFrameTime = ts;
+    const dt = (ts - lastFrameTime) / 1000;
+    lastFrameTime = ts;
+    animTime += dt * speed * 0.8;
+    const N = getHeights().length;
+    if (animTime >= N) {
+        animTime = N;
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+// ─── Controls ────────────────────────────────────────────
+sliderA1.addEventListener('input', () => {
+    a1Raw = parseInt(sliderA1.value);
+    if (!isPlaying) animTime = getHeights().length;
+    render();
+});
+sliderDiv.addEventListener('input', () => {
+    divisor = parseInt(sliderDiv.value);
+    if (!isPlaying) animTime = getHeights().length;
+    render();
+});
+sliderThresh.addEventListener('input', () => {
+    threshCm = parseInt(sliderThresh.value);
+    if (!isPlaying) animTime = getHeights().length;
+    render();
+});
+
+btnPlay.addEventListener('click', () => {
+    if (isPlaying) {
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    } else {
+        const N = getHeights().length;
+        if (animTime >= N) animTime = 0;
+        isPlaying = true;
+        lastFrameTime = 0;
+        btnPlay.textContent = '⏸ Пауза';
+        requestAnimationFrame(animate);
+    }
+});
+btnReset.addEventListener('click', () => {
+    isPlaying = false; animTime = 0; lastFrameTime = 0;
+    btnPlay.textContent = '▶ Пуск';
+    render();
+});
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        speed = parseFloat(btn.dataset.speed);
+    });
+});
+
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+setTimeout(() => { resizeCanvas(); animTime = getHeights().length; render(); }, 50);
+</script>
+</body>
+</html>

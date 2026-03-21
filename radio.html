@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Радиоактивный распад — Геометрическая прогрессия</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #0d1f18;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --bg3: #ecfdf5;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.2s, color 0.2s;
+        }
+        .app {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4ade80, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slider-group label {
+            font-size: 0.8em;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+        .slider-group .val {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #4ade80;
+            min-width: 42px;
+            text-align: center;
+        }
+        html.light .slider-group .val { color: #15803d; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 110px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--track);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #22c55e;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(34,197,94,0.4);
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-play  { background: linear-gradient(135deg, #16a34a, #15803d); color: white; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
+        .btn-speed.active { background: #16a34a; color: white; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
+        .btn-theme:hover { opacity: 0.85; }
+
+        /* ═══ MAIN GRID ═══ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 310px;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══ LEFT: Canvas ═══ */
+        .canvas-cell {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border2);
+            background: var(--bg3);
+            min-height: 0;
+            overflow: hidden;
+        }
+        .cell-title {
+            font-size: 0.8em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 8px 14px 4px;
+        }
+        .canvas-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        canvas#decayCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ═══ RIGHT: Formulas ═══ */
+        .right-cell {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            padding: 14px 18px;
+            gap: 10px;
+        }
+        .formula-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 13px 16px;
+            border: 1px solid var(--border);
+        }
+        .formula-card .card-title {
+            font-size: 0.78em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+        .formula-card .formula {
+            font-size: 1.2em;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+        }
+        html.light .formula-card .formula { color: #15803d; }
+        .formula-card .calculation {
+            font-size: 1.05em;
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.7;
+        }
+        .result {
+            color: #4ade80;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        html.light .result { color: #15803d; }
+
+        .progress-bar-bg {
+            height: 5px;
+            background: var(--card);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #15803d, #4ade80);
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        .terms-section {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        .terms-section::-webkit-scrollbar { width: 4px; }
+        .terms-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .terms-title {
+            font-size: 0.82em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .terms-list {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .term-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.88em;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        .term-badge.done {
+            background: rgba(74,222,128,0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74,222,128,0.3);
+        }
+        html.light .term-badge.done { background: rgba(22,163,74,0.12); color: #15803d; border-color: rgba(22,163,74,0.35); }
+        .term-badge.active {
+            background: rgba(250,204,21,0.2);
+            color: #facc15;
+            border: 1px solid rgba(250,204,21,0.4);
+            transform: scale(1.05);
+            box-shadow: 0 0 6px rgba(250,204,21,0.2);
+        }
+        html.light .term-badge.active { background: rgba(180,83,9,0.12); color: #b45309; border-color: rgba(180,83,9,0.4); }
+        .term-badge.future {
+            background: rgba(100,116,139,0.1);
+            color: var(--muted);
+            border: 1px solid rgba(100,116,139,0.2);
+        }
+
+        /* ═══ BOTTOM BAR ═══ */
+        .bottom-bar {
+            display: flex;
+            align-items: stretch;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
+        }
+        .status-items {
+            display: flex;
+            gap: 18px;
+            padding: 8px 20px;
+            align-items: center;
+        }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label {
+            font-size: 0.7em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .status-item .value.green  { color: #4ade80; }
+        .status-item .value.amber  { color: #facc15; }
+        .status-item .value.blue   { color: #60a5fa; }
+        .status-item .value.red    { color: #f87171; }
+        html.light .status-item .value.green { color: #15803d; }
+        html.light .status-item .value.amber { color: #b45309; }
+
+        .comparison-items {
+            display: flex;
+            gap: 12px;
+            padding: 8px 20px;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+        }
+        .comp-card {
+            padding: 6px 18px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comp-card.info  { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.2); }
+        .comp-card.answer { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
+        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; }
+        .comp-card.info   .comp-title { color: #93c5fd; }
+        .comp-card.answer .comp-title { color: #4ade80; }
+        html.light .comp-card.answer .comp-title { color: #15803d; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.info   .comp-value { color: #60a5fa; }
+        .comp-card.answer .comp-value { color: #22c55e; }
+        html.light .comp-card.answer .comp-value { color: #15803d; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <h1>Радиоактивный распад</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>a&#8321; =</label>
+                <span class="val" id="displayA1">640</span>
+                <input type="range" id="sliderA1" min="1" max="12" value="7"
+                       step="1" title="начальная масса = 10 · 2^(значение−1)">
+            </div>
+            <div class="slider-group">
+                <label>периодов =</label>
+                <span class="val" id="displayN">6</span>
+                <input type="range" id="sliderN" min="1" max="12" value="6" step="1">
+            </div>
+            <button class="btn btn-play"  id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">&#9728; Светлая</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="canvas-cell">
+            <div class="cell-title">Атомы изотопа</div>
+            <div class="canvas-wrap">
+                <canvas id="decayCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="right-cell">
+            <div class="formula-card">
+                <div class="card-title">n-й член геометрической прогрессии</div>
+                <div class="formula">a&#8345; = a&#8321; &middot; q<sup>n&minus;1</sup></div>
+                <div class="calculation" id="formulaAn">a&#8327; = 640 &middot; (1/2)&#x2076; = <span class="result">10 мг</span></div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Текущий момент</div>
+                <div class="formula" id="formulaCurrent">t = 0 мин</div>
+                <div class="calculation" id="formulaMass">Масса: <span class="result">640 мг</span></div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="terms-section">
+                <div class="terms-title">Члены прогрессии (мг)</div>
+                <div class="terms-list" id="termsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Период</span>
+                <span class="value blue" id="statStep">0 / 6</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Время</span>
+                <span class="value amber" id="statTime">0 мин</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Масса</span>
+                <span class="value green" id="statMass">640 мг</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Осталось %</span>
+                <span class="value red" id="statPct">100%</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card info">
+                <div class="comp-title">Период полураспада</div>
+                <div class="comp-value">T&#189; = 7 минут</div>
+            </div>
+            <div class="comp-card answer">
+                <div class="comp-title">Через 42 минуты</div>
+                <div class="comp-value">640 &middot; (1/2)&#x2076; = 10 мг</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+// a1 encoded: slider value k → a1 = 10 * 2^(k-1)
+// k=1→10, k=2→20, ..., k=7→640
+let sliderK = 7; // default k=7 → a1=640
+let N = 6;        // number of half-life periods (default 6 → 42 min)
+const PERIOD_MIN = 7; // minutes per half-life
+
+let animTime = 0;     // 0..N, integer = completed periods, frac = progress
+let isPlaying = false, speed = 1, lastFrameTime = 0;
+
+const COLS = 8, ROWS = 8, MAX_P = 64;
+
+const sliderA1 = document.getElementById('sliderA1');
+const sliderN  = document.getElementById('sliderN');
+const btnPlay  = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
+const canvas   = document.getElementById('decayCanvas');
+const ctx      = canvas.getContext('2d');
+
+function getA1() { return 10 * Math.pow(2, sliderK - 1); }
+function mass(step) { return getA1() / Math.pow(2, step); }
+
+// ─── Theme ───────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') {
+    document.documentElement.classList.add('light');
+    btnTheme.textContent = '\uD83C\uDF19 Тёмная';
+}
+btnTheme.addEventListener('click', () => {
+    const light = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', light ? 'light' : 'dark');
+    btnTheme.textContent = light ? '\uD83C\uDF19 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+// ─── Canvas resize ───────────────────────────────────────
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr  = window.devicePixelRatio || 1;
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+}
+
+// ─── Drawing ─────────────────────────────────────────────
+// Particle tick (deterministic shuffle by index)
+function shuffleIndex(i) {
+    // Simple deterministic permutation so dying particles are spread out
+    const prime = 37;
+    return (i * prime) % MAX_P;
+}
+
+function drawDecay() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width / dpr, h = canvas.height / dpr;
+    const light = isLight();
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Background
+    ctx.fillStyle = light ? '#f0fdf4' : '#080f0d';
+    ctx.fillRect(0, 0, w, h);
+
+    const step = Math.floor(animTime);
+    const frac = animTime - step;
+
+    // How many particles alive after `step` complete periods
+    // MAX_P / 2^step, but at least 0
+    function aliveAfter(s) {
+        return Math.max(0, Math.round(MAX_P / Math.pow(2, s)));
+    }
+
+    const surviveCount = aliveAfter(step + 1); // will survive this period
+    const aliveCount   = aliveAfter(step);      // alive at start of this period
+
+    // Grid layout
+    const margin = 28;
+    const availW = w - 2 * margin;
+    const availH = h - 2 * margin;
+    const cellSize = Math.min(availW / COLS, availH / ROWS);
+    const gridW = COLS * cellSize;
+    const gridH = ROWS * cellSize;
+    const ox = (w - gridW) / 2;
+    const oy = (h - gridH) / 2;
+    const r  = cellSize * 0.32;
+
+    // Glow pulsing for alive particles
+    const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 400);
+
+    for (let pi = 0; pi < MAX_P; pi++) {
+        const si = shuffleIndex(pi); // shuffled index determines which die first
+        const col = pi % COLS;
+        const row = Math.floor(pi / COLS);
+        const cx  = ox + col * cellSize + cellSize / 2;
+        const cy  = oy + row * cellSize + cellSize / 2;
+
+        let alpha;
+        if (si < surviveCount) {
+            alpha = 1; // survives this period
+        } else if (si < aliveCount) {
+            alpha = Math.max(0, 1 - frac); // dying during this period
+        } else {
+            alpha = 0; // already dead
+        }
+
+        if (alpha <= 0) {
+            // Draw ghost (very faint)
+            ctx.globalAlpha = 0.06;
+            ctx.fillStyle = light ? '#6b7280' : '#475569';
+            ctx.beginPath(); ctx.arc(cx, cy, r * 0.6, 0, Math.PI * 2); ctx.fill();
+            ctx.globalAlpha = 1;
+            continue;
+        }
+
+        const isDying = si >= surviveCount && si < aliveCount;
+
+        // Glow
+        const glowAlpha = alpha * (isDying ? 1 : 0.3 + 0.2 * pulse);
+        const glowR = r * (isDying ? (2 + frac * 2) : 2.2);
+        const gGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+        gGrad.addColorStop(0, `rgba(74,222,128,${glowAlpha * 0.6})`);
+        gGrad.addColorStop(1, 'rgba(74,222,128,0)');
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = gGrad;
+        ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2); ctx.fill();
+
+        // Core particle
+        ctx.globalAlpha = alpha;
+        const pGrad = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.05, cx, cy, r);
+        if (light) {
+            pGrad.addColorStop(0, '#bbf7d0');
+            pGrad.addColorStop(0.5, '#16a34a');
+            pGrad.addColorStop(1, '#14532d');
+        } else {
+            pGrad.addColorStop(0, '#bbf7d0');
+            pGrad.addColorStop(0.5, '#22c55e');
+            pGrad.addColorStop(1, '#15803d');
+        }
+        ctx.fillStyle = pGrad;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+
+        // Decay rays for dying particles
+        if (isDying && frac > 0.1) {
+            ctx.strokeStyle = `rgba(250,204,21,${alpha * 0.8})`;
+            ctx.lineWidth = 1;
+            for (let ray = 0; ray < 4; ray++) {
+                const angle = (ray / 4) * Math.PI * 2 + frac * Math.PI;
+                const rayLen = r * 1.5 + frac * r * 3;
+                ctx.globalAlpha = alpha * (1 - frac) * 0.8;
+                ctx.beginPath();
+                ctx.moveTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+                ctx.lineTo(cx + Math.cos(angle) * (r + rayLen), cy + Math.sin(angle) * (r + rayLen));
+                ctx.stroke();
+            }
+        }
+
+        ctx.globalAlpha = 1;
+    }
+
+    // Step labels at top
+    const stepLabel = `Период ${step} / ${N}   (t = ${step * PERIOD_MIN} мин)`;
+    ctx.font = `bold 13px system-ui`;
+    ctx.fillStyle = light ? '#374151' : '#94a3b8';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(stepLabel, w / 2, 6);
+
+    // Alive count label at bottom
+    const aliveNow = aliveCount - Math.round((aliveCount - surviveCount) * frac);
+    ctx.font = `bold 12px system-ui`;
+    ctx.fillStyle = light ? '#15803d' : '#4ade80';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(`Частиц: ${aliveNow} из ${MAX_P}`, w / 2, h - 6);
+}
+
+// ─── UI update ───────────────────────────────────────────
+function updateUI() {
+    const a1   = getA1();
+    const step = Math.floor(animTime);
+    const frac = animTime - step;
+
+    // Interpolated mass for display
+    const mStep     = mass(step);
+    const mStepNext = step < N ? mass(step + 1) : mStep;
+    const mNow      = mStep - (mStep - mStepNext) * frac;
+    const mFinal    = mass(N);
+
+    // n-th term formula (for the final answer of the problem)
+    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[+c] ?? c).join('');
+    const sup6 = n => String(n).split('').map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'[+c] ?? c).join('');
+    document.getElementById('formulaAn').innerHTML =
+        `a${sub(N+1)} = ${a1} &middot; (1/2)${sup6(N)} = <span class="result">${mFinal} мг</span>`;
+
+    const tMin = step * PERIOD_MIN;
+    document.getElementById('formulaCurrent').textContent = `t = ${tMin} мин (период ${step})`;
+    document.getElementById('formulaMass').innerHTML =
+        `Масса: <span class="result">${Math.round(mNow)} мг</span>`;
+
+    const pct = (mNow / a1) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    document.getElementById('displayA1').textContent = a1;
+    document.getElementById('displayN').textContent  = N;
+
+    document.getElementById('statStep').textContent = step + ' / ' + N;
+    document.getElementById('statTime').textContent = (step * PERIOD_MIN) + ' мин';
+    document.getElementById('statMass').textContent = Math.round(mNow) + ' мг';
+    document.getElementById('statPct').textContent  = Math.round(pct) + '%';
+
+    // Terms list
+    const maxShow = 14;
+    let html = '';
+    for (let k = 0; k <= Math.min(N, maxShow); k++) {
+        let cls;
+        if (k < step)       cls = 'done';
+        else if (k === step) cls = 'active';
+        else                 cls = 'future';
+        const tLabel = k * PERIOD_MIN;
+        html += `<span class="term-badge ${cls}" title="${tLabel} мин">${mass(k)}</span>`;
+    }
+    if (N > maxShow) html += `<span class="term-badge future">&hellip;</span>`;
+    document.getElementById('termsList').innerHTML = html;
+}
+
+function render() { drawDecay(); updateUI(); }
+
+// ─── Animation ───────────────────────────────────────────
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrameTime === 0) lastFrameTime = ts;
+    const dt = (ts - lastFrameTime) / 1000;
+    lastFrameTime = ts;
+    animTime += dt * speed * 0.7; // ~0.7 periods/sec at 1×
+    if (animTime >= N) {
+        animTime = N;
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+// Keep pulsing alive particles even when paused
+let pulseRAF;
+function pulseLoop() {
+    if (!isPlaying) drawDecay();
+    pulseRAF = requestAnimationFrame(pulseLoop);
+}
+pulseLoop();
+
+// ─── Controls ────────────────────────────────────────────
+sliderA1.addEventListener('input', () => {
+    sliderK = parseInt(sliderA1.value);
+    if (!isPlaying) animTime = N;
+    render();
+});
+
+sliderN.addEventListener('input', () => {
+    N = parseInt(sliderN.value);
+    if (!isPlaying) animTime = N;
+    else animTime = Math.min(animTime, N);
+    render();
+});
+
+btnPlay.addEventListener('click', () => {
+    if (isPlaying) {
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    } else {
+        if (animTime >= N) animTime = 0;
+        isPlaying = true;
+        lastFrameTime = 0;
+        btnPlay.textContent = '⏸ Пауза';
+        requestAnimationFrame(animate);
+    }
+});
+
+btnReset.addEventListener('click', () => {
+    isPlaying = false;
+    animTime  = 0;
+    lastFrameTime = 0;
+    btnPlay.textContent = '▶ Пуск';
+    render();
+});
+
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        speed = parseFloat(btn.dataset.speed);
+    });
+});
+
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+setTimeout(() => { resizeCanvas(); animTime = N; render(); }, 50);
+</script>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Змейка на клетчатой бумаге</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #16213e;
+            --card: #1e293b;
+            --border: #334155;
+            --border2: #1e293b;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --subtle: #64748b;
+            --track: #334155;
+            --btn2: #334155;
+            --btn2-text: #94a3b8;
+        }
+        html.light {
+            --bg: #f8fafc;
+            --bg2: #f1f5f9;
+            --bg3: #e8f4f8;
+            --card: #ffffff;
+            --border: #94a3b8;
+            --border2: #cbd5e1;
+            --text: #0f172a;
+            --muted: #374151;
+            --subtle: #334155;
+            --track: #94a3b8;
+            --btn2: #e2e8f0;
+            --btn2-text: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.2s, color 0.2s;
+        }
+        .app {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100vh;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border2);
+            flex-wrap: wrap;
+        }
+        .top-bar h1 {
+            font-size: 1.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fb923c, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        .top-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slider-group label {
+            font-size: 0.8em;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+        .slider-group .val {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #fb923c;
+            min-width: 32px;
+            text-align: center;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 110px;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--track);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fb923c;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(251,146,60,0.4);
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-play { background: linear-gradient(135deg, #ea580c, #d97706); color: white; }
+        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
+        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.8em; }
+        .btn-speed.active { background: #ea580c; color: white; }
+        .btn-theme {
+            background: var(--btn2);
+            color: var(--btn2-text);
+            padding: 8px 14px;
+            font-size: 0.85em;
+            margin-left: auto;
+            border: 1px solid var(--border);
+        }
+        .btn-theme:hover { opacity: 0.85; }
+
+        /* ═══ MAIN GRID ═══ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══ LEFT: Canvas ═══ */
+        .canvas-cell {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border2);
+            background: var(--bg3);
+            min-height: 0;
+            overflow: hidden;
+        }
+        .cell-title {
+            font-size: 0.8em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            padding: 8px 14px 4px;
+        }
+        .canvas-wrap {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+        }
+        canvas#snakeCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ═══ RIGHT: Formulas ═══ */
+        .right-cell {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            padding: 14px 18px;
+            gap: 10px;
+        }
+        .formula-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 13px 16px;
+            border: 1px solid var(--border);
+        }
+        .formula-card .card-title {
+            font-size: 0.78em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+        .formula-card .formula {
+            font-size: 1.2em;
+            color: #fb923c;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 5px;
+        }
+        .formula-card .calculation {
+            font-size: 1.05em;
+            color: var(--text);
+            font-weight: 600;
+            line-height: 1.7;
+        }
+        .result {
+            color: #4ade80;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+        html.light .result { color: #15803d; }
+
+        .progress-bar-bg {
+            height: 5px;
+            background: var(--card);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ea580c, #fb923c);
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        .terms-section {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+        }
+        .terms-section::-webkit-scrollbar { width: 4px; }
+        .terms-section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .terms-title {
+            font-size: 0.82em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .terms-list {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .term-badge {
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 0.88em;
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+        .term-badge.done {
+            background: rgba(251,146,60,0.15);
+            color: #fb923c;
+            border: 1px solid rgba(251,146,60,0.3);
+        }
+        .term-badge.active {
+            background: rgba(251,191,36,0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251,191,36,0.4);
+            transform: scale(1.05);
+            box-shadow: 0 0 6px rgba(251,191,36,0.2);
+        }
+        .term-badge.future {
+            background: rgba(100,116,139,0.1);
+            color: var(--muted);
+            border: 1px solid rgba(100,116,139,0.2);
+        }
+
+        /* ═══ BOTTOM BAR ═══ */
+        .bottom-bar {
+            display: flex;
+            align-items: stretch;
+            border-top: 1px solid var(--border2);
+            background: var(--bg2);
+        }
+        .status-items {
+            display: flex;
+            gap: 18px;
+            padding: 8px 20px;
+            align-items: center;
+        }
+        .status-item { display: flex; flex-direction: column; align-items: center; }
+        .status-item .label {
+            font-size: 0.7em;
+            color: var(--subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .status-item .value { font-size: 1.3em; font-weight: 700; }
+        .status-item .value.orange { color: #fb923c; }
+        .status-item .value.green { color: #4ade80; }
+        .status-item .value.amber { color: #fbbf24; }
+        .status-item .value.blue { color: #60a5fa; }
+        html.light .status-item .value.green { color: #15803d; }
+        html.light .status-item .value.amber { color: #b45309; }
+
+        .comparison-items {
+            display: flex;
+            gap: 12px;
+            padding: 8px 20px;
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+        }
+        .comp-card {
+            padding: 6px 18px;
+            border-radius: 8px;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .comp-card.manual {
+            background: rgba(239,68,68,0.08);
+            border-color: rgba(239,68,68,0.2);
+        }
+        .comp-card.answer {
+            background: rgba(74,222,128,0.08);
+            border-color: rgba(74,222,128,0.2);
+        }
+        .comp-card .comp-title {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .comp-card.manual .comp-title { color: #f87171; }
+        .comp-card.answer .comp-title { color: #4ade80; }
+        html.light .comp-card.answer .comp-title { color: #15803d; }
+        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
+        .comp-card.manual .comp-value { color: #ef4444; }
+        .comp-card.answer .comp-value { color: #22c55e; }
+        html.light .comp-card.answer .comp-value { color: #15803d; }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <h1>Змейка на клетчатой бумаге</h1>
+        <div class="top-controls">
+            <div class="slider-group">
+                <label>n =</label>
+                <span class="val" id="displayN">10</span>
+                <input type="range" id="sliderN" min="1" max="120" value="10" step="1">
+            </div>
+            <button class="btn btn-play" id="btnPlay">&#9654; Пуск</button>
+            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
+            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
+            <button class="btn btn-speed active" data-speed="1">1&times;</button>
+            <button class="btn btn-speed" data-speed="2">2&times;</button>
+            <button class="btn btn-theme" id="btnTheme">&#9728; Светлая</button>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div class="canvas-cell">
+            <div class="cell-title">Клетчатая бумага</div>
+            <div class="canvas-wrap">
+                <canvas id="snakeCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="right-cell">
+            <div class="formula-card">
+                <div class="card-title">Структура ломаной</div>
+                <div class="formula">1, 1, 2, 2, 3, 3, &hellip;, n, n</div>
+                <div class="calculation" id="formulaPairs">Пары: (1+1) + (2+2) + … + (n+n)</div>
+            </div>
+            <div class="formula-card">
+                <div class="card-title">Формула суммы — через АП</div>
+                <div class="formula">S = 2·(1+2+…+n) = n·(n+1)</div>
+                <div class="calculation" id="formulaResult">S = 10·11 = <span class="result">110</span></div>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="terms-section">
+                <div class="terms-title">Пары звеньев</div>
+                <div class="terms-list" id="termsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-items">
+            <div class="status-item">
+                <span class="label">Последнее звено</span>
+                <span class="value orange" id="statN">10</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Нарисовано</span>
+                <span class="value amber" id="statDrawn">0 / 20</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Длина сейчас</span>
+                <span class="value blue" id="statCurrent">0</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Итого</span>
+                <span class="value green" id="statTotal">110</span>
+            </div>
+        </div>
+        <div class="comparison-items">
+            <div class="comp-card manual">
+                <div class="comp-title">Вопрос задачи</div>
+                <div class="comp-value">n = 120, S = ?</div>
+            </div>
+            <div class="comp-card answer">
+                <div class="comp-title">Ответ по формуле</div>
+                <div class="comp-value">120 &middot; 121 = 14 520</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let n = 10;
+let animTime = 0; // 0..2n, integer part = completed segments, fractional = progress on current
+let isPlaying = false, speed = 1, lastFrameTime = 0;
+
+const sliderN  = document.getElementById('sliderN');
+const btnPlay  = document.getElementById('btnPlay');
+const btnReset = document.getElementById('btnReset');
+const btnTheme = document.getElementById('btnTheme');
+const canvas   = document.getElementById('snakeCanvas');
+const ctx      = canvas.getContext('2d');
+
+// ─── Theme ──────────────────────────────────────────────
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') {
+    document.documentElement.classList.add('light');
+    btnTheme.textContent = '\uD83C\uDF19 Тёмная';
+}
+btnTheme.addEventListener('click', () => {
+    const light = document.documentElement.classList.toggle('light');
+    localStorage.setItem('ap-theme', light ? 'light' : 'dark');
+    btnTheme.textContent = light ? '\uD83C\uDF19 Тёмная' : '☀ Светлая';
+    render();
+});
+function isLight() { return document.documentElement.classList.contains('light'); }
+
+// ─── Snake geometry ──────────────────────────────────────
+function getSegments(n) {
+    // Segments: pairs of equal length 1,1, 2,2, ..., n,n
+    // Directions: right, down, left, up (CW spiral from center)
+    const segs = [];
+    let x = 0, y = 0;
+    const dirs = [[1,0],[0,1],[-1,0],[0,-1]];
+    let di = 0;
+    for (let k = 1; k <= n; k++) {
+        for (let rep = 0; rep < 2; rep++) {
+            const [dx, dy] = dirs[di % 4];
+            segs.push({ x1:x, y1:y, x2:x+dx*k, y2:y+dy*k, len:k });
+            x += dx*k; y += dy*k;
+            di++;
+        }
+    }
+    return segs;
+}
+
+// ─── Canvas resize ───────────────────────────────────────
+function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const dpr  = window.devicePixelRatio || 1;
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width  = rect.width  + 'px';
+    canvas.style.height = rect.height + 'px';
+}
+
+// ─── Drawing ─────────────────────────────────────────────
+function drawSnake() {
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width / dpr, h = canvas.height / dpr;
+    const light = isLight();
+
+    ctx.clearRect(0, 0, w, h);
+
+    const segs = getSegments(n);
+    const totalSegs = segs.length; // = 2n
+
+    const doneCount = Math.min(Math.floor(animTime), totalSegs);
+    const frac = animTime - Math.floor(animTime);
+
+    // Bounding box of all segments
+    let minX = 0, maxX = 0, minY = 0, maxY = 0;
+    segs.forEach(s => {
+        minX = Math.min(minX, s.x1, s.x2);
+        maxX = Math.max(maxX, s.x1, s.x2);
+        minY = Math.min(minY, s.y1, s.y2);
+        maxY = Math.max(maxY, s.y1, s.y2);
+    });
+    minX -= 1; maxX += 1; minY -= 1; maxY += 1;
+
+    const gridW = maxX - minX;
+    const gridH = maxY - minY;
+    const margin = 24;
+    const cellSize = Math.min((w - 2*margin) / gridW, (h - 2*margin) / gridH);
+
+    const ox = (w - gridW * cellSize) / 2 - minX * cellSize;
+    const oy = (h - gridH * cellSize) / 2 - minY * cellSize;
+    const px = (gx, gy) => [ox + gx * cellSize, oy + gy * cellSize];
+
+    // Background
+    ctx.fillStyle = light ? '#f0f9ff' : '#080d1a';
+    ctx.fillRect(0, 0, w, h);
+
+    // Grid lines
+    ctx.strokeStyle = light ? 'rgba(148,163,184,0.6)' : 'rgba(51,65,85,0.7)';
+    ctx.lineWidth = 0.5;
+    for (let gx = minX; gx <= maxX; gx++) {
+        const [x1, y1] = px(gx, minY);
+        const [, y2]   = px(gx, maxY);
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1, y2); ctx.stroke();
+    }
+    for (let gy = minY; gy <= maxY; gy++) {
+        const [x1, y1] = px(minX, gy);
+        const [x2]     = px(maxX, gy);
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y1); ctx.stroke();
+    }
+
+    // Completed segments
+    ctx.lineCap  = 'round';
+    ctx.lineJoin = 'round';
+    const lw = Math.max(2, cellSize * 0.18);
+
+    for (let i = 0; i < doneCount; i++) {
+        const s = segs[i];
+        const [x1, y1] = px(s.x1, s.y1);
+        const [x2, y2] = px(s.x2, s.y2);
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = lw;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    }
+
+    // Current partial segment
+    if (doneCount < totalSegs && frac > 0) {
+        const s = segs[doneCount];
+        const [x1, y1] = px(s.x1, s.y1);
+        const [x2, y2] = px(s.x2, s.y2);
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x1 + (x2-x1)*frac, y1 + (y2-y1)*frac);
+        ctx.stroke();
+    }
+
+    // Segment length labels
+    if (cellSize > 14) {
+        const fontSize = Math.min(13, cellSize * 0.42);
+        ctx.font = `bold ${fontSize}px system-ui`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (let i = 0; i < doneCount; i++) {
+            const s = segs[i];
+            const [x1, y1] = px(s.x1, s.y1);
+            const [x2, y2] = px(s.x2, s.y2);
+            const mx = (x1+x2)/2, my = (y1+y2)/2;
+
+            // Perpendicular offset so label doesn't overlap the line
+            const dx = x2-x1, dy = y2-y1;
+            const len = Math.sqrt(dx*dx+dy*dy) || 1;
+            const nx = -dy/len, ny = dx/len;
+            const off = Math.max(10, cellSize * 0.35);
+
+            ctx.fillStyle = light ? '#92400e' : '#fcd34d';
+            ctx.fillText(s.len, mx + nx*off, my + ny*off);
+        }
+    }
+
+    // Start dot
+    const [sx, sy] = px(0, 0);
+    ctx.fillStyle = '#60a5fa';
+    ctx.beginPath();
+    ctx.arc(sx, sy, Math.max(3, cellSize*0.14), 0, Math.PI*2);
+    ctx.fill();
+}
+
+// ─── UI update ───────────────────────────────────────────
+function updateUI() {
+    const totalSegs = 2 * n;
+    const totalLen  = n * (n + 1);
+    const segs      = getSegments(n);
+    const doneCount = Math.min(Math.floor(animTime), totalSegs);
+    const frac      = animTime - Math.floor(animTime);
+
+    // Accumulated length drawn so far
+    let cumLen = 0;
+    for (let i = 0; i < doneCount; i++) cumLen += segs[i].len;
+    if (doneCount < totalSegs) cumLen += segs[doneCount] ? segs[doneCount].len * frac : 0;
+
+    document.getElementById('displayN').textContent = n;
+    document.getElementById('statN').textContent    = n;
+    document.getElementById('statDrawn').textContent  = doneCount + ' / ' + totalSegs;
+    document.getElementById('statCurrent').textContent = Math.round(cumLen);
+    document.getElementById('statTotal').textContent   = totalLen;
+
+    const pct = totalLen > 0 ? (cumLen / totalLen) * 100 : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+
+    document.getElementById('formulaPairs').textContent =
+        `Пары: (1+1) + (2+2) + … + (${n}+${n})`;
+    document.getElementById('formulaResult').innerHTML =
+        `S = ${n}&middot;${n+1} = <span class="result">${totalLen}</span>`;
+
+    // Pairs badges
+    const maxShow = 24;
+    let html = '';
+    for (let k = 1; k <= Math.min(n, maxShow); k++) {
+        let cls;
+        if (doneCount >= 2*k)        cls = 'done';
+        else if (doneCount >= 2*k-2) cls = 'active';
+        else                          cls = 'future';
+        html += `<span class="term-badge ${cls}">${k}+${k}</span>`;
+    }
+    if (n > maxShow) html += `<span class="term-badge future">&hellip;+${n-maxShow}</span>`;
+    document.getElementById('termsList').innerHTML = html;
+}
+
+function render() { drawSnake(); updateUI(); }
+
+// ─── Animation ───────────────────────────────────────────
+function animate(ts) {
+    if (!isPlaying) return;
+    if (lastFrameTime === 0) lastFrameTime = ts;
+    const dt = (ts - lastFrameTime) / 1000;
+    lastFrameTime = ts;
+    animTime += dt * speed * 2.5; // ~2.5 segments/sec at 1×
+    if (animTime >= 2*n) {
+        animTime = 2*n;
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    }
+    render();
+    if (isPlaying) requestAnimationFrame(animate);
+}
+
+// ─── Controls ────────────────────────────────────────────
+sliderN.addEventListener('input', () => {
+    n = parseInt(sliderN.value);
+    if (!isPlaying) animTime = 2*n;
+    else animTime = Math.min(animTime, 2*n);
+    render();
+});
+
+btnPlay.addEventListener('click', () => {
+    if (isPlaying) {
+        isPlaying = false;
+        btnPlay.textContent = '▶ Пуск';
+    } else {
+        if (animTime >= 2*n) animTime = 0;
+        isPlaying = true;
+        lastFrameTime = 0;
+        btnPlay.textContent = '⏸ Пауза';
+        requestAnimationFrame(animate);
+    }
+});
+
+btnReset.addEventListener('click', () => {
+    isPlaying = false;
+    animTime  = 0;
+    lastFrameTime = 0;
+    btnPlay.textContent = '▶ Пуск';
+    render();
+});
+
+document.querySelectorAll('.btn-speed').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        speed = parseFloat(btn.dataset.speed);
+    });
+});
+
+window.addEventListener('resize', () => { resizeCanvas(); render(); });
+setTimeout(() => { resizeCanvas(); animTime = 2*n; render(); }, 50);
+</script>
+</body>
+</html>
