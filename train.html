@@ -415,7 +415,7 @@
 
     <div class="main-grid">
         <div class="scene-cell">
-            <div class="cell-title">Разгон от старта</div>
+            <div class="cell-title">Движение поезда</div>
             <div class="scene-wrap">
                 <canvas id="sceneCanvas"></canvas>
             </div>
@@ -542,163 +542,143 @@ function drawScene() {
     const progress = totalDist > 0 ? currentDist / totalDist : 0;
 
     // Sky
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, trackY * 0.75);
+    const sky = ctx.createLinearGradient(0, 0, 0, trackY - 30);
     if (light) {
-        skyGrad.addColorStop(0, '#bfdbfe'); skyGrad.addColorStop(1, '#e0f2fe');
+        sky.addColorStop(0, '#bfdbfe'); sky.addColorStop(1, '#e0f2fe');
     } else {
-        skyGrad.addColorStop(0, '#1e3a5f'); skyGrad.addColorStop(1, '#0f172a');
+        sky.addColorStop(0, '#1e3a5f'); sky.addColorStop(1, '#0f172a');
     }
-    ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, w, trackY * 0.75);
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, w, trackY - 30);
 
-    // Grass
-    ctx.fillStyle = light ? '#bbf7d0' : '#0a1a0a';
-    ctx.fillRect(0, trackY * 0.75, w, h - trackY * 0.75);
+    // Ground
+    ctx.fillStyle = light ? '#bbf7d0' : '#1a3320';
+    ctx.fillRect(0, trackY - 30, w, h - trackY + 30);
 
-    // Road surface
-    const roadTop = trackY - 22, roadBot = trackY + 22, roadH = 44;
-    const roadGrad = ctx.createLinearGradient(0, roadTop, 0, roadBot);
-    if (light) {
-        roadGrad.addColorStop(0, '#94a3b8'); roadGrad.addColorStop(1, '#64748b');
-    } else {
-        roadGrad.addColorStop(0, '#1e293b'); roadGrad.addColorStop(1, '#0f172a');
+    // Track bed
+    ctx.fillStyle = light ? '#d4a96a' : '#3d2b1a';
+    ctx.fillRect(stationX - 10, trackY - 4, trackLen + 40, 8);
+
+    // Rails
+    ctx.strokeStyle = light ? '#64748b' : '#94a3b8'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(stationX - 10, trackY - 3); ctx.lineTo(trackEnd + 30, trackY - 3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(stationX - 10, trackY + 3); ctx.lineTo(trackEnd + 30, trackY + 3); ctx.stroke();
+
+    // Sleepers
+    ctx.fillStyle = light ? '#92400e' : '#5a4030';
+    for (let x = stationX; x < trackEnd + 20; x += 16) {
+        ctx.fillRect(x, trackY - 6, 4, 12);
     }
-    ctx.fillStyle = roadGrad;
-    ctx.fillRect(0, roadTop, w, roadH);
 
-    // Road edges
-    ctx.strokeStyle = light ? '#f9fafb' : '#f8fafc'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, roadTop); ctx.lineTo(w, roadTop); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, roadBot); ctx.lineTo(w, roadBot); ctx.stroke();
-
-    // Center dashes
-    ctx.setLineDash([18, 12]);
-    ctx.strokeStyle = light ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, trackY); ctx.lineTo(w, trackY); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Start line
-    ctx.strokeStyle = light ? '#1e293b' : '#94a3b8'; ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.moveTo(stationX, roadTop - 10); ctx.lineTo(stationX, roadBot + 4); ctx.stroke();
-    ctx.setLineDash([]);
+    // Station
+    ctx.fillStyle = light ? '#94a3b8' : '#334155';
+    ctx.fillRect(stationX - 20, trackY - 50, 40, 46);
+    ctx.fillStyle = light ? '#64748b' : '#475569';
+    ctx.beginPath();
+    ctx.moveTo(stationX - 25, trackY - 50);
+    ctx.lineTo(stationX, trackY - 64);
+    ctx.lineTo(stationX + 25, trackY - 50);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(stationX - 8, trackY - 36, 6, 8);
+    ctx.fillRect(stationX + 2, trackY - 36, 6, 8);
     ctx.fillStyle = light ? '#1e293b' : '#94a3b8';
-    ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    ctx.fillText('СТАРТ', stationX, roadTop - 12);
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center'; ctx.fillText('СТАНЦИЯ', stationX, trackY - 54);
 
-    // Segment markers (below road)
-    const segBarY  = roadBot + 6;
-    const segBarH  = 16;
+    // Segment markers
     for (let k = 1; k <= nDone; k++) {
         const markDist = sumN(k);
         const markX = stationX + (markDist / totalDist) * trackLen;
-
-        // Thin dashed tick on road edge
-        ctx.strokeStyle = light ? 'rgba(146,64,14,0.5)' : 'rgba(251,191,36,0.4)'; ctx.lineWidth = 1;
+        ctx.strokeStyle = light ? 'rgba(146,64,14,0.35)' : 'rgba(251,191,36,0.3)'; ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]);
-        ctx.beginPath(); ctx.moveTo(markX, roadTop - 6); ctx.lineTo(markX, roadBot + 4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(markX, trackY - 20); ctx.lineTo(markX, trackY + 20); ctx.stroke();
         ctx.setLineDash([]);
 
-        // Coloured segment bar
         const prevDist = sumN(k - 1);
         const prevX = stationX + (prevDist / totalDist) * trackLen;
-        const midX  = (prevX + markX) / 2;
-        const segW  = markX - prevX;
-        const hue   = 25 + k * 8;
-        ctx.fillStyle = `hsla(${hue},80%,${light ? 35 : 55}%,0.18)`;
-        ctx.fillRect(prevX, segBarY, segW, segBarH);
-        ctx.strokeStyle = `hsla(${hue},80%,${light ? 35 : 55}%,0.5)`;
+        const midX = (prevX + markX) / 2;
+        const segW = markX - prevX;
+        const hue = 25 + k * 8;
+        ctx.fillStyle = `hsla(${hue}, 80%, ${light ? 35 : 55}%, 0.15)`;
+        ctx.fillRect(prevX, trackY + 14, segW, 16);
+        ctx.strokeStyle = `hsla(${hue}, 80%, ${light ? 35 : 55}%, 0.4)`;
         ctx.lineWidth = 1;
-        ctx.strokeRect(prevX, segBarY, segW, segBarH);
+        ctx.strokeRect(prevX, trackY + 14, segW, 16);
 
-        if (segW > 22) {
+        if (segW > 20) {
             ctx.fillStyle = light ? '#92400e' : '#fbbf24';
             ctx.font = `bold ${Math.min(11, segW * 0.4)}px system-ui`;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('+' + fmt(term(k)), midX, segBarY + segBarH / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText('+' + fmt(term(k)), midX, trackY + 26);
         }
 
-        // Cumulative distance above road
-        ctx.fillStyle = light ? 'rgba(51,65,85,0.75)' : 'rgba(148,163,184,0.7)';
-        ctx.font = '8px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        ctx.fillText(fmt(markDist), markX, roadTop - 8);
+        ctx.fillStyle = light ? 'rgba(51,65,85,0.65)' : 'rgba(148,163,184,0.6)';
+        ctx.font = '8px system-ui'; ctx.textAlign = 'center';
+        ctx.fillText(fmt(markDist), markX, trackY - 24);
     }
 
-    // Car
-    const carX  = stationX + progress * trackLen;
-    const size  = Math.min(36, h * 0.13);
-    const bw    = size * 1.9, bh = size * 0.65;
-    const cabH  = size * 0.45, wr = size * 0.22;
-    const carY  = trackY;               // wheel base on centre line
-    const bodyY = carY - bh / 2;
+    // Train
+    const trainX = stationX + progress * trackLen;
+    const trainW = Math.min(120, h * 0.25);
+    const trainH = Math.min(46, h * 0.10);
+    const wheelR = Math.max(5, Math.round(trainH * 0.20));
+    const tx = trainX - trainW / 2;
+    const ty = trackY - trainH - wheelR * 0.4;
 
-    // Body
-    ctx.fillStyle = light ? '#1d4ed8' : '#3b82f6';
-    ctx.strokeStyle = light ? '#1e3a8a' : '#1e40af';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(carX - bw / 2, bodyY, bw, bh, 5);
-    ctx.fill(); ctx.stroke();
+    const trainGrad = ctx.createLinearGradient(tx, ty, tx, ty + trainH);
+    trainGrad.addColorStop(0, '#dc2626'); trainGrad.addColorStop(1, '#991b1b');
+    ctx.fillStyle = trainGrad;
+    roundRect(ctx, tx, ty, trainW, trainH, 4); ctx.fill();
+    ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 1.5; ctx.stroke();
 
-    // Cabin
-    ctx.fillStyle = light ? '#1e40af' : '#2563eb';
-    ctx.beginPath();
-    ctx.roundRect(carX - bw * 0.26, bodyY - cabH, bw * 0.52, cabH, [5, 5, 0, 0]);
-    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = light ? '#bfdbfe' : '#1e3a5f';
+    ctx.fillRect(tx + trainW * 0.55, ty + 3, trainW * 0.35, trainH * 0.5);
+    ctx.strokeStyle = light ? '#1d4ed8' : '#60a5fa'; ctx.lineWidth = 0.5; ctx.stroke();
 
-    // Window
-    ctx.fillStyle = 'rgba(186,230,253,0.6)';
-    ctx.beginPath();
-    ctx.roundRect(carX - bw * 0.22, bodyY - cabH + 4, bw * 0.44, cabH - 8, 3);
-    ctx.fill();
-
-    // Wheels
-    for (const wx of [carX - bw * 0.29, carX + bw * 0.29]) {
-        ctx.fillStyle = light ? '#1f2937' : '#111827';
-        ctx.strokeStyle = light ? '#6b7280' : '#4b5563';
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(wx, carY + bh / 2 - wr * 0.35, wr, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = light ? '#9ca3af' : '#6b7280';
-        ctx.beginPath(); ctx.arc(wx, carY + bh / 2 - wr * 0.35, wr * 0.38, 0, Math.PI * 2); ctx.fill();
-    }
-
-    // Headlight glow
-    if (isPlaying) {
-        ctx.globalAlpha = 0.18;
-        ctx.fillStyle = '#fbbf24';
-        ctx.beginPath();
-        ctx.moveTo(carX + bw / 2, carY - bh * 0.1);
-        ctx.lineTo(carX + bw / 2 + 34, carY - bh * 0.28);
-        ctx.lineTo(carX + bw / 2 + 34, carY + bh * 0.22);
-        ctx.lineTo(carX + bw / 2, carY + bh * 0.1);
-        ctx.closePath(); ctx.fill();
-        ctx.globalAlpha = 1;
-    }
+    const lightR = Math.max(3, Math.round(trainH * 0.12));
     ctx.fillStyle = '#fbbf24';
-    ctx.beginPath(); ctx.arc(carX + bw / 2 - 3, carY, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(tx + trainW - 2, ty + trainH * 0.5, lightR, 0, Math.PI * 2); ctx.fill();
+    if (isPlaying) {
+        const bSpread = trainH * 0.26;
+        const bLen = trainW * 0.38;
+        ctx.fillStyle = 'rgba(251,191,36,0.15)';
+        ctx.beginPath();
+        ctx.moveTo(tx + trainW, ty + trainH * 0.5 - bSpread * 0.5);
+        ctx.lineTo(tx + trainW + bLen, ty + trainH * 0.5 - bSpread);
+        ctx.lineTo(tx + trainW + bLen, ty + trainH * 0.5 + bSpread);
+        ctx.lineTo(tx + trainW, ty + trainH * 0.5 + bSpread * 0.5);
+        ctx.closePath(); ctx.fill();
+    }
 
-    // Speed lines
-    if (isPlaying && animTime > 0) {
-        ctx.globalAlpha = 0.35;
-        ctx.strokeStyle = light ? '#94a3b8' : '#475569';
-        ctx.lineWidth = 1.5;
-        for (let i = 1; i <= 3; i++) {
-            const lx = carX - bw / 2 - i * 10;
-            const ly = carY - bh * 0.05 + (i % 2 === 0 ? bh * 0.12 : -bh * 0.12);
-            ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx - 12, ly); ctx.stroke();
+    ctx.fillStyle = light ? '#6b7280' : '#374151';
+    ctx.strokeStyle = light ? '#4b5563' : '#6b7280'; ctx.lineWidth = 1.5;
+    for (let wx of [tx + trainW * 0.2, tx + trainW * 0.5, tx + trainW * 0.8]) {
+        ctx.beginPath(); ctx.arc(wx, trackY - wheelR * 0.4, wheelR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+
+    if (isPlaying || animTime > 0) {
+        ctx.globalAlpha = light ? 0.15 : 0.2;
+        ctx.fillStyle = light ? '#64748b' : '#94a3b8';
+        const t = Date.now() / 600;
+        for (let i = 0; i < 4; i++) {
+            const sx = tx + trainW * 0.08 - i * trainW * 0.1 + Math.sin(t + i) * 3;
+            const sy = ty - trainH * 0.2 - i * trainH * 0.28 + Math.cos(t + i * 0.7) * 2;
+            const sr = trainH * 0.14 + i * trainH * 0.09;
+            ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
         }
         ctx.globalAlpha = 1;
     }
 
-    // Label above car
     ctx.fillStyle = light ? '#c2410c' : '#f97316';
-    ctx.font = `bold ${Math.max(11, size * 0.38)}px system-ui`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    ctx.fillText(fmt(currentDist) + ' м', carX, bodyY - cabH - 12);
+    ctx.font = 'bold 14px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(fmt(currentDist) + ' м', trainX, ty - 14);
 
     if (nDone > 0 && nDone <= N) {
         ctx.fillStyle = light ? '#1d4ed8' : '#60a5fa';
-        ctx.font = `${Math.max(10, size * 0.3)}px system-ui`;
-        ctx.fillText('t = ' + nDone + ' с', carX, bodyY - cabH - 26);
+        ctx.font = '12px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('t = ' + nDone + ' с', trainX, ty - 28);
     }
 }
 
