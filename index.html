@@ -44,21 +44,51 @@
 
         .top-nav {
             display: flex;
-            justify-content: flex-end;
-            padding: 12px 20px 0;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px 0;
         }
+        .btn-github {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.82em;
+            font-weight: 500;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--btn2);
+            transition: all 0.2s;
+        }
+        .btn-github:hover { color: var(--text); border-color: var(--subtle); }
+        .btn-github svg { flex-shrink: 0; }
+
         .btn-theme {
+            display: flex;
+            align-items: center;
+            gap: 7px;
             background: var(--btn2);
             color: var(--btn2-text);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 0.85em;
-            font-weight: 600;
+            border-radius: 20px;
+            padding: 7px 14px 7px 10px;
+            font-size: 0.82em;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s;
         }
-        .btn-theme:hover { opacity: 0.85; }
+        .btn-theme:hover { border-color: var(--subtle); opacity: 0.9; }
+        .theme-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.4s;
+        }
+        .btn-theme:hover .theme-icon { transform: rotate(20deg); }
 
         .hero {
             text-align: center;
@@ -80,10 +110,33 @@
             background-clip: text;
         }
         .hero p {
-            font-size: 1.15em;
+            font-size: 1.05em;
             color: var(--muted);
-            max-width: 600px;
+            max-width: 640px;
             margin: 0 auto;
+            line-height: 1.6;
+        }
+        .hero-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin: 16px auto 14px;
+        }
+        .hero-tag {
+            background: var(--btn2);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            border-radius: 20px;
+            padding: 4px 13px;
+            font-size: 0.82em;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .hero-hint {
+            font-size: 0.88em !important;
+            color: var(--subtle) !important;
+            margin-top: 6px !important;
         }
 
         .cards {
@@ -325,12 +378,37 @@
 <body>
 
 <div class="top-nav">
-    <button class="btn-theme" id="btnTheme">☀ Светлая</button>
+    <a class="btn-github" href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" title="Исходный код на GitHub">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.026 2.747-1.026.546 1.378.202 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.338 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.579.688.481C19.138 20.2 22 16.447 22 12.021 22 6.484 17.523 2 12 2z"/>
+        </svg>
+        GitHub
+    </a>
+    <button class="btn-theme" id="btnTheme">
+        <span class="theme-icon" id="themeIcon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+        </span>
+        <span id="themeLabel">Светлая</span>
+    </button>
 </div>
 
 <div class="hero">
     <h1>Прогрессии</h1>
-    <p>Интерактивные модели для изучения арифметических и геометрических прогрессий.<br>Нажмите на задачу, чтобы открыть модель.</p>
+    <p>Интерактивные модели для уроков математики: арифметические и геометрические прогрессии для подготовки к ОГЭ и ЕГЭ, а также замечательные последовательности — Фибоначчи, треугольник Паскаля, решето Эратосфена.</p>
+    <div class="hero-tags">
+        <span class="hero-tag">19 моделей</span>
+        <span class="hero-tag">9–11 класс</span>
+        <span class="hero-tag">ОГЭ · ЕГЭ</span>
+        <span class="hero-tag">Для проектора</span>
+        <span class="hero-tag">Без интернета</span>
+    </div>
+    <p class="hero-hint">Каждая модель — задача с анимацией, слайдерами и формулами в реальном времени. Нажмите на карточку, чтобы открыть.</p>
 </div>
 
 <h2 class="section-heading grade-9">9 класс <span class="grade-badge badge-9">ОГЭ</span></h2>
@@ -675,12 +753,24 @@
 
 <script>
 const btnTheme = document.getElementById('btnTheme');
+const themeIcon = document.getElementById('themeIcon');
+const themeLabel = document.getElementById('themeLabel');
+
+const sunSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+const moonSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>`;
+
+function applyTheme(isLight) {
+    themeIcon.innerHTML = isLight ? moonSVG : sunSVG;
+    themeLabel.textContent = isLight ? 'Тёмная' : 'Светлая';
+}
+
 const savedTheme = localStorage.getItem('ap-theme') || 'dark';
-if (savedTheme === 'light') { document.documentElement.classList.add('light'); btnTheme.textContent = '🌙 Тёмная'; }
+if (savedTheme === 'light') { document.documentElement.classList.add('light'); applyTheme(true); }
+
 btnTheme.addEventListener('click', () => {
     const isL = document.documentElement.classList.toggle('light');
     localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
-    btnTheme.textContent = isL ? '🌙 Тёмная' : '☀ Светлая';
+    applyTheme(isL);
 });
 </script>
 </body>
