@@ -491,19 +491,26 @@ function setNumber(n) {
   drawGraph();
 }
 
+// 'idle' | 'running' | 'paused'
+let animState = 'idle';
+
+function setAnimState(state) {
+  animState = state;
+  const btn = document.getElementById('btnAnimate');
+  if (state === 'idle')    { btn.textContent = '▶ Анимировать'; }
+  if (state === 'running') { btn.textContent = '⏸ Пауза'; }
+  if (state === 'paused')  { btn.textContent = '▶ Продолжить'; }
+}
+
 function startAnimation() {
-  stopAnimation();
+  clearInterval(animTimer);
+  animTimer = null;
   displayStep = 0;
   updatePanel();
   drawGraph();
-  document.getElementById('btnAnimate').textContent = '⏸ Пауза';
-  document.getElementById('btnAnimate').onclick = pauseAnimation;
-
+  setAnimState('running');
   animTimer = setInterval(() => {
-    if (displayStep >= seq.length - 1) {
-      stopAnimation();
-      return;
-    }
+    if (displayStep >= seq.length - 1) { stopAnimation(); return; }
     displayStep++;
     updatePanel();
     drawGraph();
@@ -513,13 +520,11 @@ function startAnimation() {
 function pauseAnimation() {
   clearInterval(animTimer);
   animTimer = null;
-  document.getElementById('btnAnimate').textContent = '▶ Продолжить';
-  document.getElementById('btnAnimate').onclick = resumeAnimation;
+  setAnimState('paused');
 }
 
 function resumeAnimation() {
-  document.getElementById('btnAnimate').textContent = '⏸ Пауза';
-  document.getElementById('btnAnimate').onclick = pauseAnimation;
+  setAnimState('running');
   animTimer = setInterval(() => {
     if (displayStep >= seq.length - 1) { stopAnimation(); return; }
     displayStep++;
@@ -531,8 +536,7 @@ function resumeAnimation() {
 function stopAnimation() {
   clearInterval(animTimer);
   animTimer = null;
-  document.getElementById('btnAnimate').textContent = '▶ Анимировать';
-  document.getElementById('btnAnimate').onclick = startAnimation;
+  setAnimState('idle');
 }
 
 function resetView() {
@@ -602,7 +606,11 @@ document.getElementById('numSlider').addEventListener('input', e => {
   stopAuto(); stopAnimation();
   setNumber(parseInt(e.target.value));
 });
-document.getElementById('btnAnimate').addEventListener('click', startAnimation);
+document.getElementById('btnAnimate').addEventListener('click', () => {
+  if (animState === 'running') pauseAnimation();
+  else if (animState === 'paused') resumeAnimation();
+  else startAnimation();
+});
 document.getElementById('btnReset').addEventListener('click', resetView);
 document.getElementById('btnAuto').addEventListener('click', () => {
   autoMode ? stopAuto() : startAuto();
@@ -613,7 +621,7 @@ document.querySelectorAll('.btn-speed').forEach(btn => {
     speed = parseInt(btn.dataset.s);
     document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    if (animTimer) { pauseAnimation(); resumeAnimation(); }
+    if (animState === 'running') { pauseAnimation(); resumeAnimation(); }
   });
 });
 
