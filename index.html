@@ -46,19 +46,63 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 20px;
+            gap: 12px;
+            padding: 10px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
-            background: rgba(15,23,42,0.8);
+            background: rgba(15,23,42,0.82);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border-bottom: 1px solid rgba(51,65,85,0.6);
             transition: background 0.3s, border-color 0.3s;
         }
         html.light .top-nav {
-            background: rgba(248,250,252,0.85);
+            background: rgba(248,250,252,0.88);
             border-bottom-color: rgba(148,163,184,0.35);
+        }
+        .nav-models {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex: 1;
+            min-width: 0;
+            justify-content: flex-start;
+            padding: 0 8px;
+        }
+        .nav-models::-webkit-scrollbar { display: none; }
+        .nav-model-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            text-decoration: none;
+            color: inherit;
+            flex-shrink: 0;
+            transition: background 0.15s, transform 0.18s cubic-bezier(0.34,1.5,0.64,1);
+        }
+        .nav-model-link:hover {
+            background: var(--btn2);
+            transform: scale(1.28);
+        }
+        .nav-model-link:focus-visible {
+            outline: none;
+            background: var(--btn2);
+            box-shadow: 0 0 0 2px rgba(96,165,250,0.5);
+        }
+        .nav-sep {
+            width: 1px;
+            height: 16px;
+            background: var(--border);
+            flex-shrink: 0;
+            margin: 0 4px;
+            opacity: 0.5;
         }
         .btn-github {
             display: flex;
@@ -508,13 +552,41 @@
 <body>
 
 <div class="top-nav">
-    <a class="btn-github" href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" aria-label="Исходный код на GitHub">
+    <a class="btn-github" href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" aria-label="Исходный код на GitHub" style="flex-shrink:0">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.026 2.747-1.026.546 1.378.202 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.338 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.579.688.481C19.138 20.2 22 16.447 22 12.021 22 6.484 17.523 2 12 2z"/>
         </svg>
         GitHub
     </a>
-    <button class="btn-theme" id="btnTheme" aria-label="Переключить тему оформления">
+    <nav class="nav-models" aria-label="Все модели">
+        <!-- 9 класс · Арифметическая прогрессия -->
+        <a class="nav-model-link" href="stone.html" title="Камень в ущелье">🪨</a>
+        <a class="nav-model-link" href="tables.html" title="Официанты в ресторане">🍽️</a>
+        <a class="nav-model-link" href="amphitheater.html" title="Амфитеатр">🎭</a>
+        <a class="nav-model-link" href="train.html" title="Поезд">🚂</a>
+        <a class="nav-model-link" href="snake.html" title="Змейка">〰️</a>
+        <div class="nav-sep"></div>
+        <!-- 9 класс · Геометрическая прогрессия -->
+        <a class="nav-model-link" href="car.html" title="Автомобиль">🚗</a>
+        <a class="nav-model-link" href="ball.html" title="Мяч">🏀</a>
+        <a class="nav-model-link" href="bio.html" title="Рост колонии">🦠</a>
+        <a class="nav-model-link" href="radio.html" title="Радиоактивный распад">☢</a>
+        <div class="nav-sep"></div>
+        <!-- 11 класс -->
+        <a class="nav-model-link" href="fence.html" title="Маляры красят забор">🖌</a>
+        <a class="nav-model-link" href="snail.html" title="Улитка">🐌</a>
+        <a class="nav-model-link" href="tourist.html" title="Турист">🧗</a>
+        <a class="nav-model-link" href="postcards.html" title="Открытки Веры">💌</a>
+        <a class="nav-model-link" href="vasya.html" title="Вася и книги">📚</a>
+        <a class="nav-model-link" href="bubbly.html" title="Пузырьки">💰</a>
+        <div class="nav-sep"></div>
+        <!-- Замечательные последовательности -->
+        <a class="nav-model-link" href="fibonacci.html" title="Спираль Фибоначчи">🌀</a>
+        <a class="nav-model-link" href="pascal.html" title="Треугольник Паскаля">🔺</a>
+        <a class="nav-model-link" href="sieve.html" title="Решето Эратосфена">🔴</a>
+    </nav>
+
+    <button class="btn-theme" id="btnTheme" aria-label="Переключить тему оформления" style="flex-shrink:0">
         <span class="theme-icon" id="themeIcon">
             <!-- Иконка обновляется через JS -->
         </span>
