@@ -509,15 +509,19 @@
         .card-icon.fibonacci { background: linear-gradient(135deg, #1e1b4b, #0f0f2a); }
         .card-icon.pascal    { background: linear-gradient(135deg, #042f2e, #0a1a2e); }
         .card-icon.sieve     { background: linear-gradient(135deg, #450a0a, #1c0505); }
+        .card-icon.collatz   { background: linear-gradient(135deg, #431407, #1c1207); }
         html.light .card-icon.fibonacci { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
         html.light .card-icon.pascal    { background: linear-gradient(135deg, #cffafe, #a5f3fc); }
         html.light .card-icon.sieve     { background: linear-gradient(135deg, #ffe4e6, #fecdd3); }
+        html.light .card-icon.collatz   { background: linear-gradient(135deg, #fef3c7, #fde68a); }
         .card-body h2.fibonacci-title { color: #818cf8; }
         .card-body h2.pascal-title    { color: #67e8f9; }
         .card-body h2.sieve-title     { color: #fca5a5; }
+        .card-body h2.collatz-title   { color: #fbbf24; }
         html.light .card-body h2.fibonacci-title { color: #4f46e5; }
         html.light .card-body h2.pascal-title    { color: #0891b2; }
         html.light .card-body h2.sieve-title     { color: #be123c; }
+        html.light .card-body h2.collatz-title   { color: #b45309; }
 
         .cards { padding: 12px 20px 16px; }
 
@@ -584,6 +588,7 @@
         <a class="nav-model-link" href="fibonacci.html" title="Спираль Фибоначчи">🌀</a>
         <a class="nav-model-link" href="pascal.html" title="Треугольник Паскаля">🔺</a>
         <a class="nav-model-link" href="sieve.html" title="Решето Эратосфена">🔴</a>
+        <a class="nav-model-link" href="collatz.html" title="Гипотеза Коллатца">🌋</a>
     </nav>
 
     <button class="btn-theme" id="btnTheme" aria-label="Переключить тему оформления" style="flex-shrink:0">
@@ -953,6 +958,22 @@
                     <span class="param-tag">вычеркнуть кратные p²</span>
                 </div>
                 <span class="answer">простых до 100: 25</span>
+                <span class="open-btn">Открыть →</span>
+            </div>
+        </div>
+    </a>
+
+    <a class="card" href="collatz.html">
+        <div class="card-icon collatz">🌋</div>
+        <div class="card-body">
+            <h2 class="collatz-title">Гипотеза Коллатца</h2>
+            <p class="task-text">Чётное → делим на 2. Нечётное → умножаем на 3 и прибавляем 1. Повторяем. Число 27 делает 111 шагов, взлетая до 9232 — и всё равно приходит к 1. Но <em>доказательства</em> этого до сих пор нет.</p>
+            <div class="card-footer">
+                <div class="params">
+                    <span class="param-tag">3n + 1</span>
+                    <span class="param-tag">n / 2</span>
+                </div>
+                <span class="answer">27 → … → 1</span>
                 <span class="open-btn">Открыть →</span>
             </div>
         </div>

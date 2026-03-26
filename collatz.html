@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гипотеза Коллатца — 3n+1</title>
+<style>
+:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#f59e0b;--acc2:#b45309;--acc-glow:rgba(245,158,11,.35);--even:#60a5fa;--odd:#f97316;}
+html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#d97706;--acc2:#92400e;--acc-glow:rgba(217,119,6,.3);--even:#1d4ed8;--odd:#c2410c;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
+.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
+
+/* ── Top bar ── */
+.top-bar{display:flex;align-items:center;gap:12px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
+.top-bar h1{font-size:1.15em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
+.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0;}
+.back-link:hover{color:var(--text);border-color:var(--muted);}
+.top-controls{display:flex;align-items:center;gap:10px;flex:1;flex-wrap:wrap;}
+.num-group{display:flex;align-items:center;gap:8px;}
+.num-group label{font-size:.78em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;white-space:nowrap;}
+.num-group .val{font-size:1.35em;font-weight:700;color:var(--acc);min-width:52px;text-align:center;font-family:'Courier New',monospace;}
+input[type=range]{-webkit-appearance:none;width:130px;height:6px;border-radius:3px;background:var(--track);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
+input[type=number]{width:72px;padding:5px 8px;border-radius:7px;border:1px solid var(--border);background:var(--btn2);color:var(--text);font-size:.95em;font-weight:600;text-align:center;outline:none;transition:border-color .15s;}
+input[type=number]:focus{border-color:var(--acc);}
+.btn{padding:7px 14px;border:none;border-radius:8px;font-size:.82em;font-weight:600;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+.btn-play:hover{filter:brightness(1.1);}
+.btn-auto{background:var(--btn2);color:var(--btn2-text);border:1px solid var(--border);}
+.btn-auto.active{background:var(--acc);color:#fff;border-color:var(--acc);}
+.btn-reset{background:var(--btn2);color:var(--btn2-text);border:1px solid var(--border);}
+.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:7px 10px;font-size:.78em;border:1px solid var(--border);}
+.btn-speed.active{background:var(--acc);color:#fff;border-color:var(--acc);}
+.btn-info,.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:7px 14px;font-size:.82em;border:1px solid var(--border);}
+.btn-info:hover,.btn-theme:hover,.btn-reset:hover{border-color:var(--muted);color:var(--text);}
+.speed-group{display:flex;gap:3px;}
+
+/* ── Main grid ── */
+.main-grid{display:grid;grid-template-columns:1fr 300px;min-height:0;overflow:hidden;}
+.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;}
+.cell-title{font-size:.75em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:7px 16px 4px;}
+.scene-wrap{flex:1;min-height:0;position:relative;}
+canvas{display:block;width:100%;height:100%;}
+
+/* ── Right panel ── */
+.panel{display:flex;flex-direction:column;gap:8px;padding:12px 14px;overflow-y:auto;min-height:0;}
+.panel::-webkit-scrollbar{width:4px;}
+.panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.pcard{background:var(--card);border-radius:11px;padding:12px 14px;border:1px solid var(--border);}
+.pcard-title{font-size:.72em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;font-weight:600;}
+.rule-line{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.88em;line-height:1.4;}
+.rule-line:not(:last-child){border-bottom:1px solid var(--border2);}
+.rule-badge{padding:2px 8px;border-radius:5px;font-size:.75em;font-weight:700;letter-spacing:.3px;flex-shrink:0;}
+.badge-even{background:rgba(96,165,250,.15);color:var(--even);border:1px solid rgba(96,165,250,.3);}
+.badge-odd{background:rgba(249,115,22,.15);color:var(--odd);border:1px solid rgba(249,115,22,.3);}
+.rule-formula{font-family:'Courier New',monospace;font-weight:700;color:var(--text);font-size:1em;}
+.rule-result{color:var(--muted);font-size:.82em;}
+.cur-num{font-size:2em;font-weight:800;font-family:'Courier New',monospace;text-align:center;padding:4px 0 2px;transition:color .2s;}
+.cur-num.even{color:var(--even);}
+.cur-num.odd{color:var(--odd);}
+.cur-label{font-size:.72em;text-align:center;color:var(--subtle);margin-bottom:2px;}
+.cur-op{text-align:center;font-size:.85em;color:var(--muted);min-height:1.2em;}
+.seq-wrap{display:flex;flex-wrap:wrap;gap:4px;max-height:80px;overflow-y:auto;}
+.seq-wrap::-webkit-scrollbar{width:3px;}
+.seq-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.seq-num{padding:2px 6px;border-radius:5px;font-size:.78em;font-weight:700;font-family:'Courier New',monospace;}
+.seq-num.even{background:rgba(96,165,250,.12);color:var(--even);}
+.seq-num.odd{background:rgba(249,115,22,.12);color:var(--odd);}
+.seq-num.active{outline:2px solid var(--acc);outline-offset:1px;}
+.seq-num.done{opacity:.45;}
+.records-list{display:flex;flex-direction:column;gap:3px;}
+.rec-row{display:flex;align-items:center;gap:6px;font-size:.8em;padding:2px 0;}
+.rec-n{font-family:'Courier New',monospace;font-weight:700;min-width:30px;color:var(--text);}
+.rec-bar-wrap{flex:1;height:8px;background:var(--btn2);border-radius:4px;overflow:hidden;}
+.rec-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s;}
+.rec-steps{color:var(--muted);min-width:28px;text-align:right;}
+
+/* ── Bottom bar ── */
+.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
+.status-items{display:flex;gap:0;padding:0;flex:1;}
+.status-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7px 18px;border-right:1px solid var(--border2);}
+.status-item:last-child{border-right:none;}
+.status-item .label{font-size:.65em;color:var(--subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+.status-item .value{font-size:1.25em;font-weight:700;font-family:'Courier New',monospace;}
+.sv-a{color:var(--acc);}
+.sv-b{color:var(--even);}
+.sv-o{color:var(--odd);}
+.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
+
+/* ── Legend ── */
+.legend{display:flex;gap:12px;align-items:center;padding:5px 16px;border-bottom:1px solid var(--border2);font-size:.75em;}
+.leg-item{display:flex;align-items:center;gap:5px;color:var(--muted);}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.leg-even{background:var(--even);}
+.leg-odd{background:var(--odd);}
+
+/* ── Info Modal ── */
+.btn-info:hover{color:var(--text);border-color:var(--muted);}
+.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:999;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
+.info-overlay.open{display:flex;}
+.info-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:620px;width:100%;padding:26px 28px 22px;position:relative;margin:auto;}
+.info-modal h2{font-size:1.1em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;padding-right:32px;line-height:1.35;}
+.info-close{position:absolute;top:14px;right:14px;background:var(--btn2);color:var(--btn2-text);border:none;border-radius:6px;cursor:pointer;padding:5px 11px;font-size:1em;transition:all .15s;}
+.info-close:hover{background:var(--border);}
+.info-modal p,.info-modal li{font-size:.9em;color:var(--muted);line-height:1.65;margin-bottom:10px;}
+.info-modal ul{padding-left:18px;margin-bottom:10px;}
+.info-modal strong{color:var(--text);}
+.info-modal .example{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Courier New',monospace;font-size:.88em;color:var(--text);margin:10px 0;line-height:1.8;}
+.info-modal .highlight{color:var(--acc);font-weight:700;}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  html,body{height:auto;overflow-y:auto;}
+  .app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
+  .main-grid{grid-template-columns:1fr;}
+  .scene-cell{height:55vw;min-height:200px;max-height:320px;border-right:none;border-bottom:1px solid var(--border2);}
+  .panel{overflow:visible;height:auto;}
+  .top-bar{padding:8px 12px;gap:8px;}
+  input[type=range]{width:90px;}
+  .status-item{padding:6px 10px;}
+  .status-item .value{font-size:1.05em;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top bar ── -->
+  <div class="top-bar">
+    <a href="index.html" class="back-link">← Все модели</a>
+    <h1>Гипотеза Коллатца</h1>
+    <div class="top-controls">
+      <div class="num-group">
+        <label>Число</label>
+        <input type="number" id="numInput" min="1" max="9999" value="27">
+        <input type="range" id="numSlider" min="1" max="200" value="27">
+        <span class="val" id="numVal">27</span>
+      </div>
+      <button class="btn btn-play" id="btnAnimate">▶ Анимировать</button>
+      <button class="btn btn-reset" id="btnReset">Сбросить</button>
+      <button class="btn btn-auto" id="btnAuto">⟳ Авто</button>
+      <div class="speed-group">
+        <button class="btn btn-speed" data-s="120">1×</button>
+        <button class="btn btn-speed active" data-s="50">2×</button>
+        <button class="btn btn-speed" data-s="16">4×</button>
+      </div>
+    </div>
+    <button class="btn btn-info" id="btnInfo">?</button>
+    <button class="btn btn-theme" id="btnTheme">☀ Светлая</button>
+  </div>
+
+  <!-- ── Main ── -->
+  <div class="main-grid">
+
+    <!-- Canvas -->
+    <div class="scene-cell">
+      <div class="legend">
+        <span class="leg-item"><span class="leg-dot leg-even"></span>Чётное → n/2</span>
+        <span class="leg-item"><span class="leg-dot leg-odd"></span>Нечётное → 3n+1</span>
+      </div>
+      <div class="scene-wrap">
+        <canvas id="cvs"></canvas>
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="panel">
+
+      <!-- Rule -->
+      <div class="pcard">
+        <div class="pcard-title">Правило</div>
+        <div class="rule-line">
+          <span class="rule-badge badge-even">ЧЁТНОЕ</span>
+          <span class="rule-formula">n → n / 2</span>
+        </div>
+        <div class="rule-line">
+          <span class="rule-badge badge-odd">НЕЧЁТНОЕ</span>
+          <span class="rule-formula">n → 3n + 1</span>
+        </div>
+      </div>
+
+      <!-- Current number -->
+      <div class="pcard">
+        <div class="pcard-title">Текущий шаг <span id="stepCounter" style="color:var(--acc)">0</span></div>
+        <div class="cur-num even" id="curNum">27</div>
+        <div class="cur-op" id="curOp">нечётное → 3 × 27 + 1 = 82</div>
+        <div class="cur-label" id="curLabel">Нажмите «Анимировать»</div>
+      </div>
+
+      <!-- Sequence -->
+      <div class="pcard">
+        <div class="pcard-title">Последовательность</div>
+        <div class="seq-wrap" id="seqWrap"></div>
+      </div>
+
+      <!-- Records -->
+      <div class="pcard">
+        <div class="pcard-title">Рекорды по шагам (1–30)</div>
+        <div class="records-list" id="recordsList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Bottom bar ── -->
+  <div class="bottom-bar">
+    <div class="status-items">
+      <div class="status-item">
+        <span class="label">Начало</span>
+        <span class="value sv-a" id="stStart">27</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Шагов до 1</span>
+        <span class="value sv-g" id="stSteps">—</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Максимум</span>
+        <span class="value sv-o" id="stMax">—</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Шаг макс.</span>
+        <span class="value sv-b" id="stMaxAt">—</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Доказано?</span>
+        <span class="value" style="color:#a78bfa;font-size:.9em">Нет ✗</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Info Modal ── -->
+<div class="info-overlay" id="infoOverlay">
+  <div class="info-modal">
+    <button class="info-close" id="infoClose">✕</button>
+    <h2>Гипотеза Коллатца — простая задача без доказательства</h2>
+    <p>Возьмите любое натуральное число. Если оно <strong>чётное</strong> — делите на 2. Если <strong>нечётное</strong> — умножайте на 3 и прибавляйте 1. Повторяйте. Гипотеза утверждает: последовательность <strong>всегда придёт к 1</strong>.</p>
+    <div class="example">
+      27 → 82 → 41 → 124 → 62 → 31 → 94 → 47 → 142 → 71 → ...<br>
+      ... → 9232 <span class="highlight">(максимум!)</span> → ... → 4 → 2 → <span class="highlight">1</span><br>
+      <span style="color:var(--muted)">Всего шагов: 111</span>
+    </div>
+    <p>Число <strong>27</strong> — знаменитый пример. Несмотря на скромный старт, оно взлетает до <strong>9 232</strong> прежде чем окончательно упасть к 1 за 111 шагов.</p>
+    <ul>
+      <li>Проверено для всех чисел до <strong>2<sup>68</sup> ≈ 2.95 × 10<sup>20</sup></strong></li>
+      <li>Математики называют её «задачей, которая не по зубам математике»</li>
+      <li>Поль Эрдёш: <em>«Математика ещё не готова к таким задачам»</em></li>
+    </ul>
+    <p>Попробуйте числа: <strong>27</strong> (111 шагов), <strong>97</strong> (118 шагов), <strong>871</strong> (178 шагов).</p>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+const cvs    = document.getElementById('cvs');
+const ctx    = cvs.getContext('2d');
+const wrap   = document.querySelector('.scene-wrap');
+
+let seq = [];
+let displayStep = 0;
+let animTimer   = null;
+let autoTimer   = null;
+let autoMode    = false;
+let autoN       = 2;
+let speed       = 50; // ms per step
+
+// ── Collatz ────────────────────────────────────────────────────────────
+function buildSeq(n) {
+  const s = [n];
+  while (n !== 1) {
+    n = n % 2 === 0 ? n / 2 : 3 * n + 1;
+    s.push(n);
+  }
+  return s;
+}
+
+function collatzSteps(n) {
+  let steps = 0;
+  while (n !== 1) { n = n % 2 === 0 ? n / 2 : 3*n+1; steps++; }
+  return steps;
+}
+
+// ── Canvas ─────────────────────────────────────────────────────────────
+function resizeCanvas() {
+  const r = wrap.getBoundingClientRect();
+  cvs.width  = r.width  * devicePixelRatio;
+  cvs.height = r.height * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  drawGraph();
+}
+
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function drawGraph() {
+  const r = wrap.getBoundingClientRect();
+  const W = r.width, H = r.height;
+  ctx.clearRect(0, 0, W, H);
+  if (seq.length === 0) return;
+
+  const mg = { top: 16, right: 24, bottom: 32, left: 52 };
+  const pw = W - mg.left - mg.right;
+  const ph = H - mg.top  - mg.bottom;
+
+  const maxVal = Math.max(...seq);
+  const n = seq.length;
+  const show = Math.max(1, Math.min(displayStep + 1, n));
+
+  const xS = i => mg.left + (i / Math.max(n - 1, 1)) * pw;
+  const yS = v => mg.top  + ph - (v / maxVal) * ph;
+
+  const isDark = !document.documentElement.classList.contains('light');
+  const gridColor  = isDark ? 'rgba(51,65,85,0.6)'  : 'rgba(148,163,184,0.4)';
+  const axisColor  = isDark ? '#475569' : '#94a3b8';
+  const textColor  = isDark ? '#64748b' : '#94a3b8';
+  const fillEven   = isDark ? 'rgba(96,165,250,0.18)' : 'rgba(29,78,216,0.12)';
+  const fillOdd    = isDark ? 'rgba(249,115,22,0.18)' : 'rgba(194,65,12,0.12)';
+  const lineEven   = isDark ? '#60a5fa' : '#1d4ed8';
+  const lineOdd    = isDark ? '#f97316' : '#c2410c';
+  const accColor   = cssVar('--acc');
+
+  // Grid
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  const gridLines = 4;
+  for (let i = 1; i <= gridLines; i++) {
+    const y = mg.top + (i / gridLines) * ph;
+    ctx.beginPath(); ctx.moveTo(mg.left, y); ctx.lineTo(mg.left + pw, y); ctx.stroke();
+    const val = Math.round(maxVal * (1 - i / gridLines));
+    ctx.fillStyle = textColor;
+    ctx.font = `10px 'Segoe UI', system-ui`;
+    ctx.textAlign = 'right';
+    ctx.fillText(val > 999 ? (val/1000).toFixed(1)+'k' : val, mg.left - 5, y + 3);
+  }
+
+  // Axes
+  ctx.strokeStyle = axisColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(mg.left, mg.top); ctx.lineTo(mg.left, mg.top + ph + 6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(mg.left - 4, mg.top + ph); ctx.lineTo(mg.left + pw, mg.top + ph); ctx.stroke();
+
+  // X labels
+  ctx.fillStyle = textColor;
+  ctx.font = `10px 'Segoe UI', system-ui`;
+  ctx.textAlign = 'center';
+  const xStep = Math.ceil(n / 8);
+  for (let i = 0; i < n; i += xStep) {
+    ctx.fillText(i, xS(i), mg.top + ph + 14);
+  }
+  ctx.fillText(n - 1, xS(n - 1), mg.top + ph + 14);
+
+  // Fill under curve (gradient)
+  if (show > 1) {
+    ctx.beginPath();
+    ctx.moveTo(xS(0), mg.top + ph);
+    for (let i = 0; i < show; i++) ctx.lineTo(xS(i), yS(seq[i]));
+    ctx.lineTo(xS(show - 1), mg.top + ph);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(mg.left, 0, mg.left + pw, 0);
+    grad.addColorStop(0, fillEven);
+    grad.addColorStop(1, fillOdd);
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  // Line segments coloured by parity
+  for (let i = 1; i < show; i++) {
+    ctx.beginPath();
+    ctx.moveTo(xS(i-1), yS(seq[i-1]));
+    ctx.lineTo(xS(i), yS(seq[i]));
+    ctx.strokeStyle = seq[i-1] % 2 === 0 ? lineEven : lineOdd;
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+  }
+
+  // Dots
+  for (let i = 0; i < show; i++) {
+    const isActive = (i === show - 1);
+    const r2 = isActive ? 5 : (n > 80 ? 0 : 2.5);
+    if (r2 === 0) continue;
+    ctx.beginPath();
+    ctx.arc(xS(i), yS(seq[i]), r2, 0, Math.PI * 2);
+    ctx.fillStyle = seq[i] % 2 === 0 ? lineEven : lineOdd;
+    ctx.fill();
+    if (isActive) {
+      ctx.beginPath();
+      ctx.arc(xS(i), yS(seq[i]), 8, 0, Math.PI * 2);
+      ctx.strokeStyle = accColor;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+  }
+
+  // Mark maximum
+  const maxIdx = seq.indexOf(maxVal);
+  if (maxIdx < show && maxVal > seq[0]) {
+    const mx = xS(maxIdx), my = yS(maxVal);
+    ctx.fillStyle = isDark ? '#fbbf24' : '#d97706';
+    ctx.font = `bold 10px 'Segoe UI'`;
+    ctx.textAlign = 'center';
+    ctx.fillText('↑ ' + (maxVal > 999 ? (maxVal/1000).toFixed(1)+'k' : maxVal), mx, my - 8);
+  }
+}
+
+// ── Update UI ──────────────────────────────────────────────────────────
+function updatePanel() {
+  const i = Math.min(displayStep, seq.length - 1);
+  const cur = seq[i];
+  const next = seq[i + 1];
+
+  document.getElementById('stepCounter').textContent = i;
+  const curEl = document.getElementById('curNum');
+  curEl.textContent = cur;
+  curEl.className = 'cur-num ' + (cur % 2 === 0 ? 'even' : 'odd');
+
+  const opEl = document.getElementById('curOp');
+  const labEl = document.getElementById('curLabel');
+  if (next !== undefined) {
+    if (cur % 2 === 0) {
+      opEl.textContent = `чётное → ${cur} / 2 = ${next}`;
+    } else {
+      opEl.textContent = `нечётное → 3 × ${cur} + 1 = ${next}`;
+    }
+    labEl.textContent = '';
+  } else {
+    opEl.textContent = '';
+    labEl.textContent = cur === 1 ? '🎉 Дошли до 1!' : '';
+  }
+
+  // Sequence badges
+  const sw = document.getElementById('seqWrap');
+  sw.innerHTML = '';
+  seq.forEach((v, idx) => {
+    const sp = document.createElement('span');
+    sp.className = 'seq-num ' + (v % 2 === 0 ? 'even' : 'odd') +
+      (idx === i ? ' active' : idx < i ? ' done' : '');
+    sp.textContent = v;
+    sw.appendChild(sp);
+  });
+  // Scroll active badge into view
+  const active = sw.querySelector('.active');
+  if (active) active.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
+function updateStats(n) {
+  document.getElementById('stStart').textContent = n;
+  if (seq.length > 0) {
+    const maxVal = Math.max(...seq);
+    const maxIdx = seq.indexOf(maxVal);
+    document.getElementById('stSteps').textContent = seq.length - 1;
+    document.getElementById('stMax').textContent   = maxVal > 9999 ? (maxVal/1000).toFixed(1)+'k' : maxVal;
+    document.getElementById('stMaxAt').textContent = maxIdx;
+  } else {
+    document.getElementById('stSteps').textContent = '—';
+    document.getElementById('stMax').textContent   = '—';
+    document.getElementById('stMaxAt').textContent = '—';
+  }
+}
+
+function buildRecords() {
+  const data = [];
+  for (let n = 1; n <= 30; n++) data.push({ n, steps: collatzSteps(n) });
+  const maxSteps = Math.max(...data.map(d => d.steps));
+  const list = document.getElementById('recordsList');
+  list.innerHTML = '';
+  data.sort((a, b) => b.steps - a.steps).slice(0, 8).forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'rec-row';
+    row.innerHTML = `
+      <span class="rec-n">${d.n}</span>
+      <div class="rec-bar-wrap"><div class="rec-bar" style="width:${(d.steps/maxSteps*100).toFixed(1)}%"></div></div>
+      <span class="rec-steps">${d.steps}</span>`;
+    list.appendChild(row);
+  });
+}
+
+// ── Controls ───────────────────────────────────────────────────────────
+function setNumber(n) {
+  n = Math.max(1, Math.min(9999, n));
+  document.getElementById('numInput').value = n;
+  document.getElementById('numSlider').value = Math.min(n, 200);
+  document.getElementById('numVal').textContent = n;
+  document.getElementById('stStart').textContent = n;
+  seq = buildSeq(n);
+  displayStep = seq.length - 1; // show full immediately
+  updateStats(n);
+  updatePanel();
+  drawGraph();
+}
+
+function startAnimation() {
+  stopAnimation();
+  displayStep = 0;
+  updatePanel();
+  drawGraph();
+  document.getElementById('btnAnimate').textContent = '⏸ Пауза';
+  document.getElementById('btnAnimate').onclick = pauseAnimation;
+
+  animTimer = setInterval(() => {
+    if (displayStep >= seq.length - 1) {
+      stopAnimation();
+      return;
+    }
+    displayStep++;
+    updatePanel();
+    drawGraph();
+  }, speed);
+}
+
+function pauseAnimation() {
+  clearInterval(animTimer);
+  animTimer = null;
+  document.getElementById('btnAnimate').textContent = '▶ Продолжить';
+  document.getElementById('btnAnimate').onclick = resumeAnimation;
+}
+
+function resumeAnimation() {
+  document.getElementById('btnAnimate').textContent = '⏸ Пауза';
+  document.getElementById('btnAnimate').onclick = pauseAnimation;
+  animTimer = setInterval(() => {
+    if (displayStep >= seq.length - 1) { stopAnimation(); return; }
+    displayStep++;
+    updatePanel();
+    drawGraph();
+  }, speed);
+}
+
+function stopAnimation() {
+  clearInterval(animTimer);
+  animTimer = null;
+  document.getElementById('btnAnimate').textContent = '▶ Анимировать';
+  document.getElementById('btnAnimate').onclick = startAnimation;
+}
+
+function resetView() {
+  stopAnimation();
+  const n = parseInt(document.getElementById('numInput').value) || 27;
+  seq = buildSeq(n);
+  displayStep = seq.length - 1;
+  updatePanel();
+  updateStats(n);
+  drawGraph();
+}
+
+// Auto mode
+function startAuto() {
+  autoMode = true;
+  autoN = 2;
+  document.getElementById('btnAuto').classList.add('active');
+  document.getElementById('btnAuto').textContent = '⏹ Стоп';
+  runAutoStep();
+}
+
+function stopAuto() {
+  autoMode = false;
+  clearTimeout(autoTimer);
+  stopAnimation();
+  document.getElementById('btnAuto').classList.remove('active');
+  document.getElementById('btnAuto').textContent = '⟳ Авто';
+}
+
+function runAutoStep() {
+  if (!autoMode) return;
+  if (autoN > 100) { stopAuto(); return; }
+  const n = autoN++;
+  setNumber(n);
+  // Override: animate from start
+  displayStep = 0;
+  updatePanel();
+  drawGraph();
+  // Quick step-through
+  const autoSpeed = Math.max(8, Math.min(30, Math.round(2000 / seq.length)));
+  let step = 0;
+  const tick = () => {
+    if (!autoMode) return;
+    if (step >= seq.length - 1) {
+      autoTimer = setTimeout(runAutoStep, 600);
+      return;
+    }
+    step++;
+    displayStep = step;
+    updatePanel();
+    drawGraph();
+    autoTimer = setTimeout(tick, autoSpeed);
+  };
+  autoTimer = setTimeout(tick, autoSpeed);
+}
+
+// ── Event listeners ────────────────────────────────────────────────────
+document.getElementById('numInput').addEventListener('input', e => {
+  stopAuto(); stopAnimation();
+  const n = parseInt(e.target.value) || 1;
+  setNumber(n);
+});
+document.getElementById('numInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { stopAuto(); startAnimation(); }
+});
+document.getElementById('numSlider').addEventListener('input', e => {
+  stopAuto(); stopAnimation();
+  setNumber(parseInt(e.target.value));
+});
+document.getElementById('btnAnimate').addEventListener('click', startAnimation);
+document.getElementById('btnReset').addEventListener('click', resetView);
+document.getElementById('btnAuto').addEventListener('click', () => {
+  autoMode ? stopAuto() : startAuto();
+});
+
+document.querySelectorAll('.btn-speed').forEach(btn => {
+  btn.addEventListener('click', () => {
+    speed = parseInt(btn.dataset.s);
+    document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (animTimer) { pauseAnimation(); resumeAnimation(); }
+  });
+});
+
+document.getElementById('btnInfo').addEventListener('click', () => {
+  document.getElementById('infoOverlay').classList.add('open');
+});
+document.getElementById('infoClose').addEventListener('click', () => {
+  document.getElementById('infoOverlay').classList.remove('open');
+});
+document.getElementById('infoOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+// Theme
+const savedTheme = localStorage.getItem('ap-theme') || 'dark';
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light');
+  document.getElementById('btnTheme').textContent = '🌙 Тёмная';
+}
+document.getElementById('btnTheme').addEventListener('click', () => {
+  const isL = document.documentElement.classList.toggle('light');
+  localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
+  document.getElementById('btnTheme').textContent = isL ? '🌙 Тёмная' : '☀ Светлая';
+  drawGraph();
+});
+
+// Resize
+const ro = new ResizeObserver(resizeCanvas);
+ro.observe(wrap);
+
+// ── Init ───────────────────────────────────────────────────────────────
+buildRecords();
+setNumber(27);
+</script>
+</body>
+</html>
