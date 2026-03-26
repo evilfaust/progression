@@ -63,6 +63,11 @@
             transition: all 0.2s;
         }
         .btn-github:hover { color: var(--text); border-color: var(--subtle); }
+        .btn-github:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(96,165,250,0.4);
+        }
+        html.light .btn-github:focus-visible { box-shadow: 0 0 0 3px rgba(59,130,246,0.4); }
         .btn-github svg { flex-shrink: 0; }
 
         .btn-theme {
@@ -72,23 +77,66 @@
             background: var(--btn2);
             color: var(--btn2-text);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 7px 14px 7px 10px;
+            border-radius: 24px;
+            padding: 7px 15px 7px 11px;
             font-size: 0.82em;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.25s;
+            transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, color 0.25s;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-theme:hover { border-color: var(--subtle); opacity: 0.9; }
+        .btn-theme::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 0.25s;
+            background: radial-gradient(ellipse at center, rgba(96,165,250,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        html.light .btn-theme::after {
+            background: radial-gradient(ellipse at center, rgba(250,204,21,0.22) 0%, transparent 70%);
+        }
+        .btn-theme:hover { border-color: var(--subtle); }
+        .btn-theme:hover::after { opacity: 1; }
+        .btn-theme:hover { box-shadow: 0 0 0 3px rgba(96,165,250,0.1); }
+        html.light .btn-theme:hover { box-shadow: 0 0 0 3px rgba(234,179,8,0.15); }
+        .btn-theme:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(96,165,250,0.4);
+        }
+        html.light .btn-theme:focus-visible { box-shadow: 0 0 0 3px rgba(234,179,8,0.4); }
+
         .theme-icon {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.4s;
+            flex-shrink: 0;
         }
-        .btn-theme:hover .theme-icon { transform: rotate(20deg); }
+        .theme-icon svg {
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: block;
+        }
+        .btn-theme:hover .theme-icon svg { transform: rotate(18deg) scale(1.12); }
+
+        @keyframes iconSwap {
+            0%   { transform: rotate(0deg) scale(1);    opacity: 1; }
+            45%  { transform: rotate(180deg) scale(0.3); opacity: 0; }
+            55%  { transform: rotate(180deg) scale(0.3); opacity: 0; }
+            100% { transform: rotate(360deg) scale(1);  opacity: 1; }
+        }
+        .theme-icon.swapping svg {
+            animation: iconSwap 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .theme-icon svg, .btn-theme, .btn-theme::after,
+            .card, html, body { transition-duration: 0.01ms !important; }
+            .theme-icon.swapping svg { animation: none !important; }
+        }
 
         .hero {
             text-align: center;
@@ -166,6 +214,16 @@
             border-color: var(--muted);
         }
         html.light .card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+        .card:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(96,165,250,0.5);
+            border-color: #60a5fa;
+            transform: translateY(-2px);
+        }
+        html.light .card:focus-visible {
+            box-shadow: 0 0 0 3px rgba(29,78,216,0.4);
+            border-color: #1d4ed8;
+        }
 
         .card-icon {
             height: 80px;
@@ -378,21 +436,15 @@
 <body>
 
 <div class="top-nav">
-    <a class="btn-github" href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" title="Исходный код на GitHub">
+    <a class="btn-github" href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" aria-label="Исходный код на GitHub">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.026 2.747-1.026.546 1.378.202 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.338 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.579.688.481C19.138 20.2 22 16.447 22 12.021 22 6.484 17.523 2 12 2z"/>
         </svg>
         GitHub
     </a>
-    <button class="btn-theme" id="btnTheme">
+    <button class="btn-theme" id="btnTheme" aria-label="Переключить тему оформления">
         <span class="theme-icon" id="themeIcon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"/>
-                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-            </svg>
+            <!-- Иконка обновляется через JS -->
         </span>
         <span id="themeLabel">Светлая</span>
     </button>
@@ -699,7 +751,12 @@
 
 </div>
 
-<h2 class="section-heading special" style="margin-top:40px">✨ Замечательные последовательности</h2>
+<h2 class="section-heading special" style="margin-top:40px">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0">
+        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+    </svg>
+    Замечательные последовательности
+</h2>
 <div class="cards">
 
     <a class="card" href="fibonacci.html">
@@ -756,21 +813,45 @@ const btnTheme = document.getElementById('btnTheme');
 const themeIcon = document.getElementById('themeIcon');
 const themeLabel = document.getElementById('themeLabel');
 
-const sunSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
-const moonSVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>`;
+// Красивые SVG-иконки: заполненные, чёткие
+const sunSVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.5"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77
+           M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77"/>
+</svg>`;
+
+const moonSVG = `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    <circle cx="18.5" cy="5" r="1.2" fill="currentColor" opacity="0.7"/>
+    <circle cx="21" cy="9" r="0.8" fill="currentColor" opacity="0.5"/>
+</svg>`;
 
 function applyTheme(isLight) {
     themeIcon.innerHTML = isLight ? moonSVG : sunSVG;
     themeLabel.textContent = isLight ? 'Тёмная' : 'Светлая';
+    btnTheme.setAttribute('aria-pressed', isLight ? 'true' : 'false');
 }
 
 const savedTheme = localStorage.getItem('ap-theme') || 'dark';
 if (savedTheme === 'light') { document.documentElement.classList.add('light'); applyTheme(true); }
+else { applyTheme(false); }
 
 btnTheme.addEventListener('click', () => {
-    const isL = document.documentElement.classList.toggle('light');
-    localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
-    applyTheme(isL);
+    // Запускаем анимацию свапа иконки
+    themeIcon.classList.add('swapping');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const delay = reduceMotion ? 0 : 220;
+
+    setTimeout(() => {
+        const isL = document.documentElement.classList.toggle('light');
+        localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
+        applyTheme(isL);
+    }, delay);
+
+    themeIcon.addEventListener('animationend', () => {
+        themeIcon.classList.remove('swapping');
+    }, { once: true });
 });
 </script>
 </body>
