@@ -2,565 +2,195 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Решето Эратосфена — Простые числа</title>
-<style>
-:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#f43f5e;--acc2:#e11d48;--acc-glow:rgba(244,63,94,.4);}
-html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#e11d48;--acc2:#be123c;--acc-glow:rgba(225,29,72,.3);}
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
-.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
-.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
-.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
-.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
-.back-link:hover{color:var(--text);border-color:var(--muted);}
-.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
-.slider-group{display:flex;align-items:center;gap:6px;}
-.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
-.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:42px;text-align:center;}
-input[type=range]{-webkit-appearance:none;width:120px;height:6px;border-radius:3px;background:var(--track);outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
-.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
-.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
-.btn-reset{background:var(--btn2);color:var(--btn2-text);}
-.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
-.btn-speed.active{background:var(--acc);color:#fff;}
-.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
-.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
-.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
-.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
-.scene-wrap{flex:1;min-height:0;position:relative;}
-canvas{display:block;}
-.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;}
-.formulas-cell::-webkit-scrollbar{width:4px;}
-.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
-.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
-.formula-card .formula{font-size:1.15em;color:#fca5a5;font-family:'Courier New',monospace;margin-bottom:4px;}
-html.light .formula-card .formula{color:#be123c;}
-.formula-card .calculation{font-size:1em;color:var(--text);font-weight:600;line-height:1.6;}
-.hl-y{color:#fbbf24;}html.light .hl-y{color:#d97706;}
-.hl-g{color:#4ade80;}html.light .hl-g{color:#15803d;}
-.hl-r{color:#f87171;}html.light .hl-r{color:#be123c;}
-.prime-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
-.prime-badge{padding:3px 8px;border-radius:6px;font-size:.82em;font-weight:700;font-family:'Courier New',monospace;background:rgba(244,63,94,.15);color:#fca5a5;border:1px solid rgba(244,63,94,.35);}
-html.light .prime-badge{background:rgba(225,29,72,.1);color:#be123c;border-color:rgba(225,29,72,.3);}
-.prime-badge.current{background:rgba(244,63,94,.35);color:#fecdd3;border:1px solid rgba(244,63,94,.7);box-shadow:0 0 8px rgba(244,63,94,.35);}
-html.light .prime-badge.current{color:#be123c;}
-.note-card{background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.2);border-radius:12px;padding:12px 18px;font-size:.88em;color:var(--muted);line-height:1.55;}
-.ratio-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border2);font-size:.88em;gap:8px;}
-.ratio-row:last-child{border-bottom:none;}
-.ratio-label{color:var(--muted);white-space:nowrap;}
-.ratio-val{font-family:'Courier New',monospace;font-weight:700;color:var(--text);}
-.ratio-val.converged{color:#fbbf24;}html.light .ratio-val.converged{color:#d97706;}
-/* ── Info Modal ── */
-.btn-info{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;border:1px solid var(--border);}
-.btn-info:hover{color:var(--text);border-color:var(--muted);}
-.info-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:999;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;}
-.info-overlay.open{display:flex;}
-.info-modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:660px;width:100%;padding:28px 30px 24px;position:relative;margin:auto;}
-.info-modal h2{font-size:1.15em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:18px;padding-right:32px;line-height:1.35;}
-.info-close{position:absolute;top:14px;right:14px;background:var(--btn2);color:var(--btn2-text);border:none;border-radius:6px;cursor:pointer;padding:5px 11px;font-size:1em;transition:all .15s;}
-.info-close:hover{color:var(--text);}
-.info-sec{margin-bottom:16px;}
-.info-sec h3{font-size:.78em;text-transform:uppercase;letter-spacing:.6px;color:var(--subtle);margin-bottom:6px;font-weight:600;border-bottom:1px solid var(--border2);padding-bottom:4px;}
-.info-sec p,.info-sec ul{font-size:.9em;color:var(--muted);line-height:1.7;}
-.info-sec ul{padding-left:18px;}.info-sec li{margin-bottom:5px;}
-.info-sec strong{color:var(--text);}
-.info-hl{background:var(--bg2);border-left:3px solid var(--acc);padding:9px 14px;border-radius:0 8px 8px 0;font-family:'Courier New',monospace;font-size:.88em;color:var(--text);margin:8px 0;line-height:1.7;white-space:pre-wrap;}
-.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
-.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
-.status-item{display:flex;flex-direction:column;align-items:center;}
-.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
-.status-item .value{font-size:1.3em;font-weight:700;}
-.sv-a{color:var(--acc);}
-.sv-y{color:#fbbf24;}html.light .sv-y{color:#d97706;}
-.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
-@media(max-width:700px){
-html,body{height:auto;overflow-y:auto;}
-.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
-.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
-.top-controls{gap:8px;}.slider-group .val{font-size:1.1em;}
-input[type=range]{width:76px;}.btn-theme{margin-left:0;}
-.main-grid{grid-template-columns:1fr;overflow:visible;}
-.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
-.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
-.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Решето Эратосфена — Прогрессии</title>
+<link rel="stylesheet" href="assets/lab.css">
 </head>
 <body>
-<div class="app">
-  <div class="top-bar">
-    <a href="index.html" class="back-link">← Назад</a>
-    <h1>🔴 Простые числа — Решето Эратосфена</h1>
-    <div class="top-controls">
-      <div class="slider-group">
-        <label>До N</label>
-        <input type="range" id="slN" min="20" max="150" step="5" value="100">
-        <span class="val" id="valN">100</span>
-      </div>
-      <button class="btn btn-play" id="btnPlay">▶ Старт</button>
-      <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
-      <button class="btn btn-speed" id="btn1x">1×</button>
-      <button class="btn btn-speed active" id="btn2x">2×</button>
-      <button class="btn btn-info"  id="btnInfo">📖 О модели</button>
-      <button class="btn btn-theme" id="btnTheme">☀</button>
-    </div>
-  </div>
-
-  <div class="main-grid">
-    <div class="scene-cell">
-      <div class="cell-title">Решето чисел</div>
-      <div class="scene-wrap">
-        <canvas id="cv"></canvas>
-      </div>
-    </div>
-    <div class="formulas-cell" id="panel"></div>
-  </div>
-
-  <div class="bottom-bar">
-    <div class="status-items">
-      <div class="status-item">
-        <span class="label">Текущее простое</span>
-        <span class="value sv-a" id="stPrime">—</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Найдено простых</span>
-        <span class="value sv-g" id="stCount">0</span>
-      </div>
-      <div class="status-item">
-        <span class="label">Вычеркнуто</span>
-        <span class="value sv-y" id="stCrossed">0</span>
-      </div>
-    </div>
-  </div>
-</div>
-
+<script src="assets/catalog.js"></script>
+<script src="assets/lab.js"></script>
 <script>
-// Run full sieve and record "steps" for animation
-// Each step = one prime being processed (highlighting it + crossing multiples)
-function runSieve(n) {
-  const composite = new Array(n+1).fill(false);
-  composite[0] = composite[1] = true;
-  const steps = []; // [{prime, crossed:[...]}]
+const { F, fmt, D } = Lab;
+let hover = null;
 
-  for (let p = 2; p <= n; p++) {
-    if (composite[p]) continue;
-    const crossed = [];
-    for (let m = p*p; m <= n; m += p) {
-      if (!composite[m]) {
-        composite[m] = true;
-        crossed.push(m);
+function sieve(N) {
+  const spf = new Array(N + 1).fill(0);
+  const P = [];
+  for (let p = 2; p * p <= N; p++) if (!spf[p]) { P.push(p); for (let x = p * p; x <= N; x += p) if (!spf[x]) spf[x] = p; }
+  const primes = [];
+  for (let x = 2; x <= N; x++) if (!spf[x]) primes.push(x);
+  // момент, когда число получает статус (простое / вычеркнуто)
+  const when = new Array(N + 1).fill(Infinity);
+  const big = primes.filter(x => x * x > N);
+  P.forEach((p, u) => {
+    when[p] = u + .04;
+    const mult = []; for (let x = p * p; x <= N; x += p) mult.push(x);
+    mult.forEach((x, j) => { if (spf[x] === p) when[x] = u + .2 + .75 * j / mult.length; });
+  });
+  big.forEach((x, i) => { when[x] = P.length + .05 + .8 * i / Math.max(1, big.length); });
+  return { spf, P, primes, when, big };
+}
+function factor(x) {
+  const out = [];
+  for (let p = 2; p * p <= x; p++) { let e = 0; while (x % p === 0) { x /= p; e++; } if (e) out.push(e > 1 ? `${p}${Lab.sup(e)}` : String(p)); }
+  if (x > 1) out.push(String(x));
+  return out.join(' · ');
+}
+function layout(s) {
+  const { w, h, p } = s;
+  const cols = p.N <= 120 ? 10 : p.N <= 240 ? 15 : 20;
+  const rows = Math.ceil(p.N / cols);
+  const top = 104, pad = 20;
+  const cell = Math.min((w - pad * 2) / cols, (h - top - pad) / rows, 64);
+  const x0 = (w - cell * cols) / 2, y0 = top + (h - top - pad - cell * rows) / 2;
+  return { cols, cell, pos: x => [x0 + ((x - 1) % cols) * cell, y0 + Math.floor((x - 1) / cols) * cell] };
+}
+
+Lab.model({
+  id: 'sieve',
+  unit: 'Этап',
+  rate: .42,
+  labels: { problem: 'Алгоритм', terms: 'Найденные простые' },
+  params: [
+    { key: 'N', sym: 'N', label: 'числа до', min: 20, max: 400, value: 100 },
+  ],
+  compute: p => sieve(p.N),
+  duration: (p, m) => m.P.length + 1,
+  timeLabel: (t, p, m, dur) => {
+    const u = Math.min(Math.floor(t + 1e-9), dur);
+    if (t <= 0) return 'Готовы начать';
+    if (u < m.P.length) return `Вычёркиваем кратные <b>${m.P[u]}</b>`;
+    if (t < dur) return `<b>Остались простые</b>`;
+    return `Готово: <b>${m.primes.length}</b> простых`;
+  },
+
+  problem: (p, m, v) => `Выпишем все числа от 2 до ${v('N')}. Первое невычеркнутое число — простое; вычеркнем все его кратные, начиная с его квадрата. Возьмём следующее невычеркнутое число и повторим, пока его квадрат не превысит ${v('N')}.
+    <span class="q">Сколько простых чисел останется в решете?</span>`,
+
+  solution: (p, m) => ({
+    steps: [
+      { t: 'Хватит простых, не больших √N', f: F(`p \\le \\sqrt{${p.N}} \\approx ${fmt(Math.sqrt(p.N), 2)}`), c: F(`p \\in \\{${m.P.join(', ')}\\}`) },
+      { t: 'Почему начинаем с p²', f: `<span style="font-size:14.5px">Меньшие кратные <i>p</i> уже вычеркнуты меньшими простыми: например, 2·7 и 3·7 убрали ещё на шагах для 2 и 3.</span>`, always: true },
+      { t: 'Считаем оставшиеся', f: F(`\\pi(${p.N}) = \\ans{${m.primes.length}}`), c: F(`\\frac{N}{\\ln N} = \\frac{${p.N}}{\\ln ${p.N}} \\approx ${fmt(p.N / Math.log(p.N), 1)}`), final: true },
+    ],
+    answer: `${m.primes.length} ${Lab.plural(m.primes.length, 'простое число', 'простых числа', 'простых чисел')}`,
+  }),
+
+  terms: (p, m) => ({
+    items: m.primes.map(x => ({ i: '', x: String(x), mark: m.P.includes(x) })),
+    now: t => m.primes.filter(x => m.when[x] <= t).length,
+    max: 60,
+    sum: () => 'Рамкой отмечены простые, кратные которых пришлось вычёркивать.',
+  }),
+
+  hud: (p, m, t) => {
+    if (hover) {
+      const x = hover;
+      const st = x === 1 ? 'ни простое, ни составное' : m.spf[x] ? factor(x) : 'простое';
+      return [{ k: 'Число', v: String(x), tone: 'acc' }, { k: m.spf[x] ? 'Разложение' : 'Это', v: st }];
+    }
+    const u = Math.floor(t + 1e-9);
+    const crossed = Object.keys(m.when).filter(x => m.spf[x] && m.when[x] <= t).length;
+    const found = m.primes.filter(x => m.when[x] <= t).length;
+    return [
+      { k: 'Простое', v: u < m.P.length && t > 0 ? String(m.P[u]) : '—', tone: 'acc' },
+      { k: 'Вычеркнуто', v: String(crossed) },
+      { k: 'Простых', v: String(found), tone: 'good' },
+    ];
+  },
+  pointer(s, x, y, type) {
+    if (type === 'leave') { const was = hover; hover = null; return !!was; }
+    const L = layout(s);
+    const [x0, y0] = L.pos(1);
+    const c = Math.floor((x - x0) / L.cell), r = Math.floor((y - y0) / L.cell);
+    const n = r * L.cols + c + 1;
+    const next = c >= 0 && c < L.cols && r >= 0 && n >= 1 && n <= s.p.N ? n : null;
+    const changed = next !== hover;
+    hover = next;
+    return changed;
+  },
+  onChange: () => { hover = null; },
+  doneText: (p, m) => `До ${p.N} — ${m.primes.length} простых чисел`,
+  about: `
+    <p class="lead">Простые числа — «атомы» арифметики: любое натуральное число единственным образом раскладывается в их произведение. Решету Эратосфена больше 2200 лет, и это до сих пор лучший способ найти все простые до N.</p>
+    <h3>История</h3>
+    <p><strong>Эратосфен Киренский</strong> (≈ 276–194 до н. э.) — математик, поэт, географ и главный библиотекарь Александрийской библиотеки. Он первым измерил окружность Земли с ошибкой около 2% и придумал этот алгоритм — «просеивание» чисел.</p>
+    <h3>Алгоритм</h3>
+    <div class="box">1. Выписать числа от 2 до N<br>2. Первое невычеркнутое p — простое<br>3. Вычеркнуть p², p² + p, p² + 2p, …<br>4. Повторять, пока p² ≤ N<br>5. Все оставшиеся — простые</div>
+    <p>Сложность — <strong>O(N·log log N)</strong>, почти линейная. Наведите курсор на любое число, чтобы увидеть его разложение на простые множители.</p>
+    <h3>Сколько простых?</h3>
+    <p>Простые встречаются всё реже. <strong>Теорема о распределении простых</strong> (Адамар и Валле-Пуссен, 1896): <span class="m">π(N) ≈ N / ln N</span>. До 100 их 25, до 1000 — 168, до миллиона — 78 498.</p>
+    <h3>Их бесконечно много</h3>
+    <p>Доказательство <strong>Евклида</strong>: пусть простых конечно много — p₁, …, pₖ. Число p₁·p₂·…·pₖ + 1 не делится ни на одно из них, значит, у него есть простой делитель вне списка. Противоречие!</p>
+    <h3>Нерешённые задачи</h3>
+    <ul>
+      <li><strong>Гипотеза Гольдбаха (1742):</strong> любое чётное число больше 2 — сумма двух простых. Проверено до 4·10<sup>18</sup>, но не доказано.</li>
+      <li><strong>Простые-близнецы:</strong> бесконечно ли много пар (p, p + 2), вроде 11 и 13, 17 и 19?</li>
+      <li><strong>Гипотеза Римана</strong> о распределении простых — одна из «задач тысячелетия» с призом в миллион долларов.</li>
+    </ul>
+    <h3>Зачем это нужно</h3>
+    <p>На простых числах держится шифрование RSA: перемножить два больших простых легко, а разложить произведение обратно — почти невозможно.</p>`,
+
+  draw(ctx, s) {
+    const { w, h, t, p, m, C, time } = s;
+    const dark = C.dark;
+    ctx.fillStyle = dark ? '#14111a' : '#fdf8fa'; ctx.fillRect(0, 0, w, h);
+    const L = layout(s);
+    const pal = [C.rose, C.blue, C.green, C.amber, C.violet, C.teal, C.orange, C.cyan];
+    const u = Math.floor(t + 1e-9);
+    const cur = u < m.P.length && t > 0 ? m.P[u] : null;
+    const cs = L.cell;
+    for (let x = 1; x <= p.N; x++) {
+      const [cx, cy] = L.pos(x);
+      const pad = Math.max(1.5, cs * .07);
+      const isPrime = x > 1 && !m.spf[x];
+      const at = m.when[x];
+      const doneSt = t >= at;
+      let fill = dark ? '#221d2b' : '#ffffff', text = C.ink, stroke = dark ? '#2e2838' : '#efe4ea';
+      if (x === 1) { fill = dark ? '#1a1620' : '#f4eff2'; text = C.ink3; }
+      if (doneSt && isPrime) {
+        const pi = m.P.indexOf(x);
+        fill = pi >= 0 ? pal[pi % pal.length] : (dark ? '#e6c449' : '#f2b705');
+        text = '#fff';
+      } else if (doneSt) {
+        const pi = m.P.indexOf(m.spf[x]);
+        fill = D.alpha(pal[pi % pal.length], dark ? .16 : .12);
+        text = D.alpha(dark ? '#ffffff' : '#000000', .25);
       }
-    }
-    steps.push({prime: p, crossed});
-  }
-  return {steps, composite};
-}
-
-// ─── Canvas ───
-const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
-
-function resizeCanvas() {
-  const rect = cv.parentElement.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  cv.width = rect.width * dpr;
-  cv.height = rect.height * dpr;
-  cv.style.width = rect.width + 'px';
-  cv.style.height = rect.height + 'px';
-  ctx.scale(dpr, dpr);
-}
-window.addEventListener('resize', () => { resizeCanvas(); render(); });
-
-// ─── State ───
-let N = 100;
-let animStep = 0;   // which "step" (prime) we're currently processing
-let isPlaying = false;
-let speed = 2;
-let rafId = null;
-let lastTs = null;
-let sieveData = runSieve(N);
-
-// For smooth animation: within a step, we progressively mark multiples
-let stepProgress = 0; // 0..1 fraction within current step
-
-// ─── Controls ───
-const slN     = document.getElementById('slN');
-const valN    = document.getElementById('valN');
-const btnPlay  = document.getElementById('btnPlay');
-const btnReset = document.getElementById('btnReset');
-const btn1x    = document.getElementById('btn1x');
-const btn2x    = document.getElementById('btn2x');
-const btnTheme = document.getElementById('btnTheme');
-
-slN.addEventListener('input', () => {
-  N = +slN.value;
-  valN.textContent = N;
-  sieveData = runSieve(N);
-  animStep = Math.min(animStep, sieveData.steps.length);
-  stepProgress = 0;
-  updatePanel();
-  render();
-});
-btnPlay.addEventListener('click', () => {
-  if (isPlaying) { pause(); }
-  else {
-    if (animStep >= sieveData.steps.length) { animStep = 0; stepProgress = 0; }
-    play();
-  }
-});
-btnReset.addEventListener('click', () => { pause(); animStep = 0; stepProgress = 0; updatePanel(); render(); });
-btn1x.addEventListener('click', () => { speed=1; btn1x.classList.add('active'); btn2x.classList.remove('active'); });
-btn2x.addEventListener('click', () => { speed=2; btn2x.classList.add('active'); btn1x.classList.remove('active'); });
-btnTheme.addEventListener('click', () => { document.documentElement.classList.toggle('light'); render(); });
-
-function play() {
-  isPlaying = true;
-  btnPlay.textContent = '⏸ Пауза';
-  lastTs = null;
-  rafId = requestAnimationFrame(animate);
-}
-function pause() {
-  isPlaying = false;
-  btnPlay.textContent = '▶ Старт';
-  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-}
-
-// Animation: move through steps
-function animate(ts) {
-  if (!isPlaying) return;
-  if (lastTs === null) lastTs = ts;
-  const dt = (ts - lastTs) / 1000;
-  lastTs = ts;
-
-  // Progress: each step takes ~0.5s at 1x speed
-  const stepsPerSec = speed * 2.5;
-  stepProgress += dt * stepsPerSec;
-
-  while (stepProgress >= 1 && animStep < sieveData.steps.length) {
-    stepProgress -= 1;
-    animStep++;
-  }
-  if (stepProgress > 1) stepProgress = 1;
-
-  updatePanel();
-  render();
-
-  if (animStep >= sieveData.steps.length && stepProgress >= 1) {
-    pause();
-    return;
-  }
-  rafId = requestAnimationFrame(animate);
-}
-
-// Build the "current state" of the sieve for rendering
-function getSieveState() {
-  const state = new Array(N+1).fill('unknown'); // 'prime','composite','current','pending'
-  state[0] = state[1] = 'composite';
-
-  const {steps} = sieveData;
-
-  // All steps before animStep are complete
-  for (let s = 0; s < animStep; s++) {
-    state[steps[s].prime] = 'prime';
-    for (const c of steps[s].crossed) state[c] = 'composite';
-  }
-
-  // Current step (partially animated)
-  if (animStep < steps.length) {
-    const cur = steps[animStep];
-    state[cur.prime] = 'current';
-    const count = Math.floor(cur.crossed.length * Math.min(stepProgress, 1));
-    for (let i = 0; i < count; i++) state[cur.crossed[i]] = 'composite';
-  }
-
-  return state;
-}
-
-// ─── Render ───
-function isLight() { return document.documentElement.classList.contains('light'); }
-
-function render() {
-  const dpr = window.devicePixelRatio || 1;
-  const W = cv.width / dpr, H = cv.height / dpr;
-  const light = isLight();
-  ctx.clearRect(0, 0, W, H);
-
-  if (animStep === 0 && stepProgress < 0.01) {
-    ctx.fillStyle = light ? 'rgba(225,29,72,0.08)' : 'rgba(244,63,94,0.12)';
-    ctx.beginPath(); ctx.arc(W/2, H/2, 55, 0, 2*Math.PI); ctx.fill();
-    ctx.fillStyle = light ? '#be123c' : '#fca5a5';
-    ctx.font = 'bold 28px Segoe UI'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('▶', W/2, H/2);
-    updateStatus();
-    return;
-  }
-
-  const state = getSieveState();
-
-  // Grid layout
-  const cols = Math.ceil(Math.sqrt(N * (W/H)));
-  const rows = Math.ceil(N / cols);
-  const pad = 10;
-  const cw = (W - 2*pad) / cols;
-  const ch = (H - 2*pad) / rows;
-  const cellSize = Math.min(cw, ch);
-  const gap = Math.max(1, cellSize * 0.06);
-  const totalW = cols * cellSize;
-  const totalH = Math.ceil(N / cols) * cellSize;
-  const ox = (W - totalW) / 2;
-  const oy = (H - totalH) / 2;
-
-  for (let n = 2; n <= N; n++) {
-    const idx = n - 2;
-    const col = idx % cols;
-    const row = Math.floor(idx / cols);
-    const x = ox + col * cellSize + gap/2;
-    const y = oy + row * cellSize + gap/2;
-    const w = cellSize - gap;
-    const h = cellSize - gap;
-    const r = Math.max(2, w * 0.12);
-
-    let bg, textCol, lineThrough = false;
-    const s = state[n];
-
-    if (s === 'prime') {
-      bg = light ? 'rgba(244,63,94,0.85)' : 'rgba(244,63,94,0.9)';
-      textCol = '#fff';
-    } else if (s === 'current') {
-      bg = light ? '#fde68a' : '#fbbf24';
-      textCol = '#0f172a';
-    } else if (s === 'composite') {
-      bg = light ? 'rgba(148,163,184,0.15)' : 'rgba(30,41,59,0.6)';
-      textCol = light ? 'rgba(100,116,139,0.5)' : 'rgba(100,116,139,0.4)';
-      lineThrough = true;
-    } else {
-      bg = light ? 'rgba(99,102,241,0.1)' : 'rgba(99,102,241,0.12)';
-      textCol = light ? '#4f46e5' : '#a78bfa';
-    }
-
-    ctx.fillStyle = bg;
-    roundRect(ctx, x, y, w, h, r);
-    ctx.fill();
-
-    if (s === 'current') {
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 1.5;
-      roundRect(ctx, x, y, w, h, r);
-      ctx.stroke();
-    }
-
-    if (cellSize > 14) {
-      ctx.fillStyle = textCol;
-      const fs = Math.max(7, Math.min(cellSize * 0.28, 15));
-      ctx.font = `${s==='prime'||s==='current'?'bold ':''} ${fs}px 'Courier New',monospace`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      const cx2 = x + w/2, cy2 = y + h/2;
-      ctx.fillText(String(n), cx2, cy2);
-      if (lineThrough && cellSize > 20) {
-        ctx.strokeStyle = textCol;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cx2 - w*0.3, cy2);
-        ctx.lineTo(cx2 + w*0.3, cy2);
-        ctx.stroke();
+      const pop = doneSt ? D.ease.back(D.clamp((t - at) / .12, 0, 1)) : 1;
+      const sc = doneSt && t - at < .12 ? .82 + .18 * pop : 1;
+      ctx.save();
+      ctx.translate(cx + cs / 2, cy + cs / 2); ctx.scale(sc, sc);
+      D.rr(ctx, -cs / 2 + pad, -cs / 2 + pad, cs - pad * 2, cs - pad * 2, Math.min(10, cs * .2));
+      ctx.fillStyle = fill; ctx.fill();
+      ctx.lineWidth = 1; ctx.strokeStyle = stroke; ctx.stroke();
+      if (hover === x) { ctx.lineWidth = 2.5; ctx.strokeStyle = C.ink; ctx.stroke(); }
+      if (cs > 16) D.text(ctx, String(x), 0, .5, { size: Math.min(cs * .36, 18), weight: 700, color: text });
+      if (doneSt && !isPrime && x > 1) {
+        const pi = m.P.indexOf(m.spf[x]);
+        const k = D.clamp((t - at) / .1, 0, 1);
+        D.line(ctx, -cs * .28, cs * .28, -cs * .28 + cs * .56 * k, cs * .28 - cs * .56 * k, D.alpha(pal[pi % pal.length], .85), Math.max(1.5, cs * .06));
       }
+      ctx.restore();
     }
-  }
-
-  updateStatus();
-}
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
-  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
-  ctx.lineTo(x+w, y+h-r);
-  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-  ctx.lineTo(x+r, y+h);
-  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
-  ctx.lineTo(x, y+r);
-  ctx.quadraticCurveTo(x, y, x+r, y);
-  ctx.closePath();
-}
-
-// ─── Panel ───
-function updatePanel() {
-  const panel = document.getElementById('panel');
-  const {steps} = sieveData;
-
-  // Collect found primes so far
-  const foundPrimes = [];
-  for (let s = 0; s < animStep; s++) foundPrimes.push(steps[s].prime);
-  const currentPrime = animStep < steps.length ? steps[animStep].prime : null;
-  if (currentPrime && animStep === foundPrimes.length) foundPrimes.push(currentPrime);
-
-  const totalPrimes = steps.length;
-
-  // Build numbered sequence rows: p₁=2, p₂=3, p₃=5...
-  const subNums = ['₁','₂','₃','₄','₅','₆','₇','₈','₉','₁₀','₁₁','₁₂','₁₃','₁₄','₁₅',
-    '₁₆','₁₇','₁₈','₁₉','₂₀','₂₁','₂₂','₂₃','₂₄','₂₅'];
-  let seqRows = '';
-  const showCount = Math.min(foundPrimes.length, 12);
-  for (let i = 0; i < showCount; i++) {
-    const isCur = foundPrimes[i] === currentPrime;
-    seqRows += `<div class="ratio-row">
-      <span class="ratio-label" style="font-family:'Courier New',monospace">p${subNums[i] || '…'}</span>
-      <span class="ratio-val${isCur ? ' converged' : ''}">${foundPrimes[i]}</span>
-    </div>`;
-  }
-  if (foundPrimes.length > 12) {
-    seqRows += `<div class="ratio-row"><span class="ratio-label">…ещё ${foundPrimes.length - 12}</span>
-      <span class="ratio-val converged">p${subNums[foundPrimes.length-1]||'ₙ'} = ${foundPrimes[foundPrimes.length-1]}</span></div>`;
-  }
-
-  // Approximate n-th prime via prime number theorem: pₙ ≈ n·ln(n)
-  const k = foundPrimes.length;
-  const approx = k > 1 ? Math.round(k * Math.log(k)) : '—';
-
-  panel.innerHTML = `
-    <div class="formula-card" style="border-left:4px solid #f43f5e">
-      <div class="card-title">📝 Что такое последовательность простых чисел?</div>
-      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">
-        <strong>Простое число</strong> делится только на 1 и само себя. Выпишем их по порядку —
-        получим бесконечную последовательность:
-        <span style="color:#fca5a5;font-family:'Courier New',monospace"> 2, 3, 5, 7, 11, 13, 17, 19…</span><br><br>
-        <strong>Решето Эратосфена</strong> — алгоритм, который строит эту последовательность:
-        берём наименьшее не зачёркнутое число — оно простое — и зачёркиваем все его кратные.
-      </p>
-    </div>
-
-    <div class="formula-card">
-      <div class="card-title">📐 Алгоритм (зачёркиваем кратные)</div>
-      <div class="formula">p простое → зачеркнуть p·p, p·(p+1), …</div>
-      <div class="calculation">
-        Достаточно проверить до <span class="hl-y">√${N} ≈ ${Math.ceil(Math.sqrt(N))}</span>
-      </div>
-    </div>
-
-    ${foundPrimes.length > 0 ? `<div class="formula-card">
-      <div class="card-title">🔢 Последовательность простых${currentPrime ? ' (строится…)' : ' (готово)'}</div>
-      ${seqRows}
-    </div>` : ''}
-
-    ${currentPrime ? `<div class="formula-card">
-      <div class="card-title">🔴 Текущий шаг</div>
-      <div class="calculation" style="font-size:1.8em;text-align:center;padding:4px 0">
-        p<sub>${subNums[foundPrimes.length-1]||'ₙ'}</sub> = <span class="hl-r">${currentPrime}</span>
-      </div>
-      <div class="calculation" style="font-size:.88em;margin-top:4px">
-        Зачёркиваем ${currentPrime}² = ${currentPrime*currentPrime}${currentPrime*currentPrime<=N ? ' и далее…' : ' — за пределами N, ничего не зачёркиваем'}
-      </div>
-    </div>` : animStep >= steps.length && steps.length > 0 ? `<div class="formula-card">
-      <div class="card-title">✅ Последовательность построена</div>
-      <div class="calculation">
-        Простых до ${N}: <span class="hl-g">${totalPrimes}</span>
-      </div>
-    </div>` : ''}
-
-    <div class="formula-card">
-      <div class="card-title">✨ Формула для n-го простого числа</div>
-      <div class="formula">pₙ ≈ n · ln(n)</div>
-      <div class="calculation" style="font-size:.9em">
-        Точной формулы <strong>нет</strong> — в отличие от Фибоначчи!<br>
-        ${k > 1 ? `Приближение для p<sub>${k}</sub>: ${k}·ln(${k}) ≈ <span class="hl-y">${approx}</span>, реально — <span class="hl-g">${foundPrimes[k-1]||'?'}</span>` : 'Запусти анимацию, чтобы увидеть приближение'}
-      </div>
-    </div>`;
-}
-
-function updateStatus() {
-  const {steps} = sieveData;
-  const state = getSieveState();
-  const currentPrime = animStep < steps.length ? steps[animStep].prime : null;
-  let primeCount = 0, compositeCount = 0;
-  for (let n = 2; n <= N; n++) {
-    if (state[n]==='prime' || state[n]==='current') primeCount++;
-    if (state[n]==='composite') compositeCount++;
-  }
-  document.getElementById('stPrime').textContent = currentPrime ?? '—';
-  document.getElementById('stCount').textContent = primeCount;
-  document.getElementById('stCrossed').textContent = compositeCount;
-}
-
-// Init
-updatePanel();
-resizeCanvas();
-render();
-
-// ── Info Modal (defer until full DOM is parsed) ──
-document.addEventListener('DOMContentLoaded', () => {
-  const btnInfo     = document.getElementById('btnInfo');
-  const infoOverlay = document.getElementById('infoOverlay');
-  const infoClose   = document.getElementById('infoClose');
-  btnInfo.addEventListener('click', () => infoOverlay.classList.add('open'));
-  infoClose.addEventListener('click', () => infoOverlay.classList.remove('open'));
-  infoOverlay.addEventListener('click', e => { if (e.target === infoOverlay) infoOverlay.classList.remove('open'); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') infoOverlay.classList.remove('open'); });
+    // текущее простое: пульсирующее кольцо и «бегунок» по кратным
+    if (cur) {
+      const [cx, cy] = L.pos(cur);
+      const col = pal[u % pal.length];
+      D.circle(ctx, cx + cs / 2, cy + cs / 2, cs * (.6 + .08 * Math.sin(time * 6)), null, col, 3);
+      const f = t - u;
+      if (f > .2 && f < .95) {
+        const mult = []; for (let x = cur * cur; x <= p.N; x += cur) mult.push(x);
+        const j = Math.min(mult.length - 1, Math.floor((f - .2) / .75 * mult.length));
+        const [mx, my] = L.pos(mult[j]);
+        D.glow(ctx, mx + cs / 2, my + cs / 2, cs, col, .5);
+      }
+      D.pill(ctx, `шаг ${cur}: ${cur}², ${cur}² + ${cur}, …`, w / 2, 86, { bg: col, color: '#fff', size: 12.5, shadow: true });
+    } else if (t >= m.P.length && t > 0) {
+      D.pill(ctx, `Все невычеркнутые числа — простые`, w / 2, 86, { bg: dark ? '#e6c449' : '#f2b705', color: '#1c1a21', size: 12.5, shadow: true });
+    }
+  },
 });
 </script>
-
-<div class="info-overlay" id="infoOverlay">
-  <div class="info-modal">
-    <button class="info-close" id="infoClose">✕</button>
-    <h2>🔴 Решето Эратосфена — охота за простыми числами</h2>
-
-    <div class="info-sec">
-      <h3>Кратко</h3>
-      <p>Простые числа — «атомы» математики: любое натуральное число единственным образом раскладывается в их произведение (основная теорема арифметики). Решето Эратосфена — древнейший алгоритм поиска простых. Ему более <strong>2200 лет</strong>, а лучшего для нахождения всех простых до N по сей день нет.</p>
-    </div>
-
-    <div class="info-sec">
-      <h3>История</h3>
-      <p><strong>Эратосфен Киренский</strong> (~276–194 до н.э.) — греческий математик, поэт, географ и главный библиотекарь Александрийской библиотеки. Он первым измерил длину окружности Земли с ошибкой менее 2%, составил каталог из 675 звёзд и придумал этот алгоритм. Сам он назвал метод «просеиванием» (греч. κόσκινον — решето).</p>
-    </div>
-
-    <div class="info-sec">
-      <h3>Алгоритм: шаг за шагом</h3>
-      <div class="info-hl">1. Записать все числа от 2 до N
-2. Взять первое невычеркнутое число p — оно простое
-3. Вычеркнуть все кратные p, начиная с p²
-4. Повторять, пока p ≤ √N
-5. Все оставшиеся числа — простые</div>
-      <p>Почему начинаем с <strong>p²</strong>? Все меньшие кратные уже вычеркнуты предыдущими простыми — дублировать работу не нужно.</p>
-    </div>
-
-    <div class="info-sec">
-      <h3>Эффективность</h3>
-      <p>Сложность алгоритма — <strong>O(n · log log n)</strong> — практически линейная. Чтобы найти все простые до миллиона, нужно около 3,5 млн операций — в тысячи раз быстрее наивной проверки каждого числа на делители.</p>
-    </div>
-
-    <div class="info-sec">
-      <h3>Сколько простых чисел?</h3>
-      <p>Простые числа становятся всё реже по мере роста N. <strong>Теорема о простых числах</strong> (1896, Адамар и де ла Валле-Пуссен):</p>
-      <div class="info-hl">π(N) ≈ N / ln(N)</div>
-      <p>Здесь π(N) — количество простых, не превышающих N. До 100 их 25, до 1000 — 168, до миллиона — 78 498.</p>
-    </div>
-
-    <div class="info-sec">
-      <h3>Простых чисел бесконечно много</h3>
-      <p>Доказал <strong>Евклид</strong> ≈ 300 г. до н.э. Классическое доказательство от противного: допустим, простых конечно — p₁, p₂, …, pₖ. Рассмотрим число P = p₁·p₂·…·pₖ + 1. Оно не делится ни на одно pᵢ (остаток 1). Значит, у P есть простой делитель, которого нет в списке. Противоречие!</p>
-    </div>
-
-    <div class="info-sec">
-      <h3>Нерешённые задачи</h3>
-      <ul>
-        <li>🔵 <strong>Гипотеза Гольдбаха (1742):</strong> любое чётное число &gt; 2 — сумма двух простых. Проверено до 4·10¹⁸, но не доказано!</li>
-        <li>🔵 <strong>Гипотеза простых-близнецов:</strong> бесконечно много пар (p, p+2), где оба простые: 3 и 5, 11 и 13, 17 и 19…</li>
-        <li>🔵 <strong>Гипотеза Римана:</strong> о нулях дзета-функции. Одна из «задач тысячелетия» с призом $1 000 000, связана с точным распределением простых чисел.</li>
-      </ul>
-    </div>
-
-    <div class="info-sec">
-      <h3>Применение сегодня</h3>
-      <ul>
-        <li>🔐 <strong>RSA-шифрование:</strong> безопасность интернет-соединений основана на том, что разложить большое число на простые множители крайне сложно</li>
-        <li>💻 <strong>Хеш-таблицы:</strong> размер выбирают простым — это уменьшает коллизии</li>
-        <li>🎲 <strong>Псевдослучайные числа:</strong> арифметика по простому модулю обеспечивает равномерное распределение</li>
-      </ul>
-      <p style="margin-top:8px">🏆 Наибольшее известное простое число (2024): <strong>2¹³⁶ ²⁷⁹ ⁸⁴¹ − 1</strong> — число Мерсенна, в нём более 41 миллиона цифр!</p>
-    </div>
-  </div>
-</div>
 </body>
 </html>

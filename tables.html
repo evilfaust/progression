@@ -1,698 +1,184 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Задача о столиках — Арифметическая прогрессия</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --bg2: #1e293b;
-            --card: #1e293b;
-            --border: #334155;
-            --border2: #1e293b;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --subtle: #64748b;
-            --track: #334155;
-            --btn2: #334155;
-            --btn2-text: #94a3b8;
-            --table-td-border: #1e293b;
-        }
-        html.light {
-            --bg: #f8fafc;
-            --bg2: #f1f5f9;
-            --card: #ffffff;
-            --border: #94a3b8;
-            --border2: #cbd5e1;
-            --text: #0f172a;
-            --muted: #374151;
-            --subtle: #334155;
-            --track: #94a3b8;
-            --btn2: #e2e8f0;
-            --btn2-text: #1e293b;
-            --table-td-border: #e2e8f0;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html, body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            overflow: hidden;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .app {
-            display: grid;
-            grid-template-rows: auto 1fr auto;
-            height: 100vh;
-        }
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 10px 24px;
-            background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
-            border-bottom: 1px solid var(--border2);
-            flex-wrap: wrap;
-        }
-        .top-bar h1 {
-            font-size: 1.3em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #f59e0b, #f97316);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            white-space: nowrap;
-        }
-        .back-link {
-            text-decoration: none;
-            color: var(--muted);
-            font-size: 0.85em;
-            padding: 4px 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            transition: color 0.15s, border-color 0.15s;
-            white-space: nowrap;
-        }
-        .back-link:hover { color: var(--text); border-color: var(--muted); }
-        html.light .top-bar h1 {
-            background: linear-gradient(135deg, #b45309, #c2410c);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-        .top-controls {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex: 1;
-            flex-wrap: wrap;
-        }
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .slider-group label {
-            font-size: 0.85em;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        .slider-group .val {
-            font-size: 1.4em;
-            font-weight: 700;
-            color: #f59e0b;
-            min-width: 30px;
-            text-align: center;
-        }
-        html.light .slider-group .val { color: #b45309; }
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 110px;
-            height: 6px;
-            border-radius: 3px;
-            background: var(--track);
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: #f59e0b;
-            cursor: pointer;
-            box-shadow: 0 0 8px rgba(245,158,11,0.4);
-        }
-        html.light input[type="range"]::-webkit-slider-thumb { background: #b45309; }
-        .btn {
-            padding: 8px 18px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-play { background: linear-gradient(135deg, #f59e0b, #d97706); color: #1e293b; }
-        html.light .btn-play { background: linear-gradient(135deg, #b45309, #92400e); color: white; }
-        .btn-reset { background: var(--btn2); color: var(--btn2-text); }
-        .btn-speed { background: var(--btn2); color: var(--btn2-text); padding: 8px 12px; font-size: 0.85em; }
-        .btn-speed.active { background: #f59e0b; color: #1e293b; }
-        html.light .btn-speed.active { background: #b45309; color: white; }
-        .btn-theme {
-            background: var(--btn2);
-            color: var(--btn2-text);
-            padding: 8px 14px;
-            font-size: 0.85em;
-            margin-left: auto;
-            border: 1px solid var(--border);
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0;
-            min-height: 0;
-            overflow: hidden;
-        }
-
-        .left-cell {
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border2);
-            min-height: 0;
-            overflow: hidden;
-        }
-        .cell-title {
-            font-size: 0.8em;
-            color: var(--subtle);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-            padding: 8px 16px 4px;
-        }
-        .scene-wrap {
-            flex: 0 0 auto;
-            height: 40%;
-            min-height: 120px;
-            position: relative;
-        }
-        canvas#sceneCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        .pattern-scroll {
-            flex: 1;
-            overflow-y: auto;
-            min-height: 0;
-            border-top: 1px solid var(--border2);
-        }
-        .pattern-scroll::-webkit-scrollbar { width: 4px; }
-        .pattern-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-        .pattern-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .pattern-table th {
-            background: var(--bg2);
-            padding: 6px 8px;
-            text-align: center;
-            font-size: 0.85em;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            border-bottom: 2px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-        .pattern-table td {
-            padding: 5px 8px;
-            text-align: center;
-            border-bottom: 1px solid var(--table-td-border);
-            font-size: 0.95em;
-            font-family: 'Courier New', monospace;
-            color: var(--text);
-        }
-        .pattern-table tr.highlight td {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-            font-weight: 700;
-        }
-        html.light .pattern-table tr.highlight td { color: #b45309; background: rgba(180,83,9,0.08); }
-        .pattern-table tr.active td {
-            background: rgba(74, 222, 128, 0.06);
-            color: #4ade80;
-            font-weight: 700;
-        }
-        html.light .pattern-table tr.active td { color: #15803d; background: rgba(22,163,74,0.06); }
-        .pattern-table tr.dimmed td { color: var(--subtle); }
-
-        .formulas-cell {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 14px 20px;
-            overflow-y: auto;
-            min-height: 0;
-            justify-content: center;
-        }
-        .formula-card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 14px 20px;
-            border: 1px solid var(--border);
-        }
-        .formula-card .card-title {
-            font-size: 0.85em;
-            color: var(--subtle);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-        .formula-card .formula {
-            font-size: 1.3em;
-            color: #a78bfa;
-            font-family: 'Courier New', monospace;
-            margin-bottom: 4px;
-        }
-        html.light .formula-card .formula { color: #6d28d9; }
-        .formula-card .calculation {
-            font-size: 1.2em;
-            color: var(--text);
-            font-weight: 600;
-        }
-        .formula-card .result {
-            font-size: 1.4em;
-            color: #4ade80;
-            font-weight: 700;
-        }
-        html.light .formula-card .result { color: #15803d; }
-
-        .bottom-bar {
-            display: flex;
-            align-items: stretch;
-            gap: 0;
-            border-top: 1px solid var(--border2);
-            background: var(--bg2);
-        }
-        .status-items {
-            display: flex;
-            gap: 20px;
-            padding: 8px 20px;
-            align-items: center;
-        }
-        .status-item { display: flex; flex-direction: column; align-items: center; }
-        .status-item .label {
-            font-size: 0.7em;
-            color: var(--subtle);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-        .status-item .value { font-size: 1.3em; font-weight: 700; }
-        .status-item .value.amber { color: #f59e0b; }
-        .status-item .value.green { color: #4ade80; }
-        .status-item .value.blue { color: #60a5fa; }
-        .status-item .value.purple { color: #a78bfa; }
-        html.light .status-item .value.amber { color: #b45309; }
-        html.light .status-item .value.green { color: #15803d; }
-
-        .comparison-items {
-            display: flex;
-            gap: 12px;
-            padding: 8px 20px;
-            flex: 1;
-            justify-content: center;
-        }
-        .comp-card {
-            padding: 6px 16px;
-            border-radius: 8px;
-            border: 1px solid;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .comp-card.manual { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.2); }
-        .comp-card.formula-method { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.2); }
-        html.light .comp-card.formula-method { background: rgba(22,163,74,0.06); }
-        .comp-card .comp-title { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-        .comp-card.manual .comp-title { color: #f87171; }
-        .comp-card.formula-method .comp-title { color: #4ade80; }
-        html.light .comp-card.formula-method .comp-title { color: #15803d; }
-        .comp-card .comp-value { font-size: 1.05em; font-weight: 700; }
-        .comp-card.manual .comp-value { color: #ef4444; }
-        .comp-card.formula-method .comp-value { color: #22c55e; }
-        html.light .comp-card.formula-method .comp-value { color: #15803d; }
-
-        .insight-item {
-            padding: 8px 20px;
-            font-size: 0.9em;
-            color: #fcd34d;
-            display: none;
-            align-items: center;
-            border-left: 1px solid var(--border);
-            max-width: 380px;
-        }
-        html.light .insight-item { color: #b45309; }
-        .insight-item.visible { display: flex; }
-
-        /* ═══ МОБИЛЬНАЯ ВЕРСИЯ ═══ */
-        @media (max-width: 700px) {
-            html, body { height: auto; overflow-y: auto; overflow-x: hidden; }
-            .app { height: auto; min-height: 100svh; grid-template-rows: auto auto auto; max-width: 100vw; overflow-x: hidden; }
-
-            .top-bar { padding: 8px 12px; gap: 8px; }
-            .top-bar h1 { font-size: 1em; white-space: normal; }
-            .top-controls { gap: 5px; }
-            .slider-group { gap: 4px; }
-            .slider-group .val { font-size: 1em; min-width: 20px; }
-            input[type="range"] { width: 64px; }
-            .btn { padding: 6px 10px; }
-            .btn-speed { padding: 5px 7px; }
-            .btn-theme { margin-left: 0; padding: 5px 8px; font-size: .76em; }
-
-            .main-grid { grid-template-columns: 1fr; overflow: visible; }
-
-            .canyon-cell, .canvas-cell, .left-cell, .amphi-cell, .scene-cell {
-                height: 56vw;
-                min-height: 220px;
-                max-height: 340px;
-                border-right: none;
-                border-bottom: 1px solid var(--border2);
-            }
-
-            .right-cell, .solution-cell, .formulas-cell {
-                overflow: visible;
-                height: auto;
-                padding: 12px 14px;
-                gap: 8px;
-            }
-            .terms-section { max-height: 200px; }
-
-            .bottom-bar { flex-wrap: wrap; }
-            .status-items { flex-wrap: wrap; gap: 10px; padding: 8px 12px; }
-            .comparison-items { flex-wrap: wrap; padding: 8px 12px; gap: 8px; }
-            .comp-card { padding: 5px 12px; }
-            .comp-card .comp-value { font-size: 0.95em; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Столики в кафе — Прогрессии</title>
+<link rel="stylesheet" href="assets/lab.css">
 </head>
 <body>
-
-<div class="app">
-    <div class="top-bar">
-        <a href="index.html" class="back-link">← К задачам</a>
-        <h1>Задача о столиках в кафе</h1>
-        <div class="top-controls">
-            <div class="slider-group">
-                <label>N =</label>
-                <span class="val" id="displayN">3</span>
-                <input type="range" id="sliderN" min="1" max="40" value="3" step="1">
-            </div>
-            <button class="btn btn-play" id="btnPlay">&#9654; Пуск</button>
-            <button class="btn btn-reset" id="btnReset">&#8634; Сброс</button>
-            <button class="btn btn-speed" data-speed="0.5">0.5&times;</button>
-            <button class="btn btn-speed active" data-speed="1">1&times;</button>
-            <button class="btn btn-speed" data-speed="2">2&times;</button>
-            <button class="btn btn-theme" id="btnTheme">☀ Светлая</button>
-        </div>
-    </div>
-
-    <div class="main-grid">
-        <div class="left-cell">
-            <div class="cell-title">Вид сверху</div>
-            <div class="scene-wrap">
-                <canvas id="sceneCanvas"></canvas>
-            </div>
-            <div class="cell-title">Закономерность</div>
-            <div class="pattern-scroll">
-                <table class="pattern-table">
-                    <thead>
-                        <tr><th>N</th><th>Мест</th><th>+</th><th>Формула</th></tr>
-                    </thead>
-                    <tbody id="patternBody"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="formulas-cell">
-            <div class="formula-card" style="border-left:4px solid #f97316">
-                <div class="card-title">📝 Задача</div>
-                <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">В кафе квадратные столики ставят в ряд вплотную друг к другу. За одним столиком могут сидеть 4 человека, за двумя сдвинутыми столиками — 6, за тремя — 8 и т.д. Сколько человек сможет разместиться за рядом из <b>n</b> столиков?</p>
-            </div>
-            <div class="formula-card">
-                <div class="card-title">Закономерность</div>
-                <div class="formula">a&#8321; = 4, &nbsp;d = 2</div>
-                <div class="calculation" id="formulaPattern">Каждый новый столик &rarr; +2 места</div>
-            </div>
-            <div class="formula-card">
-                <div class="card-title">Формула n-го члена</div>
-                <div class="formula">a&#8345; = a&#8321; + (n&minus;1)&middot;d = 2n + 2</div>
-                <div class="calculation" id="formulaAn">a&#8323; = 4 + (3&minus;1)&middot;2 = <span class="result">8 мест</span></div>
-            </div>
-            <div class="formula-card">
-                <div class="card-title">Почему именно +2?</div>
-                <div class="calculation" id="formulaWhy">
-                    4 стороны нового столика &minus; 2 склеенных = +2
-                </div>
-            </div>
-            <div class="formula-card">
-                <div class="card-title">Ответ для N столиков</div>
-                <div class="formula">Мест = 2&middot;N + 2</div>
-                <div class="calculation" id="formulaAnswer">2&middot;3 + 2 = <span class="result">8 человек</span></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bottom-bar">
-        <div class="status-items">
-            <div class="status-item">
-                <span class="label">Столиков</span>
-                <span class="value amber" id="statTables">3</span>
-            </div>
-            <div class="status-item">
-                <span class="label">Мест</span>
-                <span class="value green" id="statSeats">8</span>
-            </div>
-            <div class="status-item">
-                <span class="label">Прибавка</span>
-                <span class="value blue" id="statAdded">+2</span>
-            </div>
-            <div class="status-item">
-                <span class="label">a&#8321;</span>
-                <span class="value purple" id="statA1">4</span>
-            </div>
-            <div class="status-item">
-                <span class="label">d</span>
-                <span class="value purple" id="statD">2</span>
-            </div>
-        </div>
-        <div class="comparison-items">
-            <div class="comp-card manual">
-                <div class="comp-title">Перебор</div>
-                <div class="comp-value" id="compManual">Рисовать 3 столика</div>
-            </div>
-            <div class="comp-card formula-method">
-                <div class="comp-title">Формула</div>
-                <div class="comp-value" id="compFormula">2&middot;3+2 = 8</div>
-            </div>
-        </div>
-        <div class="insight-item" id="insightBanner">
-            <span id="insightText"></span>
-        </div>
-    </div>
-</div>
-
+<script src="assets/catalog.js"></script>
+<script src="assets/lab.js"></script>
 <script>
-let N = 3;
-let isPlaying = false;
-let speed = 1;
-let lastFrame = 0;
-let animProgress = 0;
+const { F, fmt, D } = Lab;
+const seats = n => (n <= 0 ? 0 : 2 * n + 2);
 
-function seats(n) { return n === 0 ? 0 : 2 * n + 2; }
+Lab.model({
+  id: 'tables',
+  unit: 'Столик',
+  rate: 0.75,
+  params: [
+    { key: 'N', sym: 'n', label: 'столиков в ряду', min: 1, max: 30, value: 6 },
+  ],
+  compute: p => ({ an: seats(p.N) }),
+  duration: p => p.N,
 
-const sliderN = document.getElementById('sliderN');
-const btnPlay = document.getElementById('btnPlay');
-const btnReset = document.getElementById('btnReset');
-const btnTheme = document.getElementById('btnTheme');
-const sceneCanvas = document.getElementById('sceneCanvas');
-const sceneCtx = sceneCanvas.getContext('2d');
+  problem: (p, m, v) => `В кафе квадратные столики ставят в ряд вплотную друг к другу. За одним столиком помещаются 4 человека, за двумя сдвинутыми — 6, за тремя — 8.
+    <span class="q">Сколько человек поместится за ${v('N')} ${Lab.plural(p.N, 'сдвинутым столиком', 'сдвинутыми столиками', 'сдвинутыми столиками')}?</span>`,
 
-// ─── Theme ───────────────────────────────────────────────
-const savedTheme = localStorage.getItem('ap-theme') || 'dark';
-if (savedTheme === 'light') { document.documentElement.classList.add('light'); btnTheme.textContent = '🌙 Тёмная'; }
-btnTheme.addEventListener('click', () => {
-    const isL = document.documentElement.classList.toggle('light');
-    localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
-    btnTheme.textContent = isL ? '🌙 Тёмная' : '☀ Светлая';
-    render();
-});
-function isLight() { return document.documentElement.classList.contains('light'); }
+  solution: (p, m) => ({
+    steps: [
+      { t: 'Числа мест 4, 6, 8, … — арифметическая прогрессия', f: F('a_1 = 4,\\quad d = 2'), always: true },
+      { t: 'Почему каждый столик добавляет 2 места', f: `<span style="font-size:14.5px;color:var(--ink-2)">У нового столика 4 стороны, но 2 из них «склеиваются» с соседним</span>`, c: F('4 - 2 = 2'), always: true },
+      { t: 'Формула n-го члена', f: F('a_n = 4 + (n - 1)*2 = 2n + 2'), c: F(`a_{${p.N}} = 2*${p.N} + 2 = \\ans{${m.an}}`), final: true },
+    ],
+    answer: `${m.an} ${Lab.plural(m.an, 'человек', 'человека', 'человек')}`,
+  }),
 
-function resizeCanvas(canvas) {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.getContext('2d').scale(dpr, dpr);
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
-}
-function resizeAll() { resizeCanvas(sceneCanvas); render(); }
+  terms: p => ({
+    items: Array.from({ length: p.N }, (_, i) => ({ i: 'a' + Lab.sub(i + 1), x: seats(i + 1) })),
+  }),
 
-function drawScene() {
-    const dpr = window.devicePixelRatio || 1;
-    const w = sceneCanvas.width / dpr;
-    const h = sceneCanvas.height / dpr;
-    const ctx = sceneCtx;
-    const light = isLight();
-    ctx.clearRect(0, 0, w, h);
+  cards: [{
+    id: 'pattern', title: 'Закономерность', icon: 'list', at: 'after-solution',
+    render: () => '',
+    step(body, t, p) {
+      const k = Math.min(Math.ceil(t - 1e-9), p.N);
+      const from = Math.max(1, Math.min(k - 3, p.N - 6)), to = Math.min(p.N, from + 6);
+      let rows = '';
+      for (let n = from; n <= to; n++) {
+        rows += `<tr class="${n === k ? 'now' : ''}" style="${n > k ? 'opacity:.35' : ''}">
+          <td>${n}</td><td><b>${seats(n)}</b></td><td>${n === 1 ? '—' : '+2'}</td><td>${F(`2*${n} + 2`)}</td></tr>`;
+      }
+      body.innerHTML = `<table class="mini-table"><thead><tr><th>Столиков</th><th>Мест</th><th>Прибавка</th><th>Формула</th></tr></thead><tbody>${rows}</tbody></table>`;
+    },
+  }],
 
-    // Background
-    ctx.fillStyle = light ? '#f1f5f9' : '#0f172a';
+  hud: (p, m, t) => {
+    const k = Math.min(Math.ceil(t - 1e-9), p.N);
+    const joined = k > 0 && (t - (k - 1) > .62 || t >= k);
+    const n = joined ? k : k - 1;
+    return [
+      { k: 'Столиков', v: String(Math.max(0, n)), u: `из ${p.N}` },
+      { k: 'Мест', v: String(seats(Math.max(0, n))), tone: 'acc' },
+      { k: 'Прибавка', v: n > 1 ? '+2' : n === 1 ? '4' : '—' },
+    ];
+  },
+  doneText: (p, m) => `За ${p.N} ${Lab.plural(p.N, 'столиком', 'столиками', 'столиками')} — ${m.an} мест`,
+  about: `<p class="lead">Задача о столиках — один из самых наглядных способов увидеть, откуда берётся разность прогрессии.</p>
+    <p>Каждый новый столик приносит 4 стороны, но две из них — та, которой он примыкает к ряду, и соседняя сторона предыдущего столика — оказываются внутри. Поэтому мест становится больше ровно на 2.</p>
+    <p>Можно рассуждать и иначе: у ряда из <i>n</i> столиков сверху и снизу по <i>n</i> мест, плюс по одному месту на торцах: <span class="m">2<i>n</i> + 2</span>.</p>` + Lab.THEORY.ap,
+
+  draw(ctx, s) {
+    const { w, h, t, p, C, time } = s;
+    const dark = C.dark;
+    // пол
+    ctx.fillStyle = dark ? '#1c1f2a' : '#f2e6d3';
     ctx.fillRect(0, 0, w, h);
+    const plank = 34;
+    for (let y = 0, i = 0; y < h; y += plank, i++) {
+      ctx.fillStyle = i % 2 ? (dark ? '#1f2330' : '#efe0c9') : (dark ? '#1c1f2a' : '#f4e9d8');
+      ctx.fillRect(0, y, w, plank);
+      D.line(ctx, 0, y, w, y, dark ? 'rgba(255,255,255,.04)' : 'rgba(120,80,30,.12)', 1);
+      for (let x = (i * 97) % 220; x < w; x += 220) D.line(ctx, x, y, x, y + plank, dark ? 'rgba(255,255,255,.04)' : 'rgba(120,80,30,.12)', 1);
+    }
+    // ковёр под рядом
+    const N = p.N;
+    const sz = Math.max(16, Math.min(104, (w - 120) / N, (h - 200) / 2.2));
+    const chair = sz * .34;
+    const cy = h * .55;
 
-    const showN = Math.min(Math.floor(animProgress) + 1, N);
-    const partial = animProgress - Math.floor(animProgress);
-    const isPartial = Math.floor(animProgress) < N && animProgress < N;
+    const k = Math.min(Math.ceil(t - 1e-9), N);
+    const f = k > 0 ? t - (k - 1) : 0;
+    const arrive = D.ease.out(D.seg(f, 0, .42));
+    const join = D.seg(f, .42, .62);
+    const shown = k === 0 ? 0 : k - 1 + arrive;
+    const rowW = shown * sz;
+    const x0 = (w - Math.max(rowW, sz)) / 2;
 
-    const maxTableW = 60;
-    const tableSize = Math.min(maxTableW, (w - 60) / Math.max(N, 1));
-    const totalW = showN * tableSize;
-    const startX = (w - totalW) / 2;
-    const centerY = h / 2;
-    const chairSize = tableSize * 0.22;
-    const chairOffset = tableSize * 0.12;
+    D.rr(ctx, x0 - chair * 2.2, cy - sz / 2 - chair * 2.2, Math.max(rowW, sz) + chair * 4.4, sz + chair * 4.4, 18);
+    ctx.fillStyle = dark ? 'rgba(255,255,255,.035)' : 'rgba(232,89,12,.06)';
+    ctx.fill();
 
-    for (let i = 0; i < showN; i++) {
-        const isLast = (i === showN - 1) && isPartial;
-        const alpha = isLast ? 0.3 + partial * 0.7 : 1;
-        const tx = startX + i * tableSize;
-        const ty = centerY - tableSize / 2;
-        ctx.globalAlpha = alpha;
+    const tableX = i => x0 + (i - 1) * sz + (i === k ? (1 - arrive) * sz * 2.2 : 0);
+    const chairCol = dark ? '#ff8a3d' : '#e8590c';
+    const drawChair = (x, y, side, a, sc = 1) => {
+      if (a <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(x, y);
+      ctx.scale(sc, sc);
+      const horiz = side === 'top' || side === 'bottom';
+      const cw = horiz ? sz * .62 : chair, ch = horiz ? chair : sz * .62;
+      D.shadow(ctx, 6, 'rgba(0,0,0,.18)', 2);
+      D.rr(ctx, -cw / 2, -ch / 2, cw, ch, Math.min(cw, ch) * .38);
+      ctx.fillStyle = chairCol; ctx.fill();
+      D.noShadow(ctx);
+      // спинка
+      const bx = side === 'left' ? -cw / 2 : side === 'right' ? cw / 2 - cw * .28 : -cw / 2;
+      const by = side === 'top' ? -ch / 2 : side === 'bottom' ? ch / 2 - ch * .28 : -ch / 2;
+      D.rr(ctx, bx, by, horiz ? cw : cw * .28, horiz ? ch * .28 : ch, 3);
+      ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fill();
+      ctx.restore();
+    };
+    const pop = (i, delay) => (i < k ? 1 : D.ease.back(D.seg(f, .62 + delay, .82 + delay)));
 
-        ctx.fillStyle = '#92603a'; ctx.strokeStyle = '#6b4423'; ctx.lineWidth = 2;
-        const r = tableSize * 0.08;
-        roundRect(ctx, tx + 2, ty + 2, tableSize - 4, tableSize - 4, r);
-        ctx.fill(); ctx.stroke();
-
-        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1;
-        const cx = tx + tableSize / 2, cy = ty + tableSize / 2, dd = tableSize * 0.22;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - dd); ctx.lineTo(cx + dd, cy);
-        ctx.lineTo(cx, cy + dd); ctx.lineTo(cx - dd, cy);
-        ctx.closePath(); ctx.stroke();
-
-        drawChair(ctx, cx, ty - chairOffset - chairSize, chairSize, 'top');
-        drawChair(ctx, cx, ty + tableSize + chairOffset, chairSize, 'bottom');
-        if (i === 0) drawChair(ctx, tx - chairOffset - chairSize, cy, chairSize, 'left');
-        if (i === showN - 1) drawChair(ctx, tx + tableSize + chairOffset, cy, chairSize, 'right');
-
-        const plateR = tableSize * 0.06;
-        ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
-        drawPlate(ctx, cx, ty + tableSize * 0.2, plateR);
-        drawPlate(ctx, cx, ty + tableSize * 0.8, plateR);
-        if (i === 0) drawPlate(ctx, tx + tableSize * 0.2, cy, plateR);
-        if (i === showN - 1) drawPlate(ctx, tx + tableSize * 0.8, cy, plateR);
-        ctx.globalAlpha = 1;
-
-        const labelColor = light ? '#1d4ed8' : '#60a5fa';
-        const firstColor = light ? '#15803d' : '#4ade80';
-        if (i > 0 && !isLast) {
-            ctx.fillStyle = labelColor; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
-            ctx.textAlign = 'center'; ctx.fillText('+2', tx + tableSize / 2, ty - chairOffset - chairSize - 6);
+    for (let i = 1; i <= k; i++) {
+      const x = tableX(i), a = i === k ? Math.min(1, arrive * 1.6) : 1;
+      const isFirst = i === 1;
+      // стулья сверху/снизу
+      const cA = i === k && !isFirst ? a : (i === k ? D.ease.back(D.seg(f, .1, .5)) : 1);
+      drawChair(x + sz / 2, cy - sz / 2 - chair * .75, 'top', isFirst && i === k ? cA : a, isFirst && i === k ? cA : 1);
+      drawChair(x + sz / 2, cy + sz / 2 + chair * .75, 'bottom', isFirst && i === k ? cA : a, isFirst && i === k ? cA : 1);
+      // торцы
+      if (isFirst) drawChair(x - chair * .75, cy, 'left', i === k ? cA : 1, i === k ? cA : 1);
+      if (i === k) drawChair(x + sz + chair * .75, cy, 'right', i === 1 ? cA : a, i === 1 ? cA : 1);
+      else if (i === k - 1) {
+        // правый стул предыдущего столика и левый стул нового исчезают
+        const out = 1 - join;
+        if (out > 0) {
+          ctx.save();
+          drawChair(x + sz + chair * .75 - join * chair * .2, cy, 'right', out, 1 - join * .3);
+          drawChair(tableX(k) - chair * .75, cy, 'left', out * Math.min(1, arrive * 1.6), 1 - join * .3);
+          ctx.restore();
+          if (join > 0 && join < 1) D.pill(ctx, '−2', x + sz, cy - sz * .9, { bg: C.bad, color: '#fff', size: 13 });
         }
-        if (i === 0) {
-            ctx.fillStyle = firstColor; ctx.font = `bold ${Math.min(12, tableSize * 0.2)}px system-ui`;
-            ctx.textAlign = 'center'; ctx.fillText('4', tx + tableSize / 2, ty - chairOffset - chairSize - 6);
-        }
+      }
+      // столик
+      ctx.save();
+      ctx.globalAlpha = a;
+      D.shadow(ctx, 12, 'rgba(0,0,0,.2)', 4);
+      D.rr(ctx, x + 1, cy - sz / 2, sz - 2, sz, Math.max(4, sz * .1));
+      ctx.fillStyle = dark ? '#2f3546' : '#ffffff'; ctx.fill();
+      D.noShadow(ctx);
+      ctx.lineWidth = 2; ctx.strokeStyle = dark ? '#454d63' : '#e3d2ba'; ctx.stroke();
+      // тарелка и бокал
+      if (sz > 30) {
+        D.circle(ctx, x + sz / 2, cy, sz * .17, dark ? '#3c4357' : '#f4efe7', dark ? '#59627c' : '#e2d6c4', 1.5);
+        D.circle(ctx, x + sz / 2 + sz * .26, cy - sz * .22, sz * .06, dark ? '#59627c' : '#d4e7f7');
+      }
+      D.text(ctx, String(i), x + sz / 2, cy + (sz > 30 ? sz * .32 : 0), { size: Math.max(9, sz * .16), weight: 700, color: dark ? '#7d87a3' : '#b7a284' });
+      ctx.restore();
     }
-
-    const totalSeats = seats(showN - (isPartial ? 1 : 0));
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = light ? '#b45309' : '#f59e0b';
-    ctx.font = 'bold 16px system-ui';
-    ctx.textAlign = 'center'; ctx.fillText(totalSeats + ' мест', w / 2, h - 8);
-}
-
-function drawChair(ctx, cx, cy, size, dir) {
-    ctx.fillStyle = '#b47a3e'; ctx.strokeStyle = '#7a5225'; ctx.lineWidth = 1.5;
-    const r = size; ctx.beginPath();
-    if (dir === 'top') ctx.arc(cx, cy + r * 0.3, r, Math.PI * 1.15, Math.PI * 1.85);
-    else if (dir === 'bottom') ctx.arc(cx, cy - r * 0.3, r, Math.PI * 0.15, Math.PI * 0.85);
-    else if (dir === 'left') ctx.arc(cx + r * 0.3, cy, r, Math.PI * 0.65, Math.PI * 1.35);
-    else ctx.arc(cx - r * 0.3, cy, r, -Math.PI * 0.35, Math.PI * 0.35);
-    ctx.closePath(); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#f5deb3'; ctx.strokeStyle = '#d4a96a'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(cx, cy, size * 0.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-}
-function drawPlate(ctx, x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
-function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
-}
-
-function updatePatternTable() {
-    const body = document.getElementById('patternBody');
-    const nDone = Math.min(Math.floor(animProgress), N);
-    const maxShow = Math.min(N, 20);
-    let html = '';
-    for (let k = 1; k <= maxShow; k++) {
-        let cls = k <= nDone ? 'active' : (k === nDone + 1 ? 'highlight' : 'dimmed');
-        const s = seats(k), added = k === 1 ? '—' : '+2';
-        html += `<tr class="${cls}"><td>${k}</td><td>${s}</td><td>${added}</td><td>2·${k}+2=${s}</td></tr>`;
+    // новый столик: «+2»
+    if (k > 1 && f > .62) {
+      const u = D.seg(f, .62, 1);
+      D.pill(ctx, '+2 места', tableX(k) + sz / 2, cy - sz / 2 - chair * 2.4 - u * 14, { bg: C.good, color: '#fff', size: 13, shadow: true });
     }
-    if (N > maxShow) {
-        html += `<tr class="dimmed"><td colspan="4" style="font-size:0.8em">... ещё ${N - maxShow}</td></tr>`;
-        const s = seats(N);
-        html += `<tr class="${nDone >= N ? 'active' : 'highlight'}"><td>${N}</td><td>${s}</td><td>+2</td><td>2·${N}+2=${s}</td></tr>`;
+    // итог под рядом
+    if (k > 0) {
+      const joined = f > .62 || t >= k;
+      const n = joined ? k : k - 1;
+      if (n > 0) {
+        const total = seats(n);
+        const yb = cy + sz / 2 + chair * 2.8;
+        D.pill(ctx, `${n} ${Lab.plural(n, 'столик', 'столика', 'столиков')} → ${total} мест`, w / 2, Math.min(h - 26, yb + 8), { bg: dark ? '#2b2f3d' : '#ffffff', color: C.ink, size: 15, shadow: true, h: 34 });
+      }
+    } else {
+      D.text(ctx, 'Нажмите ▶, чтобы поставить первый столик', w / 2, cy, { size: 16, weight: 600, color: C.ink3 });
     }
-    body.innerHTML = html;
-}
-
-function updateUI() {
-    const nDone = Math.min(Math.floor(animProgress), N);
-    const s = seats(nDone), total = seats(N);
-    document.getElementById('displayN').textContent = N;
-    document.getElementById('statTables').textContent = nDone;
-    document.getElementById('statSeats').textContent = s;
-    document.getElementById('statAdded').textContent = nDone <= 1 ? (nDone === 0 ? '—' : '+4') : '+2';
-    document.getElementById('statA1').textContent = '4';
-    document.getElementById('statD').textContent = '2';
-    const sub = n => String(n).split('').map(c => '₀₁₂₃₄₅₆₇₈₉'[c] || c).join('');
-    document.getElementById('formulaAn').innerHTML = `a${sub(N)} = 4 + (${N}−1)·2 = <span class="result">${total} мест</span>`;
-    document.getElementById('formulaAnswer').innerHTML = `2·${N} + 2 = <span class="result">${total} человек</span>`;
-    document.getElementById('compManual').textContent = N <= 5 ? `Рисовать ${N} ст.` : `Рисовать ${N} столиков!`;
-    document.getElementById('compFormula').textContent = `2·${N}+2 = ${total}`;
-    const banner = document.getElementById('insightBanner'), txt = document.getElementById('insightText');
-    if (N >= 20) { banner.classList.add('visible'); txt.textContent = `${N} столиков? Формула: ${total} мест мгновенно!`; }
-    else if (N >= 10) { banner.classList.add('visible'); txt.textContent = `${N} столиков — считать долго. Формула проще!`; }
-    else { banner.classList.remove('visible'); }
-    updatePatternTable();
-}
-
-function render() { drawScene(); updateUI(); }
-
-function animate(ts) {
-    if (!isPlaying) return;
-    if (lastFrame === 0) lastFrame = ts;
-    animProgress += ((ts - lastFrame) / 1000) * speed * 0.9;
-    lastFrame = ts;
-    if (animProgress >= N) { animProgress = N; isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
-    render();
-    if (isPlaying) requestAnimationFrame(animate);
-}
-
-sliderN.addEventListener('input', () => {
-    N = parseInt(sliderN.value);
-    animProgress = Math.min(animProgress, N);
-    render();
+  },
 });
-btnPlay.addEventListener('click', () => {
-    if (isPlaying) { isPlaying = false; btnPlay.textContent = '▶ Пуск'; }
-    else { if (animProgress >= N) animProgress = 0; isPlaying = true; lastFrame = 0; btnPlay.textContent = '⏸ Пауза'; requestAnimationFrame(animate); }
-});
-btnReset.addEventListener('click', () => { isPlaying = false; animProgress = 0; lastFrame = 0; btnPlay.textContent = '▶ Пуск'; render(); });
-document.querySelectorAll('.btn-speed').forEach(btn => {
-    btn.addEventListener('click', () => { document.querySelectorAll('.btn-speed').forEach(b => b.classList.remove('active')); btn.classList.add('active'); speed = parseFloat(btn.dataset.speed); });
-});
-
-window.addEventListener('resize', resizeAll);
-setTimeout(resizeAll, 50);
-animProgress = 0;
-render();
 </script>
 </body>
 </html>

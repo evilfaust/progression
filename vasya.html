@@ -2,317 +2,137 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Задачи Васи — Арифметическая прогрессия</title>
-<style>
-:root{--bg:#0f172a;--bg2:#1e293b;--card:#1e293b;--border:#334155;--border2:#1e293b;--text:#e2e8f0;--muted:#94a3b8;--subtle:#64748b;--track:#334155;--btn2:#334155;--btn2-text:#94a3b8;--acc:#8b5cf6;--acc2:#6d28d9;--acc-glow:rgba(139,92,246,.4);}
-html.light{--bg:#f8fafc;--bg2:#f1f5f9;--card:#fff;--border:#94a3b8;--border2:#cbd5e1;--text:#0f172a;--muted:#374151;--subtle:#334155;--track:#94a3b8;--btn2:#e2e8f0;--btn2-text:#1e293b;--acc:#6d28d9;--acc2:#4c1d95;--acc-glow:rgba(109,40,217,.3);}
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .2s,color .2s;}
-.app{display:grid;grid-template-rows:auto 1fr auto;height:100vh;}
-.top-bar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:linear-gradient(135deg,var(--bg2),var(--bg));border-bottom:1px solid var(--border2);flex-wrap:wrap;}
-.top-bar h1{font-size:1.2em;font-weight:700;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;}
-.back-link{text-decoration:none;color:var(--muted);font-size:.85em;padding:4px 10px;border-radius:6px;border:1px solid var(--border);transition:color .15s,border-color .15s;white-space:nowrap;}
-.back-link:hover{color:var(--text);border-color:var(--muted);}
-.top-controls{display:flex;align-items:center;gap:14px;flex:1;flex-wrap:wrap;}
-.slider-group{display:flex;align-items:center;gap:6px;}
-.slider-group label{font-size:.8em;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
-.slider-group .val{font-size:1.3em;font-weight:700;color:var(--acc);min-width:36px;text-align:center;}
-input[type=range]{-webkit-appearance:none;width:100px;height:6px;border-radius:3px;background:var(--track);outline:none;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--acc);cursor:pointer;box-shadow:0 0 8px var(--acc-glow);}
-.btn{padding:8px 16px;border:none;border-radius:8px;font-size:.85em;font-weight:600;cursor:pointer;transition:all .2s;}
-.btn-play{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
-.btn-reset{background:var(--btn2);color:var(--btn2-text);}
-.btn-speed{background:var(--btn2);color:var(--btn2-text);padding:8px 12px;font-size:.8em;}
-.btn-speed.active{background:var(--acc);color:#fff;}
-.btn-theme{background:var(--btn2);color:var(--btn2-text);padding:8px 14px;font-size:.85em;margin-left:auto;border:1px solid var(--border);}
-.main-grid{display:grid;grid-template-columns:1fr 1fr;min-height:0;overflow:hidden;}
-.scene-cell{display:flex;flex-direction:column;border-right:1px solid var(--border2);min-height:0;overflow:hidden;}
-.cell-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:8px 14px 4px;}
-.scene-wrap{flex:1;min-height:0;position:relative;}
-canvas{display:block;width:100%;height:100%;}
-.formulas-cell{display:flex;flex-direction:column;gap:10px;padding:14px 20px;overflow-y:auto;min-height:0;justify-content:center;}
-.formulas-cell::-webkit-scrollbar{width:4px;}
-.formulas-cell::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-.formula-card{background:var(--card);border-radius:12px;padding:14px 20px;border:1px solid var(--border);}
-.formula-card .card-title{font-size:.85em;color:var(--subtle);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;font-weight:600;}
-.formula-card .formula{font-size:1.25em;color:#a78bfa;font-family:'Courier New',monospace;margin-bottom:4px;}
-html.light .formula-card .formula{color:#6d28d9;}
-.formula-card .calculation{font-size:1.1em;color:var(--text);font-weight:600;}
-.formula-card .result{font-size:1.4em;color:#a78bfa;font-weight:700;}
-html.light .formula-card .result{color:#6d28d9;}
-.hl-g{color:#4ade80;}html.light .hl-g{color:#15803d;}
-.hl-v{color:#a78bfa;}html.light .hl-v{color:#6d28d9;}
-.hl-b{color:#60a5fa;}html.light .hl-b{color:#1d4ed8;}
-.hl-a{color:var(--acc);}
-.terms-section{background:var(--card);border-radius:12px;padding:12px 18px;border:1px solid var(--border);}
-.terms-title{font-size:.8em;color:var(--subtle);text-transform:uppercase;letter-spacing:.4px;font-weight:600;margin-bottom:6px;}
-.terms-list{display:flex;gap:5px;flex-wrap:wrap;}
-.term-badge{padding:4px 10px;border-radius:6px;font-size:.9em;font-weight:600;font-family:'Courier New',monospace;}
-.term-badge.done{background:rgba(139,92,246,.15);color:#c4b5fd;border:1px solid rgba(139,92,246,.3);}
-html.light .term-badge.done{background:rgba(109,40,217,.1);color:#6d28d9;border-color:rgba(109,40,217,.3);}
-.term-badge.active{background:rgba(139,92,246,.25);color:#ddd6fe;border:1px solid rgba(139,92,246,.5);box-shadow:0 0 6px rgba(139,92,246,.2);}
-html.light .term-badge.active{color:#6d28d9;}
-.term-badge.future{background:rgba(100,116,139,.15);color:var(--muted);border:1px solid rgba(100,116,139,.2);}
-.term-badge.last-day{outline:2px solid #fbbf24;}
-.bottom-bar{display:flex;align-items:stretch;border-top:1px solid var(--border2);background:var(--bg2);}
-.status-items{display:flex;gap:18px;padding:8px 20px;align-items:center;}
-.status-item{display:flex;flex-direction:column;align-items:center;}
-.status-item .label{font-size:.7em;color:var(--subtle);text-transform:uppercase;letter-spacing:.3px;}
-.status-item .value{font-size:1.3em;font-weight:700;}
-.sv-g{color:#4ade80;}html.light .sv-g{color:#15803d;}
-.sv-v{color:#a78bfa;}html.light .sv-v{color:#6d28d9;}
-.sv-a{color:var(--acc);}
-.sv-o{color:#fb923c;}html.light .sv-o{color:#c2410c;}
-.insight-item{padding:8px 20px;font-size:.9em;color:#c4b5fd;display:none;align-items:center;border-left:1px solid var(--border);max-width:340px;}
-html.light .insight-item{color:#6d28d9;}
-.insight-item.visible{display:flex;}
-@media(max-width:700px){
-html,body{height:auto;overflow-y:auto;}
-.app{height:auto;min-height:100svh;grid-template-rows:auto auto auto;}
-.top-bar{padding:8px 12px;gap:8px;}.top-bar h1{font-size:1em;}
-.top-controls{gap:5px;flex-basis:100%;}.slider-group{gap:4px;}.slider-group .val{font-size:1em;min-width:20px;}
-input[type=range]{width:60px;}.btn{padding:6px 10px;}.btn-speed{padding:5px 7px;}.btn-theme{margin-left:0;}
-.main-grid{grid-template-columns:1fr;overflow:visible;}
-.scene-cell{height:56vw;min-height:220px;max-height:340px;border-right:none;border-bottom:1px solid var(--border2);}
-.formulas-cell{overflow:visible;height:auto;padding:12px 14px;gap:8px;}
-.bottom-bar{flex-wrap:wrap;}.status-items{flex-wrap:wrap;gap:10px;padding:8px 12px;}
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Задачи Васи — Прогрессии</title>
+<link rel="stylesheet" href="assets/lab.css">
 </head>
 <body>
-<div class="app">
-<div class="top-bar">
-  <a href="index.html" class="back-link">← К задачам</a>
-  <h1>📚 Задачи Васи</h1>
-  <div class="top-controls">
-    <div class="slider-group">
-      <label>N =</label>
-      <span class="val" id="dN">14</span>
-      <input type="range" id="slN" min="5" max="20" step="1" value="14">
-    </div>
-    <div class="slider-group">
-      <label>a₁ =</label>
-      <span class="val" id="dA1">5</span>
-      <input type="range" id="slA1" min="2" max="20" step="1" value="5">
-    </div>
-    <div class="slider-group">
-      <label>d =</label>
-      <span class="val" id="dD">5</span>
-      <input type="range" id="slD" min="1" max="15" step="1" value="5">
-    </div>
-    <button class="btn btn-play" id="btnPlay">▶ Пуск</button>
-    <button class="btn btn-reset" id="btnReset">↺ Сброс</button>
-    <div style="display:flex;gap:4px">
-      <button class="btn btn-speed active" data-speed="1">1×</button>
-      <button class="btn btn-speed" data-speed="2">2×</button>
-      <button class="btn btn-speed" data-speed="0.5">½×</button>
-    </div>
-    <button class="btn btn-theme" id="btnTheme">☀</button>
-  </div>
-</div>
-
-<div class="main-grid">
-  <div class="scene-cell">
-    <div class="cell-title">Сцена</div>
-    <div class="scene-wrap"><canvas id="c"></canvas></div>
-  </div>
-  <div class="formulas-cell">
-    <div class="formula-card" style="border-left:4px solid #8b5cf6">
-      <div class="card-title">📝 Задача</div>
-      <p style="font-size:.88em;color:var(--muted);line-height:1.55;margin-top:4px">Вася каждый день решает задачи по математике. В первый день он решил 5 задач, каждый следующий день — на 5 больше. Всего Вася занимался 14 дней. Сколько задач он решил в последний день?</p>
-    </div>
-    <div class="formula-card">
-      <div class="card-title">Последний член</div>
-      <div class="formula">aₙ = a₁ + (n−1)·d</div>
-      <div class="calculation" id="fan"></div>
-      <div class="result" id="fanres"></div>
-    </div>
-    <div class="formula-card">
-      <div class="card-title">Связь суммы и крайних членов</div>
-      <div class="formula">aₙ = 2S/n − a₁</div>
-      <div class="calculation" id="fanS"></div>
-    </div>
-    <div class="formula-card">
-      <div class="card-title">Всего задач</div>
-      <div class="formula">S = n·(a₁+aₙ)/2</div>
-      <div class="calculation" id="fS"></div>
-    </div>
-    <div class="terms-section">
-      <div class="terms-title">Задач по дням <span style="color:#fbbf24;font-size:.85em">(⭐ = последний)</span></div>
-      <div class="terms-list" id="termsList"></div>
-    </div>
-  </div>
-</div>
-
-<div class="bottom-bar">
-  <div class="status-items">
-    <div class="status-item"><span class="label">День</span><span class="value sv-a" id="stDay">0</span></div>
-    <div class="status-item"><span class="label">Сегодня</span><span class="value sv-v" id="stToday">—</span></div>
-    <div class="status-item"><span class="label">Всего решено</span><span class="value sv-g" id="stTotal">0</span></div>
-    <div class="status-item"><span class="label">aₙ (ответ)</span><span class="value sv-o" id="stAn">—</span></div>
-  </div>
-  <div class="insight-item" id="insight">✓ Все задачи решены!</div>
-</div>
-</div>
-
+<script src="assets/catalog.js"></script>
+<script src="assets/lab.js"></script>
 <script>
-const cv=document.getElementById('c'),ctx=cv.getContext('2d');
-let N=14,a1=5,d=5;
-let animTime=0,isPlaying=false,speed=1,lastFT=0;
+const { F, fmt, D } = Lab;
 
-const slN=document.getElementById('slN'),slA1=document.getElementById('slA1'),slD=document.getElementById('slD');
-const dN=document.getElementById('dN'),dA1=document.getElementById('dA1'),dD=document.getElementById('dD');
-const btnPlay=document.getElementById('btnPlay'),btnReset=document.getElementById('btnReset'),btnTheme=document.getElementById('btnTheme');
+Lab.model({
+  id: 'vasya',
+  unit: 'День',
+  rate: p => Math.max(.7, p.N / 14),
+  params: [
+    { key: 'N', sym: 'n', label: 'дней', min: 5, max: 20, value: 14 },
+    { key: 'a1', sym: 'a_1', label: 'в первый день', min: 1, max: 20, value: 5 },
+    { key: 'S', sym: 'S', label: 'всего задач', value: 434, keepIndex: true,
+      values: p => Array.from({ length: 8 }, (_, i) => p.N * p.a1 + (i + 1) * p.N * (p.N - 1) / 2) },
+  ],
+  random: () => { const N = 6 + Math.floor(Math.random() * 10), a1 = 2 + Math.floor(Math.random() * 10), d = 1 + Math.floor(Math.random() * 5); return { N, a1, S: N * a1 + d * N * (N - 1) / 2 }; },
+  compute(p) {
+    const an = 2 * p.S / p.N - p.a1, d = (an - p.a1) / (p.N - 1);
+    return { an, d, day: k => p.a1 + (k - 1) * d, sum: k => k * (2 * p.a1 + (k - 1) * d) / 2 };
+  },
+  duration: p => p.N,
 
-function isLight(){return document.documentElement.classList.contains('light');}
-function getTerms(){const t=[];for(let k=0;k<N;k++) t.push(a1+k*d);return t;}
+  problem: (p, m, v) => `Васе надо решить ${v('S')} ${Lab.plural(p.S, 'задачу', 'задачи', 'задач')}. Ежедневно он решает на одно и то же количество задач больше, чем в предыдущий день. За первый день Вася решил ${v('a1')} ${Lab.plural(p.a1, 'задачу', 'задачи', 'задач')}.
+    <span class="q">Сколько задач Вася решил в последний день, если со всеми задачами он справился за ${v('N')} ${Lab.plural(p.N, 'день', 'дня', 'дней')}?</span>`,
 
-function render(){
-  const W=cv.width,H=cv.height;
-  if(!W||!H) return;
-  ctx.clearRect(0,0,W,H);
-  const light=isLight();
-  const terms=getTerms();
-  const S=terms.reduce((a,b)=>a+b,0);
-  const an=terms[N-1];
-  const step=Math.min(Math.floor(animTime),N);
-  const frac=animTime-Math.floor(animTime);
-  let totalDone=0;
-  for(let k=0;k<step;k++) totalDone+=terms[k];
-  if(step<N) totalDone+=Math.round(terms[step]*Math.min(frac,1));
+  solution: (p, m) => ({
+    steps: [
+      { t: 'Задачи по дням — арифметическая прогрессия', f: F(`a_1 = ${p.a1},\\quad n = ${p.N},\\quad S_{${p.N}} = ${p.S}`), always: true },
+      { t: 'Формула суммы через первый и последний члены', f: F('S_n = \\frac{a_1 + a_n}{2}*n \\Rightarrow a_n = \\frac{2S_n}{n} - a_1') },
+      { t: 'Последний день', c: F(`a_{${p.N}} = \\frac{2*${p.S}}{${p.N}} - ${p.a1} = ${fmt(2 * p.S / p.N)} - ${p.a1} = \\ans{${fmt(m.an)}}`), final: true },
+    ],
+    answer: `${fmt(m.an)} ${Lab.plural(m.an, 'задача', 'задачи', 'задач')}`,
+  }),
 
-  // Background
-  ctx.fillStyle=light?'#f8fafc':'#0f172a';
-  ctx.fillRect(0,0,W,H);
+  terms: (p, m) => ({
+    items: Array.from({ length: p.N }, (_, i) => ({ i: `${i + 1} д.`, x: fmt(m.day(i + 1)), star: i === p.N - 1 })),
+    sum: t => `Решено <b>${fmt(m.sum(Math.min(Math.floor(t), p.N)))}</b> из ${p.S}`,
+  }),
 
-  // Chart area
-  const padL=36,padR=16,padT=24,padB=48;
-  const cW=W-padL-padR,cH=H-padT-padB;
-  const maxVal=terms[N-1];
-  const barW=cW/N;
+  hud: (p, m, t) => {
+    const k = Math.min(Math.ceil(t - 1e-9), p.N);
+    return [
+      { k: 'День', v: String(k), u: `из ${p.N}` },
+      { k: 'Решено', v: fmt(Math.floor(solved(p, m, t)), 0), u: `из ${p.S}`, tone: 'acc' },
+      { k: 'Сегодня', v: k ? fmt(Math.floor(solved(p, m, t) - m.sum(k - 1) + 1e-9), 0) : '—' },
+    ];
+  },
+  doneText: (p, m) => `В последний день Вася решил ${fmt(m.an)} задач`,
+  about: `<p class="lead">Здесь неизвестен последний член, но его не нужно искать через разность — есть короткий путь.</p>
+    <p>Формула <span class="m">S<sub><i>n</i></sub> = (a<sub>1</sub> + a<sub><i>n</i></sub>)·<i>n</i>/2</span> связывает сумму с первым и последним членами напрямую:</p>
+    <div class="box">a<sub>n</sub> = 2S<sub>n</sub>/n − a<sub>1</sub></div>
+    <p>На доске каждая клетка — одна задача. Видно, как «лесенка» дней складывается в трапецию: её площадь и есть формула суммы.</p>` + Lab.THEORY.ap,
 
-  // Grid lines
-  const nGrid=5;
-  ctx.strokeStyle=light?'rgba(100,116,139,.2)':'rgba(100,116,139,.15)';ctx.lineWidth=1;
-  for(let i=0;i<=nGrid;i++){
-    const gy=padT+cH*(1-i/nGrid);
-    ctx.beginPath();ctx.moveTo(padL,gy);ctx.lineTo(padL+cW,gy);ctx.stroke();
-    const lv=Math.round(maxVal*i/nGrid);
-    ctx.fillStyle=light?'#64748b':'#475569';
-    ctx.font=`${Math.min(10,W*.015)}px 'Segoe UI',sans-serif`;
-    ctx.textAlign='right';
-    ctx.fillText(lv,padL-4,gy+4);
-  }
-
-  // Bars
-  for(let k=0;k<N;k++){
-    const x=padL+k*barW;
-    const fullH=(terms[k]/maxVal)*cH;
-    const isLast=(k===N-1);
-
-    // Full bar outline (target)
-    ctx.fillStyle=light?'rgba(139,92,246,.08)':'rgba(139,92,246,.06)';
-    ctx.fillRect(x+2,padT+cH-fullH,barW-4,fullH);
-    ctx.strokeStyle=light?'rgba(139,92,246,.2)':'rgba(139,92,246,.15)';ctx.lineWidth=1;
-    ctx.strokeRect(x+2,padT+cH-fullH,barW-4,fullH);
-
-    // Filled portion
-    let cnt=0;
-    if(k<step) cnt=terms[k];
-    else if(k===step) cnt=Math.round(terms[step]*Math.min(frac,1));
-
-    if(cnt>0){
-      const fH=(cnt/maxVal)*cH;
-      const grad=ctx.createLinearGradient(0,padT+cH-fH,0,padT+cH);
-      if(isLast){
-        grad.addColorStop(0,light?'#fbbf24':'#f59e0b');
-        grad.addColorStop(1,light?'#d97706':'#b45309');
-      } else {
-        grad.addColorStop(0,light?'#a78bfa':'#7c3aed');
-        grad.addColorStop(1,light?'#7c3aed':'#4c1d95');
+  draw(ctx, s) {
+    const { w, h, t, p, m, C, time } = s;
+    const dark = C.dark;
+    // школьная доска / тетрадный лист
+    ctx.fillStyle = dark ? '#173027' : '#fbfaf6'; ctx.fillRect(0, 0, w, h);
+    if (!dark) {
+      for (let y = 0; y < h; y += 22) D.line(ctx, 0, y, w, y, 'rgba(47,125,225,.12)', 1);
+      D.line(ctx, 46, 0, 46, h, 'rgba(224,49,49,.3)', 1.5);
+    } else {
+      const g = ctx.createRadialGradient(w / 2, h / 2, 50, w / 2, h / 2, Math.max(w, h));
+      g.addColorStop(0, 'rgba(255,255,255,.04)'); g.addColorStop(1, 'rgba(0,0,0,.25)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    }
+    const top = 96, base = h - 40;
+    const colW = (w - 80) / p.N;
+    const per = 3;
+    const maxRows = Math.ceil(m.an / per);
+    const cell = Math.max(3, Math.min(colW / (per + .9), (base - top - 30) / maxRows, 20));
+    const done = solved(p, m, t);
+    let acc = 0;
+    const ink = dark ? '#e9f5ee' : C.ink;
+    for (let d = 1; d <= p.N; d++) {
+      const cnt = Math.round(m.day(d));
+      const cx = 60 + (d - .5) * colW;
+      const x0 = cx - per * cell / 2;
+      const shown = D.clamp(done - acc, 0, cnt);
+      for (let i = 0; i < cnt; i++) {
+        const r = Math.floor(i / per), c = i % per;
+        const x = x0 + c * cell, y = base - (r + 1) * cell;
+        const fill = D.clamp(shown - i, 0, 1);
+        D.rr(ctx, x + 1, y + 1, cell - 2, cell - 2, Math.min(4, cell * .25));
+        if (fill <= 0) {
+          ctx.strokeStyle = dark ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.08)'; ctx.lineWidth = 1; ctx.stroke();
+          continue;
+        }
+        ctx.fillStyle = d === p.N ? C.amber : D.mix(C.violet, C.blue, (d - 1) / Math.max(1, p.N - 1));
+        ctx.globalAlpha = .35 + .65 * fill;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        if (cell > 9 && fill >= 1) {
+          ctx.beginPath();
+          ctx.moveTo(x + cell * .28, y + cell * .52); ctx.lineTo(x + cell * .44, y + cell * .68); ctx.lineTo(x + cell * .74, y + cell * .34);
+          ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = Math.max(1.2, cell * .1); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+        }
       }
-      ctx.fillStyle=grad;
-      ctx.fillRect(x+2,padT+cH-fH,barW-4,fH);
-
-      // Value label on top
-      if(cnt>0&&barW>14){
-        ctx.fillStyle=isLast?(light?'#92400e':'#fbbf24'):(light?'#4c1d95':'#c4b5fd');
-        ctx.font=`bold ${Math.min(11,barW*.5)}px 'Segoe UI',sans-serif`;
-        ctx.textAlign='center';
-        ctx.fillText(cnt,x+barW/2,padT+cH-fH-3);
-      }
+      const rows = Math.ceil(cnt / per);
+      if (shown >= cnt - 1e-9) D.text(ctx, fmt(cnt), cx, base - rows * cell - 12, { size: Math.min(13, colW * .34), weight: 800, color: d === p.N ? (dark ? '#ffd43b' : '#b26b00') : ink });
+      else if (d === p.N) D.pill(ctx, '?', cx, base - 18, { bg: C.amber, color: '#1c1a21', size: 12 });
+      D.text(ctx, String(d), cx, base + 15, { size: Math.min(12, colW * .4), weight: 700, color: dark ? 'rgba(233,245,238,.6)' : C.ink3 });
+      acc += cnt;
     }
-
-    // Day label
-    if(barW>10){
-      ctx.fillStyle=light?'#64748b':'#475569';
-      ctx.font=`${Math.min(9,barW*.42)}px 'Segoe UI',sans-serif`;
-      ctx.textAlign='center';
-      ctx.fillText(k+1,x+barW/2,padT+cH+14);
+    // полоса прогресса «до 434»
+    const bx = 60, bw = w - 120, by = 82;
+    if (w > 500) {
+      D.rr(ctx, bx, by, bw, 8, 4); ctx.fillStyle = dark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.07)'; ctx.fill();
+      D.rr(ctx, bx, by, bw * done / p.S, 8, 4); ctx.fillStyle = C.acc; ctx.fill();
     }
-    if(isLast){
-      ctx.fillStyle='#fbbf24';
-      ctx.font=`${Math.min(11,barW*.5)}px sans-serif`;
-      ctx.textAlign='center';
-      ctx.fillText('⭐',x+barW/2,padT+cH+26);
+    if (t >= p.N) {
+      // трапеция: «площадь» = сумма
+      const xa = 60 + .5 * colW - per * cell / 2, xb = 60 + (p.N - .5) * colW + per * cell / 2;
+      const ya = base - Math.ceil(p.a1 / per) * cell, yb = base - Math.ceil(m.an / per) * cell;
+      ctx.beginPath(); ctx.moveTo(xa, base); ctx.lineTo(xa, ya); ctx.lineTo(xb, yb); ctx.lineTo(xb, base); ctx.closePath();
+      ctx.strokeStyle = D.alpha(C.acc, .7); ctx.lineWidth = 2; ctx.setLineDash([6, 5]); ctx.stroke(); ctx.setLineDash([]);
+      D.pill(ctx, `(${p.a1} + ${fmt(m.an)}) · ${p.N} / 2 = ${p.S}`, (xa + xb) / 2, (ya + yb) / 2 - 30, { bg: C.acc, color: '#fff', size: 13, shadow: true, h: 28 });
     }
-  }
-
-  // Axes
-  ctx.strokeStyle=light?'#94a3b8':'#475569';ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.moveTo(padL,padT);ctx.lineTo(padL,padT+cH);ctx.lineTo(padL+cW,padT+cH);ctx.stroke();
-
-  // Axis labels
-  ctx.fillStyle=light?'#475569':'#94a3b8';
-  ctx.font=`${Math.min(10,W*.016)}px 'Segoe UI',sans-serif`;
-  ctx.textAlign='center';
-  ctx.fillText('День',padL+cW/2,padT+cH+38);
-  ctx.save();ctx.translate(10,padT+cH/2);ctx.rotate(-Math.PI/2);
-  ctx.fillText('Задач',0,0);ctx.restore();
-
-  // UI
-  document.getElementById('stDay').textContent=step<N?step:N;
-  document.getElementById('stToday').textContent=step<N?terms[step]:terms[N-1];
-  document.getElementById('stTotal').textContent=totalDone;
-  document.getElementById('stAn').textContent=an;
-  document.getElementById('insight').classList.toggle('visible',animTime>=N);
-
-  document.getElementById('fan').innerHTML=`aₙ = ${a1} + (${N}−1)·${d} = ${a1} + ${(N-1)*d}`;
-  document.getElementById('fanres').innerHTML=`aₙ = <span class="hl-v">${an}</span> задач`;
-  document.getElementById('fanS').innerHTML=`aₙ = 2·${Math.round(S)}/${N} − ${a1} = ${2*Math.round(S)/N} − ${a1} = <span class="hl-v">${an}</span>`;
-  document.getElementById('fS').innerHTML=`S = ${N}·(${a1}+${an})/2 = <span class="hl-g">${Math.round(S)}</span>`;
-
-  const tl=document.getElementById('termsList');tl.innerHTML='';
-  for(let k=0;k<N;k++){
-    const b=document.createElement('span');
-    b.className='term-badge '+(k<step?'done':k===step?'active':'future');
-    if(k===N-1) b.classList.add('last-day');
-    b.textContent=terms[k];tl.appendChild(b);
-  }
-}
-
-function animate(ts){
-  if(!isPlaying) return;
-  if(!lastFT) lastFT=ts;
-  animTime+=((ts-lastFT)/1000)*speed*.7;lastFT=ts;
-  if(animTime>=N){animTime=N;isPlaying=false;btnPlay.textContent='▶ Пуск';}
-  render();
-  if(isPlaying) requestAnimationFrame(animate);
-}
-
-btnPlay.addEventListener('click',()=>{
-  if(isPlaying){isPlaying=false;btnPlay.textContent='▶ Пуск';}
-  else{if(animTime>=N) animTime=0;isPlaying=true;lastFT=0;btnPlay.textContent='⏸ Пауза';requestAnimationFrame(animate);}
+  },
 });
-btnReset.addEventListener('click',()=>{isPlaying=false;animTime=0;lastFT=0;btnPlay.textContent='▶ Пуск';render();});
-btnTheme.addEventListener('click',()=>{const l=document.documentElement.classList.toggle('light');btnTheme.textContent=l?'🌙':'☀';render();});
-document.querySelectorAll('.btn-speed').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.btn-speed').forEach(b=>b.classList.remove('active'));btn.classList.add('active');speed=parseFloat(btn.dataset.speed);}));
-slN.addEventListener('input',()=>{N=parseInt(slN.value);dN.textContent=N;animTime=Math.min(animTime,N);render();});
-slA1.addEventListener('input',()=>{a1=parseInt(slA1.value);dA1.textContent=a1;animTime=Math.min(animTime,N);render();});
-slD.addEventListener('input',()=>{d=parseInt(slD.value);dD.textContent=d;animTime=Math.min(animTime,N);render();});
-window.addEventListener('resize',()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;render();});
-setTimeout(()=>{cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;animTime=0;render();},50);
+
+function solved(p, m, t) {
+  const k = Math.min(Math.floor(t), p.N);
+  if (k >= p.N) return p.S;
+  return m.sum(k) + m.day(k + 1) * D.clamp((t - k) / .85, 0, 1);
+}
 </script>
 </body>
 </html>

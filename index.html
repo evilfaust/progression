@@ -1,1039 +1,299 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Интерактивные модели — Арифметическая прогрессия</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --bg2: #1e293b;
-            --card: #1e293b;
-            --border: #334155;
-            --border2: #1e293b;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --subtle: #64748b;
-            --task-text: #cbd5e1;
-            --btn2: #334155;
-            --btn2-text: #94a3b8;
-        }
-        html.light {
-            --bg: #f8fafc;
-            --bg2: #f1f5f9;
-            --card: #ffffff;
-            --border: #94a3b8;
-            --border2: #cbd5e1;
-            --text: #0f172a;
-            --muted: #374151;
-            --subtle: #334155;
-            --task-text: #1e293b;
-            --btn2: #e2e8f0;
-            --btn2-text: #1e293b;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Прогрессии — интерактивные модели для уроков математики</title>
+<meta name="description" content="19 интерактивных моделей: арифметическая и геометрическая прогрессии для ОГЭ и ЕГЭ, спираль Фибоначчи, треугольник Паскаля, решето Эратосфена, гипотеза Коллатца.">
+<link rel="stylesheet" href="assets/lab.css">
+<style>
+  .page { max-width: 1240px; margin: 0 auto; padding: 0 24px 40px; }
+  .topbar { max-width: 1240px; margin: 0 auto; padding: 14px 24px; }
+  .brand-name { font-weight: 800; font-size: 17px; letter-spacing: -.02em; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* ── hero ── */
+  .hero {
+    position: relative;
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: center;
+    margin: 8px 0 36px; padding: 44px 44px;
+    border-radius: 30px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(500px 300px at 0% 0%, color-mix(in srgb, #6d6af0 14%, transparent), transparent 70%),
+      radial-gradient(500px 320px at 100% 100%, color-mix(in srgb, #d6336c 12%, transparent), transparent 70%);
+  }
+  .hero > * { position: relative; }
+  .eyebrow { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 700; color: var(--acc-ink); background: var(--acc-soft); padding: 5px 12px; border-radius: 99px; }
+  .hero h1 { margin: 16px 0 14px; font-size: clamp(36px, 5vw, 60px); line-height: 1.02; letter-spacing: -.035em; font-weight: 800; }
+  .hero h1 .grad { background: linear-gradient(100deg, #6d6af0, #d6336c 60%, #f08c00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.sub { margin: 0; font-size: 17.5px; line-height: 1.6; color: var(--ink-2); max-width: 560px; text-wrap: pretty; }
+  .hero-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .hero-stats .chip { height: 30px; font-size: 13px; padding: 0 12px; background: var(--surface-2); border: 1px solid var(--line); }
+  .hero-cta { display: flex; gap: 10px; margin-top: 26px; flex-wrap: wrap; }
+  .hero-art { position: relative; height: 340px; border-radius: 22px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+  .hero-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-        html, body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            transition: background 0.2s, color 0.2s;
-        }
+  /* ── фильтры ── */
+  .toolbar { position: sticky; top: 0; z-index: 10; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 0; margin-bottom: 8px; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .toolbar .seg button { height: 34px; padding: 0 14px; font-size: 13.5px; }
+  .search { position: relative; flex: 1; min-width: 200px; max-width: 340px; margin-left: auto; }
+  .search input { width: 100%; height: 42px; padding: 0 14px 0 40px; border-radius: 13px; border: 1px solid var(--line); background: var(--surface); font-size: 14.5px; box-shadow: var(--shadow-sm); transition: border-color .2s, box-shadow .2s; }
+  .search input:focus { outline: none; border-color: var(--acc); box-shadow: var(--focus); }
+  .search svg { position: absolute; left: 13px; top: 12px; width: 18px; height: 18px; color: var(--ink-3); }
 
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(15,23,42,0.82);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(51,65,85,0.6);
-            transition: background 0.3s, border-color 0.3s;
-        }
-        html.light .top-nav {
-            background: rgba(248,250,252,0.88);
-            border-bottom-color: rgba(148,163,184,0.35);
-        }
-        .nav-models {
-            display: flex;
-            align-items: center;
-            gap: 1px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            flex: 1;
-            min-width: 0;
-            justify-content: flex-start;
-            padding: 0 8px;
-        }
-        .nav-models::-webkit-scrollbar { display: none; }
-        .nav-model-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
-            font-size: 0.95em;
-            text-decoration: none;
-            color: inherit;
-            flex-shrink: 0;
-            transition: background 0.15s, transform 0.18s cubic-bezier(0.34,1.5,0.64,1);
-        }
-        .nav-model-link:hover {
-            background: var(--btn2);
-            transform: scale(1.28);
-        }
-        .nav-model-link:focus-visible {
-            outline: none;
-            background: var(--btn2);
-            box-shadow: 0 0 0 2px rgba(96,165,250,0.5);
-        }
-        .nav-sep {
-            width: 1px;
-            height: 16px;
-            background: var(--border);
-            flex-shrink: 0;
-            margin: 0 4px;
-            opacity: 0.5;
-        }
-        .btn-github {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 0.82em;
-            font-weight: 500;
-            padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--btn2);
-            transition: all 0.2s;
-        }
-        .btn-github:hover { color: var(--text); border-color: var(--subtle); }
-        .btn-github:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(96,165,250,0.4);
-        }
-        html.light .btn-github:focus-visible { box-shadow: 0 0 0 3px rgba(59,130,246,0.4); }
-        .btn-github svg { flex-shrink: 0; }
+  /* ── секции и карточки ── */
+  .group { margin-top: 28px; }
+  .group[hidden], .mcard[hidden] { display: none; }
+  .group-h { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 4px 14px; }
+  .group-h h2 { margin: 0; font-size: 26px; letter-spacing: -.02em; }
+  .group-h .chip { transform: translateY(-3px); }
+  .group-h p { flex-basis: 100%; margin: 0; color: var(--ink-3); font-size: 14.5px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
 
-        .btn-theme {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            background: var(--btn2);
-            color: var(--btn2-text);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 7px 15px 7px 11px;
-            font-size: 0.82em;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, color 0.25s;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-theme::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            opacity: 0;
-            transition: opacity 0.25s;
-            background: radial-gradient(ellipse at center, rgba(96,165,250,0.18) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        html.light .btn-theme::after {
-            background: radial-gradient(ellipse at center, rgba(250,204,21,0.22) 0%, transparent 70%);
-        }
-        .btn-theme:hover { border-color: var(--subtle); }
-        .btn-theme:hover::after { opacity: 1; }
-        .btn-theme:hover { box-shadow: 0 0 0 3px rgba(96,165,250,0.1); }
-        html.light .btn-theme:hover { box-shadow: 0 0 0 3px rgba(234,179,8,0.15); }
-        .btn-theme:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(96,165,250,0.4);
-        }
-        html.light .btn-theme:focus-visible { box-shadow: 0 0 0 3px rgba(234,179,8,0.4); }
+  .mcard {
+    position: relative;
+    display: flex; flex-direction: column;
+    padding: 18px 18px 16px;
+    border-radius: 22px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .25s;
+    animation: card-in .55s var(--ease-out) both;
+    overflow: hidden;
+  }
+  .mcard:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: color-mix(in srgb, var(--acc) 35%, var(--line)); }
+  .mcard::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--acc-2), var(--acc)); transform: scaleX(0); transform-origin: left; transition: transform .45s var(--ease-out); }
+  .mcard:hover::after { transform: scaleX(1); }
+  .mcard-top { display: flex; align-items: center; gap: 12px; }
+  .mcard .emoji { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 25px; background: var(--acc-soft); flex: none; transition: transform .4s var(--ease-spring); }
+  .mcard:hover .emoji { transform: rotate(-8deg) scale(1.08); }
+  .mcard h3 { margin: 0; font-size: 17.5px; line-height: 1.25; letter-spacing: -.01em; }
+  .mcard .kind { font-size: 12px; font-weight: 650; color: var(--acc-ink); margin-top: 2px; }
+  .mcard p { margin: 12px 0 14px; font-size: 14px; line-height: 1.55; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
+  .spark { display: flex; align-items: flex-end; gap: 5px; height: 44px; margin-bottom: 14px; }
+  .spark i { flex: 1; border-radius: 6px 6px 3px 3px; background: linear-gradient(180deg, var(--acc-2), var(--acc)); opacity: .85; transform-origin: bottom; transform: scaleY(.35); transition: transform .6s var(--ease-spring); }
+  .mcard:hover .spark i, .mcard:focus-visible .spark i { transform: scaleY(1); }
+  .spark i:nth-child(2) { transition-delay: .03s; } .spark i:nth-child(3) { transition-delay: .06s; } .spark i:nth-child(4) { transition-delay: .09s; }
+  .spark i:nth-child(5) { transition-delay: .12s; } .spark i:nth-child(6) { transition-delay: .15s; } .spark i:nth-child(7) { transition-delay: .18s; }
+  .mcard-foot { display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px dashed var(--line); }
+  .mcard-foot .ans { font-size: 13px; font-weight: 700; color: var(--good); filter: blur(5px); transition: filter .35s; }
+  .mcard:hover .ans, .mcard:focus-visible .ans { filter: none; }
+  .mcard-foot .lbl { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+  .mcard-foot .go { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; font-weight: 700; color: var(--acc-ink); }
+  .mcard-foot .go svg { width: 16px; height: 16px; transition: transform .3s var(--ease-out); }
+  .mcard:hover .go svg { transform: translateX(3px); }
+  .empty { padding: 60px 20px; text-align: center; color: var(--ink-3); font-size: 15px; }
 
-        .theme-icon {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .theme-icon svg {
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: block;
-        }
-        .btn-theme:hover .theme-icon svg { transform: rotate(18deg) scale(1.12); }
+  .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+  .how .card { padding: 20px; }
+  .how h4 { margin: 10px 0 6px; font-size: 16px; }
+  .how p { margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.55; }
+  .how .num { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--acc-soft); color: var(--acc-ink); font-weight: 800; }
 
-        @keyframes iconSwap {
-            0%   { transform: rotate(0deg) scale(1);    opacity: 1; }
-            45%  { transform: rotate(180deg) scale(0.3); opacity: 0; }
-            55%  { transform: rotate(180deg) scale(0.3); opacity: 0; }
-            100% { transform: rotate(360deg) scale(1);  opacity: 1; }
-        }
-        .theme-icon.swapping svg {
-            animation: iconSwap 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .theme-icon svg, .btn-theme, .btn-theme::after,
-            .card, html, body { transition-duration: 0.01ms !important; }
-            .theme-icon.swapping svg { animation: none !important; }
-        }
+  footer { max-width: 1240px; margin: 40px auto 0; padding: 24px; display: flex; gap: 18px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 14px; }
+  footer a { color: var(--ink-2); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+  footer a:hover { color: var(--ink); }
+  footer .spacer { flex: 1; }
 
-        .hero {
-            text-align: center;
-            padding: 56px 20px 44px;
-            position: relative;
-            overflow: hidden;
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(96,165,250,0.10) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 30%, rgba(167,139,250,0.09) 0%, transparent 55%),
-                radial-gradient(ellipse at 55% 85%, rgba(232,121,249,0.07) 0%, transparent 50%),
-                linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
-        }
-        html.light .hero {
-            background:
-                radial-gradient(ellipse at 20% 50%, rgba(96,165,250,0.10) 0%, transparent 55%),
-                radial-gradient(ellipse at 80% 30%, rgba(167,139,250,0.09) 0%, transparent 55%),
-                radial-gradient(ellipse at 55% 85%, rgba(232,121,249,0.06) 0%, transparent 50%),
-                linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
-        }
-        .hero-decor {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            user-select: none;
-            overflow: hidden;
-            font-family: 'Georgia', 'Times New Roman', serif;
-            font-weight: 700;
-            line-height: 1;
-            color: var(--text);
-            opacity: 0.045;
-        }
-        html.light .hero-decor { opacity: 0.06; }
-        .hero-decor span { position: absolute; }
-        .hero h1 {
-            font-size: 2.6em;
-            font-weight: 800;
-            position: relative;
-            background: linear-gradient(135deg, #60a5fa, #a78bfa, #e879f9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
-        html.light .hero h1 {
-            background: linear-gradient(135deg, #1d4ed8, #7c3aed, #a21caf);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-        .hero p {
-            font-size: 1.05em;
-            color: var(--muted);
-            max-width: 580px;
-            margin: 0 auto;
-            line-height: 1.7;
-            position: relative;
-        }
-        .hero-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-            margin: 22px auto 16px;
-            position: relative;
-        }
-        .hero-tag {
-            background: var(--btn2);
-            border: 1px solid var(--border);
-            color: var(--muted);
-            border-radius: 20px;
-            padding: 5px 14px;
-            font-size: 0.82em;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            transition: border-color 0.2s, color 0.2s;
-        }
-        .hero-tag:hover { border-color: var(--subtle); color: var(--text); }
-        .hero-hint {
-            font-size: 0.88em !important;
-            color: var(--subtle) !important;
-            margin-top: 10px !important;
-            position: relative;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 30px 20px 50px;
-        }
-
-        .card {
-            background: var(--card);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            transition: transform 0.22s cubic-bezier(0.34,1.2,0.64,1), box-shadow 0.22s, border-color 0.22s;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa, #e879f9);
-            opacity: 0;
-            transition: opacity 0.22s;
-            z-index: 1;
-        }
-        .card:hover::before { opacity: 1; }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 16px 48px rgba(0,0,0,0.18);
-            border-color: rgba(96,165,250,0.35);
-        }
-        html.light .card:hover {
-            box-shadow: 0 16px 48px rgba(0,0,0,0.11);
-            border-color: rgba(99,102,241,0.3);
-        }
-        .card:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(96,165,250,0.5);
-            border-color: #60a5fa;
-            transform: translateY(-2px);
-        }
-        html.light .card:focus-visible {
-            box-shadow: 0 0 0 3px rgba(29,78,216,0.4);
-            border-color: #1d4ed8;
-        }
-
-        .card-icon {
-            height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3.2em;
-            transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
-        }
-        .card:hover .card-icon { transform: scale(1.12); }
-        .card-icon.stone { background: linear-gradient(135deg, #1e3a5f, #0f172a); }
-        .card-icon.tables { background: linear-gradient(135deg, #422006, #1c1917); }
-        .card-icon.amphi { background: linear-gradient(135deg, #3b0764, #1e1b4b); }
-        .card-icon.train { background: linear-gradient(135deg, #7c2d12, #1c1917); }
-        .card-icon.snake { background: linear-gradient(135deg, #451a03, #1c1917); }
-        .card-icon.radio { background: linear-gradient(135deg, #052e16, #0f172a); }
-        html.light .card-icon.stone { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
-        html.light .card-icon.tables { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-        html.light .card-icon.amphi { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
-        html.light .card-icon.train { background: linear-gradient(135deg, #fee2e2, #fecaca); }
-        html.light .card-icon.snake { background: linear-gradient(135deg, #fff7ed, #fed7aa); }
-        html.light .card-icon.radio { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
-        .card-icon.bio { background: linear-gradient(135deg, #2e1065, #1e1b4b); }
-        html.light .card-icon.bio { background: linear-gradient(135deg, #f5f3ff, #ede9fe); }
-        .card-icon.ball { background: linear-gradient(135deg, #0c1a2e, #1c1207); }
-        html.light .card-icon.ball { background: linear-gradient(135deg, #fff7ed, #ffedd5); }
-        .card-icon.car { background: linear-gradient(135deg, #431407, #1c0505); }
-        html.light .card-icon.car { background: linear-gradient(135deg, #fee2e2, #fecaca); }
-
-        .card-body {
-            padding: 18px 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .card-body h2 {
-            font-size: 1.2em;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        .card-body h2.stone-title { color: #60a5fa; }
-        .card-body h2.tables-title { color: #f59e0b; }
-        .card-body h2.amphi-title { color: #e879f9; }
-        .card-body h2.train-title { color: #f97316; }
-        .card-body h2.snake-title { color: #fb923c; }
-        html.light .card-body h2.stone-title { color: #1d4ed8; }
-        html.light .card-body h2.tables-title { color: #b45309; }
-        html.light .card-body h2.amphi-title { color: #7e22ce; }
-        html.light .card-body h2.train-title { color: #c2410c; }
-        html.light .card-body h2.snake-title { color: #c2410c; }
-        .card-body h2.radio-title { color: #4ade80; }
-        html.light .card-body h2.radio-title { color: #15803d; }
-        .card-body h2.bio-title { color: #c084fc; }
-        html.light .card-body h2.bio-title { color: #7e22ce; }
-        .card-body h2.ball-title { color: #fb923c; }
-        html.light .card-body h2.ball-title { color: #c2410c; }
-        .card-body h2.car-title { color: #f87171; }
-        html.light .card-body h2.car-title { color: #dc2626; }
-
-        .card-body .task-text {
-            font-size: 0.92em;
-            color: var(--task-text);
-            line-height: 1.55;
-            flex: 1;
-        }
-
-        .card-body .params {
-            display: flex;
-            gap: 10px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .param-tag {
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 0.8em;
-            font-weight: 600;
-            font-family: 'Courier New', monospace;
-            background: rgba(100,116,139,0.15);
-            color: var(--muted);
-            border: 1px solid rgba(100,116,139,0.2);
-        }
-        html.light .param-tag {
-            background: rgba(100,116,139,0.1);
-            color: var(--subtle);
-            border-color: rgba(100,116,139,0.3);
-        }
-
-        .card-footer {
-            padding: 12px 20px;
-            border-top: 1px solid var(--border2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .open-btn {
-            font-size: 0.85em;
-            font-weight: 600;
-            color: #60a5fa;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        html.light .open-btn { color: #1d4ed8; }
-        .card:hover .open-btn { opacity: 0.8; }
-        .card-footer .answer {
-            font-size: 0.8em;
-            color: #4ade80;
-            font-weight: 600;
-        }
-        html.light .card-footer .answer { color: #15803d; }
-
-        .section-heading {
-            max-width: 1100px;
-            margin: 32px auto 0;
-            padding: 0 20px 14px;
-            font-size: 1.3em;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .section-heading::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-        .section-heading.ap { color: #60a5fa; }
-        .section-heading.gp { color: #4ade80; }
-        html.light .section-heading.ap { color: #1d4ed8; }
-        html.light .section-heading.gp { color: #15803d; }
-        .section-heading.grade-9 { color: #f97316; }
-        .section-heading.grade-11 { color: #a78bfa; }
-        html.light .section-heading.grade-9 { color: #c2410c; }
-        html.light .section-heading.grade-11 { color: #6d28d9; }
-        .grade-badge {
-            font-size: 0.6em;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            vertical-align: middle;
-        }
-        .badge-9 { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
-        .badge-11 { background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
-        html.light .badge-9 { background: rgba(194,65,12,0.1); color: #c2410c; border-color: rgba(194,65,12,0.3); }
-        html.light .badge-11 { background: rgba(109,40,217,0.1); color: #6d28d9; border-color: rgba(109,40,217,0.3); }
-        /* 11th grade card icon backgrounds */
-        .card-icon.fence  { background: linear-gradient(135deg, #052e16, #0f2d0a); }
-        .card-icon.snail  { background: linear-gradient(135deg, #042f2e, #0f2926); }
-        .card-icon.tourist{ background: linear-gradient(135deg, #0c1a35, #162040); }
-        .card-icon.postcards{ background: linear-gradient(135deg, #500724, #2d0618); }
-        .card-icon.vasya  { background: linear-gradient(135deg, #2e1065, #1a0a3d); }
-        .card-icon.bubbly { background: linear-gradient(135deg, #431407, #1c0a02); }
-        html.light .card-icon.fence   { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
-        html.light .card-icon.snail   { background: linear-gradient(135deg, #ccfbf1, #99f6e4); }
-        html.light .card-icon.tourist { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
-        html.light .card-icon.postcards{ background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
-        html.light .card-icon.vasya   { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
-        html.light .card-icon.bubbly  { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-        .card-body h2.fence-title   { color: #4ade80; }
-        .card-body h2.snail-title   { color: #2dd4bf; }
-        .card-body h2.tourist-title { color: #60a5fa; }
-        .card-body h2.postcards-title{ color: #f472b6; }
-        .card-body h2.vasya-title   { color: #a78bfa; }
-        .card-body h2.bubbly-title  { color: #fbbf24; }
-        html.light .card-body h2.fence-title   { color: #15803d; }
-        html.light .card-body h2.snail-title   { color: #0f766e; }
-        html.light .card-body h2.tourist-title { color: #1d4ed8; }
-        html.light .card-body h2.postcards-title{ color: #be185d; }
-        html.light .card-body h2.vasya-title   { color: #6d28d9; }
-        html.light .card-body h2.bubbly-title  { color: #d97706; }
-
-        /* Beautiful math section */
-        .section-heading.special { color: #a78bfa; }
-        html.light .section-heading.special { color: #6d28d9; }
-        .card-icon.fibonacci { background: linear-gradient(135deg, #1e1b4b, #0f0f2a); }
-        .card-icon.pascal    { background: linear-gradient(135deg, #042f2e, #0a1a2e); }
-        .card-icon.sieve     { background: linear-gradient(135deg, #450a0a, #1c0505); }
-        .card-icon.collatz   { background: linear-gradient(135deg, #431407, #1c1207); }
-        html.light .card-icon.fibonacci { background: linear-gradient(135deg, #ede9fe, #ddd6fe); }
-        html.light .card-icon.pascal    { background: linear-gradient(135deg, #cffafe, #a5f3fc); }
-        html.light .card-icon.sieve     { background: linear-gradient(135deg, #ffe4e6, #fecdd3); }
-        html.light .card-icon.collatz   { background: linear-gradient(135deg, #fef3c7, #fde68a); }
-        .card-body h2.fibonacci-title { color: #818cf8; }
-        .card-body h2.pascal-title    { color: #67e8f9; }
-        .card-body h2.sieve-title     { color: #fca5a5; }
-        .card-body h2.collatz-title   { color: #fbbf24; }
-        html.light .card-body h2.fibonacci-title { color: #4f46e5; }
-        html.light .card-body h2.pascal-title    { color: #0891b2; }
-        html.light .card-body h2.sieve-title     { color: #be123c; }
-        html.light .card-body h2.collatz-title   { color: #b45309; }
-
-        .cards { padding: 12px 20px 16px; }
-
-        .footer {
-            text-align: center;
-            padding: 28px 20px;
-            color: var(--subtle);
-            font-size: 0.82em;
-            border-top: 1px solid var(--border2);
-            margin-top: 32px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: center;
-        }
-        .footer a {
-            color: var(--muted);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        .footer a:hover { color: var(--text); }
-
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 1.6em; }
-            .hero p  { font-size: 1em; }
-            .hero    { padding: 24px 16px 20px; }
-            .cards   { padding: 8px 12px 12px; gap: 14px; }
-            .section-heading { font-size: 1.1em; margin-top: 20px; }
-        }
-    </style>
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 28px 22px; }
+    .hero-art { height: 240px; }
+    .how { grid-template-columns: 1fr; }
+    .search { max-width: none; margin-left: 0; flex-basis: 100%; }
+  }
+  @media (max-width: 560px) {
+    .page, .topbar { padding-left: 14px; padding-right: 14px; }
+    .toolbar .seg { overflow-x: auto; max-width: 100%; }
+  }
+</style>
 </head>
-<body>
+<body data-accent="indigo">
+<script src="assets/catalog.js"></script>
+<script src="assets/lab.js"></script>
 
-<div class="top-nav">
-    <a class="btn-github" href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" aria-label="Исходный код на GitHub" style="flex-shrink:0">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M12 2C6.477 2 2 6.484 2 12.021c0 4.428 2.865 8.184 6.839 9.504.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.004.07 1.532 1.032 1.532 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.026 2.747-1.026.546 1.378.202 2.397.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.847-2.338 4.695-4.566 4.944.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.579.688.481C19.138 20.2 22 16.447 22 12.021 22 6.484 17.523 2 12 2z"/>
-        </svg>
-        GitHub
-    </a>
-    <nav class="nav-models" aria-label="Все модели">
-        <!-- 9 класс · Арифметическая прогрессия -->
-        <a class="nav-model-link" href="stone.html" title="Камень в ущелье">🪨</a>
-        <a class="nav-model-link" href="tables.html" title="Официанты в ресторане">🍽️</a>
-        <a class="nav-model-link" href="amphitheater.html" title="Амфитеатр">🎭</a>
-        <a class="nav-model-link" href="train.html" title="Поезд">🚂</a>
-        <a class="nav-model-link" href="snake.html" title="Змейка">〰️</a>
-        <div class="nav-sep"></div>
-        <!-- 9 класс · Геометрическая прогрессия -->
-        <a class="nav-model-link" href="car.html" title="Автомобиль">🚗</a>
-        <a class="nav-model-link" href="ball.html" title="Мяч">🏀</a>
-        <a class="nav-model-link" href="bio.html" title="Рост колонии">🦠</a>
-        <a class="nav-model-link" href="radio.html" title="Радиоактивный распад">☢</a>
-        <div class="nav-sep"></div>
-        <!-- 11 класс -->
-        <a class="nav-model-link" href="fence.html" title="Маляры красят забор">🖌</a>
-        <a class="nav-model-link" href="snail.html" title="Улитка">🐌</a>
-        <a class="nav-model-link" href="tourist.html" title="Турист">🧗</a>
-        <a class="nav-model-link" href="postcards.html" title="Открытки Веры">💌</a>
-        <a class="nav-model-link" href="vasya.html" title="Вася и книги">📚</a>
-        <a class="nav-model-link" href="bubbly.html" title="Пузырьки">💰</a>
-        <div class="nav-sep"></div>
-        <!-- Замечательные последовательности -->
-        <a class="nav-model-link" href="fibonacci.html" title="Спираль Фибоначчи">🌀</a>
-        <a class="nav-model-link" href="pascal.html" title="Треугольник Паскаля">🔺</a>
-        <a class="nav-model-link" href="sieve.html" title="Решето Эратосфена">🔴</a>
-        <a class="nav-model-link" href="collatz.html" title="Гипотеза Коллатца">🌋</a>
-    </nav>
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-mark">a<sub style="font-size:.6em">n</sub></span><span class="brand-name">Прогрессии</span></a>
+  <div class="spacer"></div>
+  <a class="btn ghost" href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" id="gh"></a>
+  <button class="btn icon ghost" data-theme-toggle></button>
+</header>
 
-    <button class="btn-theme" id="btnTheme" aria-label="Переключить тему оформления" style="flex-shrink:0">
-        <span class="theme-icon" id="themeIcon">
-            <!-- Иконка обновляется через JS -->
-        </span>
-        <span id="themeLabel">Светлая</span>
-    </button>
-</div>
-
-<div class="hero">
-    <div class="hero-decor" aria-hidden="true">
-        <span style="font-size:90px;top:8%;left:3%">∑</span>
-        <span style="font-size:65px;top:15%;right:6%">π</span>
-        <span style="font-size:110px;bottom:2%;left:8%">∞</span>
-        <span style="font-size:75px;bottom:8%;right:4%">φ</span>
-        <span style="font-size:55px;top:45%;left:18%">√</span>
-        <span style="font-size:85px;top:3%;right:20%">∫</span>
-        <span style="font-size:50px;bottom:20%;left:35%">Δ</span>
-        <span style="font-size:60px;top:30%;right:15%">≈</span>
+<main class="page">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">✦ Интерактивные модели для уроков</span>
+      <h1>Математика,<br><span class="grad">которую видно</span></h1>
+      <p class="sub">Задачи на арифметическую и геометрическую прогрессии из ОГЭ и ЕГЭ — с анимацией, живыми формулами и пошаговым решением. А ещё четыре знаменитые последовательности, от спирали Фибоначчи до гипотезы Коллатца.</p>
+      <div class="hero-stats">
+        <span class="chip">19 моделей</span><span class="chip">9 и 11 класс</span><span class="chip">Для проектора</span><span class="chip">Работает без интернета</span>
+      </div>
+      <div class="hero-cta">
+        <a class="btn primary" href="#catalog">Выбрать модель</a>
+        <a class="btn" href="stone.html">Начать с камня в ущелье</a>
+      </div>
     </div>
-    <h1>Прогрессии</h1>
-    <p>Интерактивные модели для уроков математики: арифметические и геометрические прогрессии для подготовки к ОГЭ и ЕГЭ, а также замечательные последовательности — Фибоначчи, треугольник Паскаля, решето Эратосфена.</p>
-    <div class="hero-tags">
-        <span class="hero-tag">19 моделей</span>
-        <span class="hero-tag">9–11 класс</span>
-        <span class="hero-tag">ОГЭ · ЕГЭ</span>
-        <span class="hero-tag">Для проектора</span>
-        <span class="hero-tag">Без интернета</span>
+    <div class="hero-art" aria-hidden="true"><canvas id="heroArt"></canvas></div>
+  </section>
+
+  <div class="toolbar" id="catalog">
+    <div class="seg" id="filter">
+      <button data-f="all" aria-pressed="true">Все</button>
+      <button data-f="oge" aria-pressed="false">9 класс</button>
+      <button data-f="ege" aria-pressed="false">11 класс</button>
+      <button data-f="seq" aria-pressed="false">Последовательности</button>
     </div>
-    <p class="hero-hint">Каждая модель — задача с анимацией, слайдерами и формулами в реальном времени. Нажмите на карточку, чтобы открыть.</p>
-</div>
+    <div class="seg" id="kind">
+      <button data-k="all" aria-pressed="true">Любые</button>
+      <button data-k="ap" aria-pressed="false">АП</button>
+      <button data-k="gp" aria-pressed="false">ГП</button>
+    </div>
+    <label class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="q" placeholder="Поиск: мяч, проценты, сумма…" aria-label="Поиск модели">
+    </label>
+  </div>
 
-<h2 class="section-heading grade-9">9 класс <span class="grade-badge badge-9">ОГЭ</span></h2>
-<h2 class="section-heading ap">Арифметическая прогрессия</h2>
-<div class="cards">
+  <div id="groups"></div>
+  <div class="empty" id="empty" hidden>Ничего не нашлось. Попробуйте другое слово.</div>
 
-    <a class="card" href="stone.html">
-        <div class="card-icon stone">🪨</div>
-        <div class="card-body">
-            <h2 class="stone-title">Камень в ущелье</h2>
-            <div class="task-text">
-                Камень падает в ущелье. За первую секунду он пролетает 9&nbsp;метров, а за каждую следующую секунду — на 10&nbsp;метров больше, чем за предыдущую. Какое расстояние камень пролетит за N&nbsp;секунд?
-            </div>
-            <div class="params">
-                <span class="param-tag">a₁ = 9</span>
-                <span class="param-tag">d = 10</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">S₅ = 145 м</span>
-        </div>
-    </a>
+  <section class="how">
+    <div class="card"><div class="num">1</div><h4>Читаем условие</h4><p>Числа в условии подсвечены и меняются вместе с параметрами — можно сразу разобрать свой вариант задачи.</p></div>
+    <div class="card"><div class="num">2</div><h4>Смотрим, как это работает</h4><p>Анимация показывает процесс шаг за шагом. Перемотка, пауза, шаги вперёд и назад, скорость ½×–2×.</p></div>
+    <div class="card"><div class="num">3</div><h4>Открываем решение</h4><p>Решение и ответ скрыты, пока их не откроют, — удобно, чтобы класс сначала решил сам.</p></div>
+  </section>
+</main>
 
-    <a class="card" href="tables.html">
-        <div class="card-icon tables">🍽️</div>
-        <div class="card-body">
-            <h2 class="tables-title">Столики в кафе</h2>
-            <div class="task-text">
-                В кафе квадратные столики ставят в ряд. За одним столиком сидят 4&nbsp;человека. Когда столики сдвигают, за каждый следующий столик добавляется 2&nbsp;места. Сколько человек сядет за N&nbsp;сдвинутых столиков?
-            </div>
-            <div class="params">
-                <span class="param-tag">a₁ = 4</span>
-                <span class="param-tag">d = 2</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">N=16 → 34 мест</span>
-        </div>
-    </a>
-
-    <a class="card" href="amphitheater.html">
-        <div class="card-icon amphi">🎭</div>
-        <div class="card-body">
-            <h2 class="amphi-title">Амфитеатр</h2>
-            <div class="task-text">
-                В амфитеатре 14&nbsp;рядов, причём в каждом следующем ряду на одно и то же число мест больше, чем в предыдущем. В пятом ряду 27&nbsp;мест, а в восьмом ряду 36&nbsp;мест. Сколько мест в последнем ряду амфитеатра?
-            </div>
-            <div class="params">
-                <span class="param-tag">a₅ = 27</span>
-                <span class="param-tag">a₈ = 36</span>
-                <span class="param-tag">n = 14</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">a₁₄ = 54 мест</span>
-        </div>
-    </a>
-
-    <a class="card" href="train.html">
-        <div class="card-icon train">🚂</div>
-        <div class="card-body">
-            <h2 class="train-title">Поезд от станции</h2>
-            <div class="task-text">
-                Поезд начал движение от станции. За первую секунду состав сдвинулся на 0,2&nbsp;м, а за каждую следующую секунду он проходил на 0,4&nbsp;м больше, чем за предыдущую. Сколько метров состав прошёл за первые 10&nbsp;секунд движения?
-            </div>
-            <div class="params">
-                <span class="param-tag">a₁ = 0.2</span>
-                <span class="param-tag">d = 0.4</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">S₁₀ = 20 м</span>
-        </div>
-    </a>
-
-    <a class="card" href="snake.html">
-        <div class="card-icon snake">〰️</div>
-        <div class="card-body">
-            <h2 class="snake-title">Змейка на клетчатой бумаге</h2>
-            <div class="task-text">
-                На клетчатой бумаге нарисована «змейка» — ломаная из чётного числа звеньев, идущих по линиям сетки. Длины звеньев образуют пары: 1,&nbsp;1,&nbsp;2,&nbsp;2,&nbsp;…,&nbsp;n,&nbsp;n. Последнее звено имеет длину 10. Найдите длину ломаной, у которой последнее звено имеет длину 120.
-            </div>
-            <div class="params">
-                <span class="param-tag">S = n·(n+1)</span>
-                <span class="param-tag">n = 1..120</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">S = 14 520</span>
-        </div>
-    </a>
-
-    <a class="card" href="car.html">
-        <div class="card-icon car">🚗</div>
-        <div class="card-body">
-            <h2 class="car-title">Торможение автомобиля</h2>
-            <div class="task-text">
-                Автомобиль начал тормозить. За первую секунду он проехал v₁&nbsp;метров, а за каждую следующую секунду — на d&nbsp;метров меньше. Найдите полный тормозной путь и через сколько секунд автомобиль остановится.
-            </div>
-            <div class="params">
-                <span class="param-tag">d &gt; 0</span>
-                <span class="param-tag">v₁ = 5..80</span>
-                <span class="param-tag">найти S и n</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">v₁=30, d=5 → S=105 м</span>
-        </div>
-    </a>
-
-</div>
-
-<h2 class="section-heading gp">Геометрическая прогрессия</h2>
-<div class="cards">
-
-    <a class="card" href="ball.html">
-        <div class="card-icon ball">🏀</div>
-        <div class="card-body">
-            <h2 class="ball-title">Прыгающий мяч</h2>
-            <div class="task-text">
-                Мячик отскочил на высоту 5,4&nbsp;м, а при каждом следующем прыжке поднимается втрое ниже. При каком по счёту прыжке мячик впервые не достигнет высоты 10&nbsp;см?
-            </div>
-            <div class="params">
-                <span class="param-tag">h&#8321; = 5.4 м</span>
-                <span class="param-tag">q = 1/3</span>
-                <span class="param-tag">порог = 10 см</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">Прыжок №5</span>
-        </div>
-    </a>
-
-    <a class="card" href="bio.html">
-        <div class="card-icon bio">🦠</div>
-        <div class="card-body">
-            <h2 class="bio-title">Рост колонии микроорганизмов</h2>
-            <div class="task-text">
-                В чашку Петри поместили колонию микроорганизмов массой 13&nbsp;мг. Каждые 30&nbsp;минут масса колонии увеличивается в 3&nbsp;раза. Найдите массу колонии через 90&nbsp;минут.
-            </div>
-            <div class="params">
-                <span class="param-tag">a&#8321; = 13</span>
-                <span class="param-tag">q = 3</span>
-                <span class="param-tag">T = 30 мин</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">a&#8324; = 351 мг</span>
-        </div>
-    </a>
-
-    <a class="card" href="radio.html">
-        <div class="card-icon radio">&#9762;</div>
-        <div class="card-body">
-            <h2 class="radio-title">Радиоактивный распад</h2>
-            <div class="task-text">
-                Масса радиоактивного изотопа уменьшается вдвое каждые 7&nbsp;минут. В начальный момент масса составляла 640&nbsp;мг. Найдите массу изотопа через 42&nbsp;минуты.
-            </div>
-            <div class="params">
-                <span class="param-tag">a&#8321; = 640</span>
-                <span class="param-tag">q = 1/2</span>
-                <span class="param-tag">T&#189; = 7 мин</span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <span class="open-btn">Открыть модель &rarr;</span>
-            <span class="answer">a&#8327; = 10 мг</span>
-        </div>
-    </a>
-
-</div>
-
-<h2 class="section-heading grade-11" style="margin-top:40px">11 класс <span class="grade-badge badge-11">ЕГЭ база</span></h2>
-<h2 class="section-heading ap">Арифметическая прогрессия</h2>
-<div class="cards">
-
-    <a class="card" href="fence.html">
-        <div class="card-icon fence">🖌</div>
-        <div class="card-body">
-            <h2 class="fence-title">Маляры красят забор</h2>
-            <p class="task-text">Бригада красит забор длиной 270 м, ежедневно увеличивая норму на одно и то же число метров. За первый и последний день в сумме покрасили 90 м. Сколько дней красили забор?</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">S = 270</span>
-                    <span class="param-tag">a₁+aₙ = 90</span>
-                </div>
-                <span class="answer">n = 6</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-    <a class="card" href="snail.html">
-        <div class="card-icon snail">🐌</div>
-        <div class="card-body">
-            <h2 class="snail-title">Улитка между деревьями</h2>
-            <p class="task-text">Улитка ползёт от одного дерева до другого, каждый день проползая на одинаковое расстояние больше. За первый и последний дни в сумме — 10 м. Расстояние между деревьями 150 м. Сколько дней в пути?</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">S = 150</span>
-                    <span class="param-tag">a₁+aₙ = 10</span>
-                </div>
-                <span class="answer">n = 30</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-    <a class="card" href="tourist.html">
-        <div class="card-icon tourist">🧗</div>
-        <div class="card-body">
-            <h2 class="tourist-title">Турист между городами</h2>
-            <p class="task-text">Турист идёт из одного города в другой, каждый день проходя больше на одно и то же расстояние. В первый день прошёл 10 км, всего 6 дней, расстояние 120 км. Сколько км прошёл за третий день?</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">a₁ = 10</span>
-                    <span class="param-tag">n = 6</span>
-                    <span class="param-tag">S = 120</span>
-                </div>
-                <span class="answer">a₃ = 18</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-    <a class="card" href="postcards.html">
-        <div class="card-icon postcards">💌</div>
-        <div class="card-body">
-            <h2 class="postcards-title">Открытки Веры</h2>
-            <p class="task-text">Вере надо подписать 640 открыток. Ежедневно она подписывает на одинаковое количество больше. В первый день — 10 открыток, вся работа за 16 дней. Сколько открыток за четвёртый день?</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">a₁ = 10</span>
-                    <span class="param-tag">n = 16</span>
-                    <span class="param-tag">S = 640</span>
-                </div>
-                <span class="answer">a₄ = 22</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-    <a class="card" href="vasya.html">
-        <div class="card-icon vasya">📚</div>
-        <div class="card-body">
-            <h2 class="vasya-title">Задачи Васи</h2>
-            <p class="task-text">Васе надо решить 525 задач. Ежедневно он решает на одинаковое количество задач больше. В первый день решил 5 задач, справился за 14 дней. Сколько задач решил в последний день?</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">a₁ = 5</span>
-                    <span class="param-tag">n = 14</span>
-                    <span class="param-tag">S = 525</span>
-                </div>
-                <span class="answer">aₙ = 70</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-</div>
-
-<h2 class="section-heading gp">Геометрическая прогрессия</h2>
-<div class="cards">
-
-    <a class="card" href="bubbly.html">
-        <div class="card-icon bubbly">💰</div>
-        <div class="card-body">
-            <h2 class="bubbly-title">Прибыль Бубликова</h2>
-            <p class="task-text">Бизнесмен Бубликов получил в 2000 году прибыль 5000 рублей. Каждый следующий год его прибыль увеличивалась на 300% по сравнению с предыдущим. Сколько рублей заработал за 2003 год?</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">a₁ = 5000</span>
-                    <span class="param-tag">q = 4</span>
-                </div>
-                <span class="answer">a₄ = 320 000</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-</div>
-
-<h2 class="section-heading special" style="margin-top:40px">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0">
-        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
-    </svg>
-    Замечательные последовательности
-</h2>
-<div class="cards">
-
-    <a class="card" href="fibonacci.html">
-        <div class="card-icon fibonacci">🌀</div>
-        <div class="card-body">
-            <h2 class="fibonacci-title">Спираль Фибоначчи</h2>
-            <p class="task-text">Строим квадраты со сторонами 1, 1, 2, 3, 5, 8… и вписываем в каждый четверть окружности. Отношение соседних чисел стремится к золотому сечению φ = 1.618…</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">F(n) = F(n-1)+F(n-2)</span>
-                </div>
-                <span class="answer">φ ≈ 1.6180…</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-    <a class="card" href="pascal.html">
-        <div class="card-icon pascal">🔺</div>
-        <div class="card-body">
-            <h2 class="pascal-title">Треугольник Паскаля</h2>
-            <p class="task-text">Каждое число — сумма двух чисел над ним. Включите режим цвета — нечётные числа образуют треугольник Серпинского: фрактал из простого правила!</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">C(n,k) = C(n-1,k-1)+C(n-1,k)</span>
-                </div>
-                <span class="answer">Σ строки = 2ⁿ</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-    <a class="card" href="sieve.html">
-        <div class="card-icon sieve">🔴</div>
-        <div class="card-body">
-            <h2 class="sieve-title">Решето Эратосфена</h2>
-            <p class="task-text">Берём наименьшее невычеркнутое число — оно простое. Вычёркиваем все его кратные. Повторяем до √N. Всё что осталось — простые числа.</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">вычеркнуть кратные p²</span>
-                </div>
-                <span class="answer">простых до 100: 25</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-    <a class="card" href="collatz.html">
-        <div class="card-icon collatz">🌋</div>
-        <div class="card-body">
-            <h2 class="collatz-title">Гипотеза Коллатца</h2>
-            <p class="task-text">Чётное → делим на 2. Нечётное → умножаем на 3 и прибавляем 1. Повторяем. Число 27 делает 111 шагов, взлетая до 9232 — и всё равно приходит к 1. Но <em>доказательства</em> этого до сих пор нет.</p>
-            <div class="card-footer">
-                <div class="params">
-                    <span class="param-tag">3n + 1</span>
-                    <span class="param-tag">n / 2</span>
-                </div>
-                <span class="answer">27 → … → 1</span>
-                <span class="open-btn">Открыть →</span>
-            </div>
-        </div>
-    </a>
-
-</div>
-
-<div class="footer">
-    <span>Интерактивные модели для уроков математики</span>
-    <a href="https://oipav.ru" target="_blank" rel="noopener">oipav.ru — все проекты</a>
-    <a href="https://github.com/evilfaust/progression" target="_blank" rel="noopener">
-        github.com/evilfaust/progression
-    </a>
-</div>
+<footer>
+  <span>Интерактивные модели для уроков математики</span>
+  <span class="spacer"></span>
+  <a href="https://oipav.ru" target="_blank" rel="noopener">oipav.ru — все проекты</a>
+  <a href="https://github.com/evilfaust/progression" target="_blank" rel="noopener" id="gh2">github.com/evilfaust/progression</a>
+</footer>
 
 <script>
-const btnTheme = document.getElementById('btnTheme');
-const themeIcon = document.getElementById('themeIcon');
-const themeLabel = document.getElementById('themeLabel');
+(function () {
+  const { GROUPS, MODELS, KINDS } = window.CATALOG;
+  const { icon, toggleTheme, applyTheme } = Lab;
+  document.getElementById('gh').innerHTML = `${icon('github')}<span>GitHub</span>`;
+  document.querySelectorAll('[data-theme-toggle]').forEach(b => b.addEventListener('click', toggleTheme));
+  applyTheme(document.documentElement.dataset.theme);
 
-// Красивые SVG-иконки: заполненные, чёткие
-const sunSVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <circle cx="12" cy="12" r="4.5"/>
-    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M18.01 18.01l1.77 1.77
-           M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M18.01 5.99l1.77-1.77"/>
-</svg>`;
+  const arrow = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const groupsEl = document.getElementById('groups');
+  let n = 0;
+  GROUPS.forEach(g => {
+    const sec = document.createElement('section');
+    sec.className = 'group';
+    sec.dataset.g = g.id;
+    const cards = MODELS.filter(m => m.group === g.id).map(m => {
+      const max = Math.max(...m.preview.map(Math.abs));
+      const bars = m.preview.map(v => `<i style="height:${Math.max(8, Math.abs(v) / max * 100)}%"></i>`).join('');
+      const kind = m.kind === 'seq' ? 'Последовательность' : `${KINDS[m.kind]} прогрессия`;
+      return `<a class="mcard" href="${m.id}.html" data-accent="${m.accent}" data-kind="${m.kind}" data-text="${(m.title + ' ' + m.text).toLowerCase()}" style="animation-delay:${(n++) * 0.03}s">
+        <div class="mcard-top"><div class="emoji">${m.emoji}</div><div><h3>${m.title}</h3><div class="kind">${kind}</div></div></div>
+        <p>${m.text}</p>
+        <div class="spark" aria-hidden="true">${bars}</div>
+        <div class="mcard-foot"><span class="lbl">Ответ:</span><span class="ans">${m.answer}</span><span class="go">Открыть ${arrow}</span></div>
+      </a>`;
+    }).join('');
+    sec.innerHTML = `<div class="group-h"><h2>${g.title}</h2><span class="chip acc">${g.badge}</span><p>${g.desc}</p></div><div class="grid">${cards}</div>`;
+    groupsEl.appendChild(sec);
+  });
 
-const moonSVG = `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-    <path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-    <circle cx="18.5" cy="5" r="1.2" fill="currentColor" opacity="0.7"/>
-    <circle cx="21" cy="9" r="0.8" fill="currentColor" opacity="0.5"/>
-</svg>`;
+  // фильтры и поиск
+  let fGroup = 'all', fKind = 'all', query = '';
+  function apply() {
+    let shown = 0;
+    document.querySelectorAll('.group').forEach(sec => {
+      let any = 0;
+      sec.querySelectorAll('.mcard').forEach(c => {
+        const ok = (fGroup === 'all' || sec.dataset.g === fGroup) && (fKind === 'all' || c.dataset.kind === fKind) && (!query || c.dataset.text.includes(query));
+        c.hidden = !ok;
+        if (ok) any++;
+      });
+      sec.hidden = !any;
+      shown += any;
+    });
+    document.getElementById('empty').hidden = shown > 0;
+  }
+  const segClick = (id, attr, setter) => document.getElementById(id).addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.getElementById(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    setter(b.dataset[attr]); apply();
+  });
+  segClick('filter', 'f', v => { fGroup = v; });
+  segClick('kind', 'k', v => { fKind = v; });
+  document.getElementById('q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); apply(); });
 
-function applyTheme(isLight) {
-    themeIcon.innerHTML = isLight ? moonSVG : sunSVG;
-    themeLabel.textContent = isLight ? 'Тёмная' : 'Светлая';
-    btnTheme.setAttribute('aria-pressed', isLight ? 'true' : 'false');
-}
-
-const savedTheme = localStorage.getItem('ap-theme') || 'dark';
-if (savedTheme === 'light') { document.documentElement.classList.add('light'); applyTheme(true); }
-else { applyTheme(false); }
-
-btnTheme.addEventListener('click', () => {
-    // Запускаем анимацию свапа иконки
-    themeIcon.classList.add('swapping');
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const delay = reduceMotion ? 0 : 220;
-
-    setTimeout(() => {
-        const isL = document.documentElement.classList.toggle('light');
-        localStorage.setItem('ap-theme', isL ? 'light' : 'dark');
-        applyTheme(isL);
-    }, delay);
-
-    themeIcon.addEventListener('animationend', () => {
-        themeIcon.classList.remove('swapping');
-    }, { once: true });
-});
+  // ── иллюстрация в шапке: АП растёт ровно, ГП — взрывом, спираль Фибоначчи
+  const cv = document.getElementById('heroArt'), ctx = cv.getContext('2d');
+  const { D } = Lab;
+  let W = 0, H = 0, dpr = 1, C = Lab.readColors();
+  window.addEventListener('lab:theme', () => { C = Lab.readColors(); });
+  new ResizeObserver(() => {
+    const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1);
+    W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr;
+  }).observe(cv);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const t0 = performance.now();
+  function frame(now) {
+    const time = reduce ? 6 : (now - t0) / 1000;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const cyc = (time % 9) / 9;
+    const grow = D.ease.out(D.seg(cyc, 0, .45)) * (1 - D.seg(cyc, .9, 1));
+    const n = 8, left = 26, right = W * .62, base = H - 30, top = 40;
+    const bw = (right - left) / n;
+    // сетка
+    for (let i = 0; i < 4; i++) D.line(ctx, left, top + i * (base - top) / 3, right, top + i * (base - top) / 3, D.alpha(C.ink3, .12), 1);
+    const ap = i => 1 + i * 1.6, gp = i => Math.pow(1.62, i);
+    const maxV = gp(n - 1);
+    for (let i = 0; i < n; i++) {
+      const g = D.ease.back(D.clamp(grow * n * 1.25 - i * .9, 0, 1));
+      const x = left + i * bw;
+      const ha = ap(i) / maxV * (base - top) * g, hg = gp(i) / maxV * (base - top) * g;
+      D.rr(ctx, x + bw * .1, base - hg, bw * .36, hg, 5); ctx.fillStyle = D.alpha(C.rose, .9); ctx.fill();
+      D.rr(ctx, x + bw * .52, base - ha, bw * .36, ha, 5); ctx.fillStyle = D.alpha(C.indigo, .9); ctx.fill();
+    }
+    D.line(ctx, left, base, right, base, C.lineStrong, 1.5);
+    D.pill(ctx, 'aₙ = a₁ + (n−1)d', left, 20, { align: 'left', bg: C.indigo, color: '#fff', size: 12 });
+    D.pill(ctx, 'bₙ = b₁·qⁿ⁻¹', left + 146, 20, { align: 'left', bg: C.rose, color: '#fff', size: 12 });
+    // спираль Фибоначчи справа
+    const cx = W * .82, cy = H * .5, s = Math.min(W * .3, H * .8) / 21;
+    const fib = [1, 1, 2, 3, 5, 8, 13];
+    const ARC = [[1, 1, Math.PI, 1.5 * Math.PI], [0, 1, 1.5 * Math.PI, 2 * Math.PI], [0, 0, 0, .5 * Math.PI], [1, 0, .5 * Math.PI, Math.PI]];
+    let L = 0, T = 0, R = 1, B = 1;
+    const sq = [{ x: 0, y: 0, f: 1 }, { x: 1, y: 0, f: 1 }]; R = 2;
+    for (let i = 2; i < fib.length; i++) {
+      const f = fib[i], d = i % 4; let x, y;
+      if (d === 2) { x = L; y = B; B += f; } else if (d === 3) { x = L - f; y = T; L -= f; } else if (d === 0) { x = L; y = T - f; T -= f; } else { x = R; y = T; R += f; }
+      sq.push({ x, y, f });
+    }
+    const ox = cx - (L + R) / 2 * s, oy = cy - (T + B) / 2 * s;
+    const spin = D.ease.inOut(D.seg(cyc, .1, .75)) * (1 - D.seg(cyc, .9, 1));
+    sq.forEach((q, i) => {
+      const a = D.clamp(spin * sq.length - i, 0, 1);
+      if (a <= 0) return;
+      ctx.globalAlpha = a * .9;
+      D.rr(ctx, ox + q.x * s + 1, oy + q.y * s + 1, q.f * s - 2, q.f * s - 2, 4);
+      ctx.fillStyle = D.alpha([C.amber, C.orange, C.rose, C.violet, C.blue, C.teal, C.green][i % 7], .18); ctx.fill();
+      ctx.globalAlpha = 1;
+      const [cxm, cym, a0, a1] = ARC[i % 4];
+      ctx.beginPath(); ctx.arc(ox + (q.x + cxm * q.f) * s, oy + (q.y + cym * q.f) * s, q.f * s, a0, a0 + (a1 - a0) * a);
+      ctx.strokeStyle = C.amber; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke();
+    });
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>
